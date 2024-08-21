@@ -1,0 +1,21 @@
+{
+  "name": "editor-test",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/index.mjs",
+  "scripts": {
+    "start": "node src/index.mjs",
+    "test": "mocha --recursive --timeout 100000",
+    "lint": "eslint . --ext .js,.mjs"
+  },
+  "author": "",
+  "license": "Properietary",
+  "devDependencies": {
+    "@playcanvas/eslint-config": "^1.7.4",
+    "chai": "^5.1.1",
+    "eslint": "^8.57.0",
+    "mocha": "^10.7.3",
+    "puppeteer": "^23.1.1"
+  }
+}
