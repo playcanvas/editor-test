@@ -1,4 +1,7 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import stealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+puppeteer.use(stealthPlugin());
 
 const USER_DATA_PATH = 'user_data';
 
