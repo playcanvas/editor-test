@@ -80,7 +80,7 @@ console.log('Checking sign in status...');
 await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle0' });
 const url = await page.evaluate(() => window.location.href);
 if (/login\./.test(url)) {
-    throw new Error('Please login to PlayCanvas');
+    throw new Error('Please login to PlayCanvas by running `npm run login`');
 }
 
 await page.setRequestInterception(true);

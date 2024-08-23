@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "src/index.mjs",
   "scripts": {
-    "start": "node src/index.mjs",
     "test": "mocha --recursive --timeout 100000",
+    "login": "node src/login.mjs",
     "lint": "eslint . --ext .js,.mjs"
   },
   "author": "",
