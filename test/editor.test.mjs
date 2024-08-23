@@ -79,6 +79,9 @@ await page.setRequestInterception(true);
 let requests = 0;
 
 page.on('request', (request) => {
+    if (/jsdoc-parser\/types\/lib\..+\.d\.ts/.test(request.url())) {
+        return;
+    }
     if (/playcanvas\.com/.test(request.url())) {
         requests++;
         request.continue();
@@ -109,7 +112,7 @@ describe(`Testing ${projects.length} projects`, () => {
             });
 
             it(`checking https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`, async () => {
-                await throttle();
+                // await throttle();
                 const errors = await navigate({
                     page,
                     url: `https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`,
@@ -127,7 +130,7 @@ describe(`Testing ${projects.length} projects`, () => {
                     });
 
                     it(`checking https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, async () => {
-                        await throttle();
+                        // await throttle();
                         const errors = await navigate({
                             page,
                             url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
@@ -137,7 +140,7 @@ describe(`Testing ${projects.length} projects`, () => {
                     });
 
                     it(`checking https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`, async () => {
-                        await throttle();
+                        // await throttle();
                         const errors = await navigate({
                             page,
                             url: `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`,
