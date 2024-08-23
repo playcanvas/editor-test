@@ -4,12 +4,29 @@ import { expect } from 'chai';
 import { describe, it, before, after } from 'mocha';
 import puppeteer from 'puppeteer';
 
-import projectIds from './fixtures/projects.mjs';
+import projects from './fixtures/projects.mjs';
 
 const USER_DATA_PATH = 'user_data';
 const OUT_PATH = 'out';
 
-const HOST = 'playcanvas.com';
+const HOST = process.env.PC_HOST ?? 'playcanvas.com';
+const FRONTEND = process.env.PC_FRONTEND ?? '';
+const ENGINE = process.env.PC_ENGINE ?? '';
+
+const searchParams = {};
+if (FRONTEND) {
+    searchParams.use_local_frontend = undefined;
+}
+if (ENGINE) {
+    searchParams.use_local_engine = ENGINE;
+}
+const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
+    if (value === undefined) {
+        return key;
+    }
+    return `${key}=${value}`;
+}).join('&');
+
 
 /**
  * @param {object} options - Options.
@@ -51,69 +68,79 @@ const navigate = async ({ page, url, outPath }) => {
     return errors;
 };
 
-const getProjectSceneIds = async (page, projectId) => {
-    return await page.evaluate(async (projectId) => {
-        try {
-            const res = await fetch(`/api/projects/${projectId}/scenes`);
-            const json = await res.json();
-            return json.result?.map(scene => scene.id) ?? [];
-        } catch (err) {
-            return [];
-        }
-    }, projectId);
-};
-
 await fs.promises.rm(`${OUT_PATH}`, { recursive: true, force: true });
 await fs.promises.mkdir(`${OUT_PATH}`);
 
 const browser = await puppeteer.launch({ userDataDir: USER_DATA_PATH });
-const page = await browser.newPage();
+const page = (await browser.pages())[0];
+await page.setViewport({ width: 1270, height: 720 });
 
-const sceneIds = new Map();
-await page.goto(`https://${HOST}`);
-await Promise.all(
-    projectIds.map(async projectId => sceneIds.set(projectId, await getProjectSceneIds(page, projectId)))
-);
+await page.setRequestInterception(true);
+let requests = 0;
 
-describe(`Testing ${projectIds.length} projects`, () => {
-    projectIds.forEach((projectId) => {
-        describe(`projectId: ${projectId}`, () => {
+page.on('request', (request) => {
+    if (/playcanvas\.com/.test(request.url())) {
+        requests++;
+        request.continue();
+        return;
+    }
+    request.continue();
+});
+
+const throttle = async (limit = 240, refreshRate = 60 * 1000) => {
+    if (requests > limit) {
+        console.log(`        waiting for requests to cool down ${requests}/${limit}`);
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                requests = 0;
+                resolve();
+            }, refreshRate);
+        });
+    }
+};
+
+describe(`Testing ${projects.length} projects`, () => {
+    projects.forEach((project) => {
+        describe(`${project.name} (${project.id})`, () => {
             let projectPath;
             before(async () => {
-                projectPath = `${OUT_PATH}/${projectId}`;
+                projectPath = `${OUT_PATH}/${project.id}`;
                 await fs.promises.mkdir(projectPath);
             });
 
-            it(`checking https://${HOST}/editor/project/${projectId}`, async () => {
+            it(`checking https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`, async () => {
+                await throttle();
                 const errors = await navigate({
                     page,
-                    url: `https://${HOST}/editor/project/${projectId}`,
+                    url: `https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`,
                     outPath: `${projectPath}/editor`
                 });
                 expect(errors).to.eql([]);
             });
 
-            sceneIds.get(projectId).forEach((sceneId) => {
-                describe(`sceneId: ${sceneId}`, () => {
+            project.scenes.forEach((sceneId) => {
+                describe(`scene (${sceneId})`, () => {
                     let scenePath;
                     before(async () => {
-                        scenePath = `${OUT_PATH}/${projectId}/${sceneId}`;
+                        scenePath = `${OUT_PATH}/${project.id}/${sceneId}`;
                         await fs.promises.mkdir(scenePath);
                     });
 
-                    it(`checking https://${HOST}/editor/scene/${sceneId}`, async () => {
+                    it(`checking https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, async () => {
+                        await throttle();
                         const errors = await navigate({
                             page,
-                            url: `https://${HOST}/editor/scene/${sceneId}`,
+                            url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
                             outPath: `${scenePath}/editor`
                         });
                         expect(errors).to.eql([]);
                     });
 
-                    it(`checking https://launch.${HOST}/${sceneId}`, async () => {
+                    it(`checking https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`, async () => {
+                        await throttle();
                         const errors = await navigate({
                             page,
-                            url: `https://launch.${HOST}/${sceneId}`,
+                            url: `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`,
                             outPath: `${scenePath}/launch`
                         });
                         expect(errors).to.eql([]);
