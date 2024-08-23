@@ -75,6 +75,14 @@ const browser = await puppeteer.launch({ userDataDir: USER_DATA_PATH });
 const page = (await browser.pages())[0];
 await page.setViewport({ width: 1270, height: 720 });
 
+console.log('Checking sign in status...');
+
+await page.goto(`https://${HOST}`, { waitUntil: 'networkidle0' });
+const url = await page.evaluate(() => window.location.href);
+if (/login\./.test(url)) {
+    throw new Error('Please login to PlayCanvas');
+}
+
 await page.setRequestInterception(true);
 let requests = 0;
 
