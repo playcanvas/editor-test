@@ -7,7 +7,7 @@ import fs from 'fs';
  * @param {string} options.sceneId - The scene ID.
  * @returns {Promise<string[]>} - The number of errors.
  */
-export const download = async ({ page, outPath, sceneId }) => {
+export const publish = async ({ page, outPath, sceneId }) => {
     const errors = [];
 
     await fs.promises.writeFile(`${outPath}.console.log`, '');
@@ -43,8 +43,8 @@ export const download = async ({ page, outPath, sceneId }) => {
                 return json.result?.map(scene => scene.id) ?? [];
             };
 
-            const postDownload = async (sceneIds) => {
-                const res = await fetch('/api/apps/download', {
+            const postPublish = async (sceneIds) => {
+                const res = await fetch('/api/apps', {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${config.accessToken}`,
@@ -61,14 +61,15 @@ export const download = async ({ page, outPath, sceneId }) => {
                 return await res.json();
             };
 
-            const checkJob = async (jobId) => {
-                const res = await fetch(`/api/jobs/${jobId}`, {
+            const checkJob = async (appId) => {
+                const res = await fetch(`/api/projects/${config.project.id}/apps?limit=0`, {
                     headers: {
                         Authorization: `Bearer ${config.accessToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
-                return await res.json();
+                const json = await res.json();
+                return json.result.find(app => app.id === appId)?.task ?? { error: 'Job not found' };
             };
 
             const sceneIds = await getSceneIds();
@@ -78,15 +79,16 @@ export const download = async ({ page, outPath, sceneId }) => {
                 return 0;
             });
 
-            const download = await postDownload(sceneIds);
-            if (download.error) {
-                return download;
+            const app = await postPublish(sceneIds);
+            if (app.task.error) {
+                errors.push(app.task.error);
+                return;
             }
 
             return await new Promise((resolve, reject) => {
                 const int = setInterval(async () => {
                     try {
-                        const job = await checkJob(download.id);
+                        const job = await checkJob(app.id);
                         if (job.status !== 'running') {
                             clearInterval(int);
                             resolve(job);

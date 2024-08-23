@@ -5,8 +5,11 @@ import { describe, it, before, after } from 'mocha';
 import puppeteer from 'puppeteer';
 
 import projects from './fixtures/projects.mjs';
+import { app } from './lib/app.mjs';
+import { delete_ } from './lib/delete.mjs';
 import { download } from './lib/download.mjs';
 import { navigate } from './lib/navigate.mjs';
+import { publish } from './lib/publish.mjs';
 import { throttler } from './lib/throttler.mjs';
 
 const USER_DATA_PATH = 'user_data';
@@ -68,7 +71,6 @@ describe(`Testing ${projects.length} projects`, () => {
             });
 
             it(`checking https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`, async () => {
-                // await throttle();
                 const errors = await navigate({
                     page,
                     url: `https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`,
@@ -86,7 +88,6 @@ describe(`Testing ${projects.length} projects`, () => {
                     });
 
                     it(`checking https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, async () => {
-                        // await throttle();
                         const errors = await navigate({
                             page,
                             url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
@@ -98,15 +99,41 @@ describe(`Testing ${projects.length} projects`, () => {
                     it('downloading project', async () => {
                         const errors = await download({
                             page,
-                            host: HOST,
                             outPath: `${scenePath}/download`,
                             sceneId
                         });
                         expect(errors).to.eql([]);
                     });
 
+                    it('publishing project', async () => {
+                        const errors = await publish({
+                            page,
+                            outPath: `${scenePath}/publish`,
+                            sceneId
+                        });
+                        expect(errors).to.eql([]);
+                    });
+
+                    it('launching app', async () => {
+                        const errors = await app({
+                            page,
+                            outPath: `${scenePath}/app`,
+                            sceneId
+                        });
+                        expect(errors).to.eql([]);
+                    });
+
+                    it('deleting app', async () => {
+                        await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle0' });
+                        const errors = await delete_({
+                            page,
+                            outPath: `${scenePath}/delete`,
+                            sceneId
+                        });
+                        expect(errors).to.eql([]);
+                    });
+
                     it(`checking https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`, async () => {
-                        // await throttle();
                         const errors = await navigate({
                             page,
                             url: `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`,
