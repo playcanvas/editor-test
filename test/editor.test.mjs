@@ -5,6 +5,9 @@ import { describe, it, before, after } from 'mocha';
 import puppeteer from 'puppeteer';
 
 import projects from './fixtures/projects.mjs';
+import { download } from './lib/download.mjs';
+import { navigate } from './lib/navigate.mjs';
+import { throttler } from './lib/throttler.mjs';
 
 const USER_DATA_PATH = 'user_data';
 const OUT_PATH = 'out';
@@ -12,6 +15,7 @@ const OUT_PATH = 'out';
 const HOST = process.env.PC_HOST ?? 'playcanvas.com';
 const FRONTEND = process.env.PC_FRONTEND ?? '';
 const ENGINE = process.env.PC_ENGINE ?? '';
+const DEBUG = process.env.PC_DEBUG ?? '';
 
 const searchParams = {};
 if (FRONTEND) {
@@ -27,88 +31,32 @@ const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
     return `${key}=${value}`;
 }).join('&');
 
+const launchBrowser = async () => {
+    await fs.promises.rm(`${OUT_PATH}`, { recursive: true, force: true });
+    await fs.promises.mkdir(`${OUT_PATH}`);
 
-/**
- * @param {object} options - Options.
- * @param {puppeteer.Page} options.page - The puppeteer page.
- * @param {string} options.url - The URL to navigate to.
- * @param {string} options.outPath - The output path.
- * @returns {Promise<string[]>} - The number of errors.
- */
-const navigate = async ({ page, url, outPath }) => {
-    const errors = [];
+    const launchArgs = { userDataDir: USER_DATA_PATH };
+    if (DEBUG) {
+        launchArgs.headless = false;
+        launchArgs.devtools = true;
+    }
+    const browser = await puppeteer.launch(launchArgs);
+    const page = (await browser.pages())[0];
+    await page.setViewport({ width: 1270, height: 720 });
 
-    await fs.promises.writeFile(`${outPath}.console.log`, '');
-    await fs.promises.writeFile(`${outPath}.request.log`, '');
+    console.log('Checking sign in status...');
 
-    page.on('console', (msg) => {
-        if (msg.type() === 'error') {
-            errors.push(msg.text());
-        }
-        const msgStr = `[${msg.type()}] ${msg.text()}`;
-        fs.promises.appendFile(`${outPath}.console.log`, `${msgStr}\n`);
-    });
-    page.on('pageerror', (msg) => {
-        errors.push(msg);
-        const msgStr = `[pageerror] ${msg}`;
-        fs.promises.appendFile(`${outPath}.console.log`, `${msgStr}\n`);
-    });
-    page.on('response', (response) => {
-        const msgStr = `[${response.status()}] ${response.url()}`;
-        fs.promises.appendFile(`${outPath}.request.log`, `${msgStr}\n`);
-    });
+    await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle0' });
+    const url = await page.evaluate(() => window.location.href);
+    if (/login\./.test(url)) {
+        throw new Error('Please login to PlayCanvas by running `npm run login`');
+    }
 
-    await page.goto(url, { waitUntil: 'networkidle0' });
-    await page.screenshot({ path: `${outPath}.png` });
-
-    page.removeAllListeners('console');
-    page.removeAllListeners('pageerror');
-    page.removeAllListeners('response');
-
-    return errors;
+    return { browser, page };
 };
 
-await fs.promises.rm(`${OUT_PATH}`, { recursive: true, force: true });
-await fs.promises.mkdir(`${OUT_PATH}`);
-
-const browser = await puppeteer.launch({ userDataDir: USER_DATA_PATH });
-const page = (await browser.pages())[0];
-await page.setViewport({ width: 1270, height: 720 });
-
-console.log('Checking sign in status...');
-
-await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle0' });
-const url = await page.evaluate(() => window.location.href);
-if (/login\./.test(url)) {
-    throw new Error('Please login to PlayCanvas by running `npm run login`');
-}
-
-await page.setRequestInterception(true);
-let requests = 0;
-
-page.on('request', (request) => {
-    if (/jsdoc-parser\/types\/lib\..+\.d\.ts/.test(request.url())) {
-        return;
-    }
-    if (/playcanvas\.com/.test(request.url())) {
-        requests++;
-        request.continue();
-        return;
-    }
-    request.continue();
-});
-
-const throttle = async (limit = 240, refreshRate = 60 * 1000) => {
-    if (requests > limit) {
-        console.log(`        waiting for requests to cool down ${requests}/${limit}`);
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                requests = 0;
-                resolve();
-            }, refreshRate);
-        });
-    }
-};
+const { browser, page } = await launchBrowser();
+const throttle = await throttler(page);
 
 describe(`Testing ${projects.length} projects`, () => {
     projects.forEach((project) => {
@@ -143,6 +91,16 @@ describe(`Testing ${projects.length} projects`, () => {
                             page,
                             url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
                             outPath: `${scenePath}/editor`
+                        });
+                        expect(errors).to.eql([]);
+                    });
+
+                    it('downloading project', async () => {
+                        const errors = await download({
+                            page,
+                            host: HOST,
+                            outPath: `${scenePath}/download`,
+                            sceneId
                         });
                         expect(errors).to.eql([]);
                     });
