@@ -77,7 +77,7 @@ await page.setViewport({ width: 1270, height: 720 });
 
 console.log('Checking sign in status...');
 
-await page.goto(`https://${HOST}`, { waitUntil: 'networkidle0' });
+await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle0' });
 const url = await page.evaluate(() => window.location.href);
 if (/login\./.test(url)) {
     throw new Error('Please login to PlayCanvas');
