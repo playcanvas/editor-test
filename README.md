@@ -16,4 +16,11 @@ Edit when running `npm test` use the env variable `PC_ENGINE` to set `use_local_
 
 ## Adding more tests
 
-Add the project ids in `test/fixtures/projects.mjs`.
+Add the project entries in in `test/fixtures/projects.mjs`. The type of each entry is is:
+```js
+type Project = {
+    name: string // project name
+    id: number // project id
+    scenes: string[] // list of scene ids
+}
+```
