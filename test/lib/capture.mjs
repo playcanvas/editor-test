@@ -4,7 +4,7 @@ import fs from 'fs';
  * @param {object} options - Options.
  * @param {import('@playwright/test').Page} options.page - The page to navigate.
  * @param {string} options.outPath - The output path.
- * @param {function(string[])} options.fn - The function to run.
+ * @param {function} options.fn - The function to run.
  * @returns {Promise<string[]>} - The number of errors.
  */
 export const capture = async ({ page, outPath, fn }) => {
@@ -13,32 +13,34 @@ export const capture = async ({ page, outPath, fn }) => {
     await fs.promises.writeFile(`${outPath}.console.log`, '');
     await fs.promises.writeFile(`${outPath}.request.log`, '');
 
-    page.on('console', (msg) => {
+    const onConsole = (msg) => {
         if (msg.type() === 'error') {
             errors.push(msg.text());
         }
         const msgStr = `[${msg.type()}] ${msg.text()}`;
         fs.promises.appendFile(`${outPath}.console.log`, `${msgStr}\n`);
-    });
-    page.on('pageerror', (msg) => {
-        errors.push(msg);
-        const msgStr = `[pageerror] ${msg}`;
+    };
+    const onPageError = (msg) => {
+        if (msg.type() === 'error') {
+            errors.push(msg.text());
+        }
+        const msgStr = `[${msg.type()}] ${msg.text()}`;
         fs.promises.appendFile(`${outPath}.console.log`, `${msgStr}\n`);
-    });
-    page.on('response', (response) => {
+    };
+    const onResponse = (response) => {
         const msgStr = `[${response.status()}] ${response.url()}`;
         fs.promises.appendFile(`${outPath}.request.log`, `${msgStr}\n`);
-    });
+    };
 
-    try {
-        await fn(errors);
-    } catch (error) {
-        errors.push(error.message);
-    }
+    page.on('console', onConsole);
+    page.on('pageerror', onPageError);
+    page.on('response', onResponse);
 
-    page.removeAllListeners('console');
-    page.removeAllListeners('pageerror');
-    page.removeAllListeners('response');
+    await fn(errors);
+
+    page.removeListener('console', onConsole);
+    page.removeListener('pageerror', onPageError);
+    page.removeListener('response', onResponse);
 
     return errors;
 };

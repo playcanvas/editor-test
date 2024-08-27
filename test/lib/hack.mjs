@@ -1,0 +1,16 @@
+import fs from 'fs';
+
+export const jsdocHack = (test) => {
+    // FIXME: This is a workaround for the JSDoc parser rate limiting.
+    test.beforeEach(({ context }) => {
+        context.route(/jsdoc-parser\/types\/lib\..+\.d\.ts/, (route) => {
+            const matches = /jsdoc-parser\/types\/(lib\..+\.d\.ts)/.exec(route.request().url());
+            const filePath = `./test/fixtures/jsdoc-parser/types/${matches[1]}`;
+            route.fulfill({
+                status: 200,
+                contentType: 'text/plain',
+                body: fs.readFileSync(filePath, 'utf8')
+            });
+        });
+    });
+};

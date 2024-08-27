@@ -3,46 +3,15 @@ import fs from 'fs';
 import { test, expect } from '@playwright/test';
 
 import projects from './fixtures/projects.mjs';
+import { capture } from './lib/capture.mjs';
 import { download } from './lib/download.mjs';
-import { navigate } from './lib/navigate.mjs';
+import { jsdocHack } from './lib/hack.mjs';
 import { publish } from './lib/publish.mjs';
+import { editorProjectUrl, editorSceneUrl, launchSceneUrl } from './lib/url.mjs';
 
 const OUT_PATH = 'out';
 
-const HOST = process.env.PC_HOST ?? 'playcanvas.com';
-const FRONTEND = process.env.PC_FRONTEND ?? '';
-const ENGINE = process.env.PC_ENGINE ?? '';
-
-const searchParams = {};
-if (FRONTEND) {
-    searchParams.use_local_frontend = undefined;
-}
-if (ENGINE) {
-    searchParams.use_local_engine = ENGINE;
-}
-const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
-    if (value === undefined) {
-        return key;
-    }
-    return `${key}=${value}`;
-}).join('&');
-
-const editorProjectUrl = projectId => `https://${HOST}/editor/project/${projectId}?${SEARCH_PARAMS}`;
-const editorSceneUrl = sceneId => `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`;
-const launchSceneUrl = sceneId => `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`;
-
-// FIXME: This is a workaround for the JSDoc parser rate limiting.
-test.beforeEach(({ context }) => {
-    context.route(/jsdoc-parser\/types\/lib\..+\.d\.ts/, (route) => {
-        const matches = /jsdoc-parser\/types\/(lib\..+\.d\.ts)/.exec(route.request().url());
-        const filePath = `./test/fixtures/jsdoc-parser/types/${matches[1]}`;
-        route.fulfill({
-            status: 200,
-            contentType: 'text/plain',
-            body: fs.readFileSync(filePath, 'utf8')
-        });
-    });
-});
+jsdocHack(test);
 
 test.describe('Projects', () => {
     projects.forEach((project) => {
@@ -51,12 +20,14 @@ test.describe('Projects', () => {
             const projectUrl = editorProjectUrl(project.id);
             test(`checking ${projectUrl}`, async ({ page }) => {
                 await fs.promises.mkdir(projectPath, { recursive: true });
-                const errors = await navigate({
+                expect(await capture({
                     page,
-                    url: projectUrl,
-                    outPath: `${projectPath}/editor`
-                });
-                expect(errors).toStrictEqual([]);
+                    outPath: `${projectPath}/editor`,
+                    fn: async () => {
+                        await page.goto(projectUrl, { waitUntil: 'networkidle' });
+                        await page.screenshot({ path: `${projectPath}/editor.png` });
+                    }
+                }));
             });
 
             project.scenes.forEach((sceneId) => {
@@ -65,41 +36,46 @@ test.describe('Projects', () => {
                 const sceneLaunchUrl = launchSceneUrl(sceneId);
                 test(`checking ${sceneUrl}`, async ({ page }) => {
                     await fs.promises.mkdir(scenePath, { recursive: true });
-                    const errors = await navigate({
+                    expect(await capture({
                         page,
-                        url: sceneUrl,
-                        outPath: `${scenePath}/editor`
-                    });
-                    expect(errors).toStrictEqual([]);
+                        outPath: `${scenePath}/editor`,
+                        fn: async () => {
+                            await page.goto(sceneUrl, { waitUntil: 'networkidle' });
+                            await page.screenshot({ path: `${scenePath}/editor.png` });
+                        }
+                    }));
                 });
 
                 test('downloading project', async ({ page }) => {
-                    const errors = await download({
+                    await fs.promises.mkdir(scenePath, { recursive: true });
+                    expect(await download({
                         page,
                         url: sceneUrl,
                         outPath: `${scenePath}/download`,
                         sceneId
-                    });
-                    expect(errors).toStrictEqual([]);
+                    })).toStrictEqual([]);
                 });
 
-                test('publishing project', async ({ page }) => {
-                    const errors = await publish({
+                test('publish project, open app then delete published app', async ({ page }) => {
+                    await fs.promises.mkdir(scenePath, { recursive: true });
+                    expect(await publish({
                         page,
                         url: sceneUrl,
                         outPath: `${scenePath}/publish`,
                         sceneId
-                    });
-                    expect(errors).toStrictEqual([]);
+                    })).toStrictEqual([]);
                 });
 
-                test(`checking https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`, async ({ page }) => {
-                    const errors = await navigate({
+                test(`checking ${sceneLaunchUrl}`, async ({ page }) => {
+                    await fs.promises.mkdir(scenePath, { recursive: true });
+                    expect(await capture({
                         page,
-                        url: sceneLaunchUrl,
-                        outPath: `${scenePath}/launch`
-                    });
-                    expect(errors).toStrictEqual([]);
+                        outPath: `${scenePath}/launch`,
+                        fn: async () => {
+                            await page.goto(sceneLaunchUrl, { waitUntil: 'networkidle' });
+                            await page.screenshot({ path: `${scenePath}/launch.png` });
+                        }
+                    }));
                 });
             });
         });
