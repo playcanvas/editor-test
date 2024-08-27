@@ -18,7 +18,7 @@ test.describe('Projects', () => {
         test.describe(project.name, () => {
             const projectPath = `${OUT_PATH}/${project.id}`;
             const projectUrl = editorProjectUrl(project.id);
-            test('fork project > delete forked project', async ({ page }) => {
+            test('fork > delete forked', async ({ page }) => {
                 await fs.promises.mkdir(projectPath, { recursive: true });
                 expect(await capture({
                     page,
@@ -39,7 +39,7 @@ test.describe('Projects', () => {
                 })).toStrictEqual([]);
             });
 
-            test(`goto ${projectUrl}`, async ({ page }) => {
+            test('goto editor (project id)', async ({ page }) => {
                 await fs.promises.mkdir(projectPath, { recursive: true });
                 expect(await capture({
                     page,
@@ -55,7 +55,7 @@ test.describe('Projects', () => {
                 const scenePath = `${projectPath}/${sceneId}`;
                 const sceneUrl = editorSceneUrl(sceneId);
                 const sceneLaunchUrl = launchSceneUrl(sceneId);
-                test(`goto ${sceneUrl}`, async ({ page }) => {
+                test('goto editor (scene id) > goto launcher', async ({ page }) => {
                     await fs.promises.mkdir(scenePath, { recursive: true });
                     expect(await capture({
                         page,
@@ -65,9 +65,18 @@ test.describe('Projects', () => {
                             await page.screenshot({ path: `${scenePath}/editor.png` });
                         }
                     }));
+
+                    expect(await capture({
+                        page,
+                        outPath: `${scenePath}/launch`,
+                        fn: async () => {
+                            await page.goto(sceneLaunchUrl, { waitUntil: 'networkidle' });
+                            await page.screenshot({ path: `${scenePath}/launch.png` });
+                        }
+                    }));
                 });
 
-                test('download project', async ({ page }) => {
+                test('download', async ({ page }) => {
                     await fs.promises.mkdir(scenePath, { recursive: true });
                     expect(await capture({
                         page,
@@ -110,7 +119,7 @@ test.describe('Projects', () => {
                     })).toStrictEqual([]);
                 });
 
-                test('publish project > open app > delete app', async ({ page }) => {
+                test('publish > goto app > delete app', async ({ page }) => {
                     await fs.promises.mkdir(scenePath, { recursive: true });
                     expect(await capture({
                         page,
@@ -169,18 +178,6 @@ test.describe('Projects', () => {
                             }
                         }
                     })).toStrictEqual([]);
-                });
-
-                test(`goto ${sceneLaunchUrl}`, async ({ page }) => {
-                    await fs.promises.mkdir(scenePath, { recursive: true });
-                    expect(await capture({
-                        page,
-                        outPath: `${scenePath}/launch`,
-                        fn: async () => {
-                            await page.goto(sceneLaunchUrl, { waitUntil: 'networkidle' });
-                            await page.screenshot({ path: `${scenePath}/launch.png` });
-                        }
-                    }));
                 });
             });
         });
