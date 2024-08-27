@@ -1,5 +1,5 @@
-export const initContext = () => {
-    class TestContext {
+export const initInterface = () => {
+    class WebInterface {
         loaded = true;
 
         get headers() {
@@ -80,5 +80,7 @@ export const initContext = () => {
         }
     }
 
-    window.test = new TestContext();
+    const wi = window.wi = new WebInterface();
+
+    return wi;
 };

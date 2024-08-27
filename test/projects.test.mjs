@@ -5,9 +5,9 @@ import { test, expect } from '@playwright/test';
 import projects from './fixtures/projects.mjs';
 import { capture } from './lib/capture.mjs';
 import { jsdocHack } from './lib/hack.mjs';
-import { initContext } from './lib/test-context.mjs';
 import { editorProjectUrl, editorSceneUrl, launchSceneUrl } from './lib/url.mjs';
 import { poll } from './lib/utils.mjs';
+import { initInterface } from './lib/web-interface.mjs';
 
 const OUT_PATH = 'out';
 
@@ -83,9 +83,9 @@ test.describe('Projects', () => {
                         outPath: `${scenePath}/download`,
                         fn: async (errors) => {
                             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-                            await page.evaluate(initContext);
+                            await page.evaluate(initInterface);
 
-                            const scenes = await page.evaluate(() => test.getScenes());
+                            const scenes = await page.evaluate(() => wi.getScenes());
                             if (!scenes.length) {
                                 errors.push('[FETCH ERROR] Scenes not found');
                                 return;
@@ -98,14 +98,14 @@ test.describe('Projects', () => {
                                 return 0;
                             });
 
-                            const download = await page.evaluate(sceneIds => test.postDownload(sceneIds), sceneIds);
+                            const download = await page.evaluate(sceneIds => wi.postDownload(sceneIds), sceneIds);
                             if (download.error) {
                                 errors.push(`[JOB ERROR] ${download.error}`);
                                 return;
                             }
 
                             const job = await poll(async () => {
-                                const job = await page.evaluate(downloadId => test.checkDownload(downloadId), download.id);
+                                const job = await page.evaluate(downloadId => wi.checkDownload(downloadId), download.id);
                                 if (job.status !== 'running') {
                                     return job;
                                 }
@@ -126,9 +126,9 @@ test.describe('Projects', () => {
                         outPath: `${scenePath}/publish`,
                         fn: async (errors) => {
                             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-                            await page.evaluate(initContext);
+                            await page.evaluate(initInterface);
 
-                            const scenes = await page.evaluate(() => test.getScenes());
+                            const scenes = await page.evaluate(() => wi.getScenes());
                             if (!scenes.length) {
                                 errors.push('[FETCH ERROR] Scenes not found');
                                 return;
@@ -141,14 +141,14 @@ test.describe('Projects', () => {
                                 return 0;
                             });
 
-                            const app = await page.evaluate(sceneIds => test.postPublish(sceneIds), sceneIds);
+                            const app = await page.evaluate(sceneIds => wi.postPublish(sceneIds), sceneIds);
                             if (app.task.error) {
                                 errors.push(`[JOB ERROR] ${app.task.error}`);
                                 return;
                             }
 
                             const pubJob = await poll(async () => {
-                                const job = await page.evaluate(appId => test.checkPublish(appId), app.id);
+                                const job = await page.evaluate(appId => wi.checkPublish(appId), app.id);
                                 if (job.status !== 'running') {
                                     return job;
                                 }
@@ -169,8 +169,8 @@ test.describe('Projects', () => {
 
                             // delete app
                             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-                            await page.evaluate(initContext);
-                            const delJob = await page.evaluate(appId => test.deleteApp(appId), app.id);
+                            await page.evaluate(initInterface);
+                            const delJob = await page.evaluate(appId => wi.deleteApp(appId), app.id);
                             if (delJob.error) {
                                 errors.push(`[JOB ERROR] ${delJob.error}`);
                             } else if (delJob.status !== 'complete') {

@@ -2,6 +2,9 @@
     "extends": [
       "@playcanvas/eslint-config"
     ],
+    "globals": {
+      "wi": false
+    },
     "rules": {
       "no-unused-expressions": "off",
       "jsdoc/check-tag-names": "off",
