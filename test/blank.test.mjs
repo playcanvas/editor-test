@@ -11,20 +11,40 @@ const OUT_PATH = 'out';
 jsdocHack(test);
 
 test.describe('Blank', () => {
-    test('creating and deleting a blank project', async ({ page }) => {
-        await page.goto(`https://${HOST}`);
+    test('create a blank project > fork project > delete forked project > delete project', async ({ page }) => {
+        expect(await capture({
+            page,
+            outPath: `${OUT_PATH}/blank-fork`,
+            fn: async () => {
+                await page.goto(`https://${HOST}`);
 
-        await page.getByText('NEW', { exact: true }).click();
-        await page.getByRole('button', { name: 'CREATE' }).click();
-        await page.waitForURL('**/project/**');
-        await page.getByRole('link', { name: ' SETTINGS' }).click();
-        await page.getByRole('button', { name: 'DELETE' }).click();
-        await page.getByPlaceholder('type here').fill('Blank Project');
-        await page.locator('input[type="submit"]').click();
-        await page.waitForURL('**/user/**');
+                await page.getByText('NEW', { exact: true }).click();
+                await page.getByRole('button', { name: 'CREATE' }).click();
+                await page.waitForURL('**/project/**');
+                const projectId = /project\/(\d+)/.exec(page.url())[1];
+
+                await page.getByText(' Fork').first().click();
+                await page.getByPlaceholder('Project Name').fill('Blank Project FORK');
+                await page.getByRole('button', { name: 'FORK' }).click();
+                await page.waitForURL('**/project/**/overview/**-fork');
+
+                await page.getByRole('link', { name: ' SETTINGS' }).click();
+                await page.getByRole('button', { name: 'DELETE' }).click();
+                await page.getByPlaceholder('type here').fill('Blank Project FORK');
+                await page.locator('input[type="submit"]').click();
+                await page.waitForURL('**/user/**');
+
+                await page.goto(`https://${HOST}/project/${projectId}`);
+                await page.getByRole('link', { name: ' SETTINGS' }).click();
+                await page.getByRole('button', { name: 'DELETE' }).click();
+                await page.getByPlaceholder('type here').fill('Blank Project');
+                await page.locator('input[type="submit"]').click();
+                await page.waitForURL('**/user/**');
+            }
+        })).toStrictEqual([]);
     });
 
-    test('creates new blank project opens editor and launch page then deletes', async ({ page }) => {
+    test('create blank project > goto editor > goto launcher > delete project', async ({ page }) => {
         await page.goto(`https://${HOST}`);
 
         await page.getByText('NEW', { exact: true }).click();
