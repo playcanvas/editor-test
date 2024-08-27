@@ -8,7 +8,7 @@ import { initContext } from '../fixtures/test-context.mjs';
  * @param {import('@playwright/test').Page} options.page - The page to navigate.
  * @param {string} options.url - The URL to navigate to.
  * @param {string} options.outPath - The output path.
- * @param {string} options.sceneId - The scene ID.
+ * @param {number} options.sceneId - The scene ID.
  * @returns {Promise<string[]>} - The number of errors.
  */
 export const download = ({ page, url, outPath, sceneId }) => {
