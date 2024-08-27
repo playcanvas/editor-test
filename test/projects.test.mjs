@@ -27,6 +27,10 @@ const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
     return `${key}=${value}`;
 }).join('&');
 
+const editorProjectUrl = projectId => `https://${HOST}/editor/project/${projectId}?${SEARCH_PARAMS}`;
+const editorSceneUrl = sceneId => `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`;
+const launchSceneUrl = sceneId => `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`;
+
 // FIXME: This is a workaround for the JSDoc parser rate limiting.
 test.beforeEach(({ context }) => {
     context.route(/jsdoc-parser\/types\/lib\..+\.d\.ts/, (route) => {
@@ -44,11 +48,12 @@ test.describe('Projects', () => {
     projects.forEach((project) => {
         test.describe(project.name, () => {
             const projectPath = `${OUT_PATH}/${project.id}`;
-            test(`checking https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`, async ({ page }) => {
+            const projectUrl = editorProjectUrl(project.id);
+            test(`checking ${projectUrl}`, async ({ page }) => {
                 await fs.promises.mkdir(projectPath, { recursive: true });
                 const errors = await navigate({
                     page,
-                    url: `https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`,
+                    url: projectUrl,
                     outPath: `${projectPath}/editor`
                 });
                 expect(errors).toStrictEqual([]);
@@ -56,11 +61,13 @@ test.describe('Projects', () => {
 
             project.scenes.forEach((sceneId) => {
                 const scenePath = `${projectPath}/${sceneId}`;
-                test(`checking https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, async ({ page }) => {
+                const sceneUrl = editorSceneUrl(sceneId);
+                const sceneLaunchUrl = launchSceneUrl(sceneId);
+                test(`checking ${sceneUrl}`, async ({ page }) => {
                     await fs.promises.mkdir(scenePath, { recursive: true });
                     const errors = await navigate({
                         page,
-                        url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
+                        url: sceneUrl,
                         outPath: `${scenePath}/editor`
                     });
                     expect(errors).toStrictEqual([]);
@@ -69,7 +76,7 @@ test.describe('Projects', () => {
                 test('downloading project', async ({ page }) => {
                     const errors = await download({
                         page,
-                        url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
+                        url: sceneUrl,
                         outPath: `${scenePath}/download`,
                         sceneId
                     });
@@ -79,7 +86,7 @@ test.describe('Projects', () => {
                 test('publishing project', async ({ page }) => {
                     const errors = await publish({
                         page,
-                        url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
+                        url: sceneUrl,
                         outPath: `${scenePath}/publish`,
                         sceneId
                     });
@@ -89,7 +96,7 @@ test.describe('Projects', () => {
                 test(`checking https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`, async ({ page }) => {
                     const errors = await navigate({
                         page,
-                        url: `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`,
+                        url: sceneLaunchUrl,
                         outPath: `${scenePath}/launch`
                     });
                     expect(errors).toStrictEqual([]);
