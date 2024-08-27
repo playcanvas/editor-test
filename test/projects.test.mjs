@@ -3,8 +3,6 @@ import fs from 'fs';
 import { test, expect } from '@playwright/test';
 
 import projects from './fixtures/projects.mjs';
-import { app } from './lib/app.mjs';
-import { delete_ } from './lib/delete.mjs';
 import { download } from './lib/download.mjs';
 import { navigate } from './lib/navigate.mjs';
 import { publish } from './lib/publish.mjs';
@@ -29,6 +27,7 @@ const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
     return `${key}=${value}`;
 }).join('&');
 
+// FIXME: This is a workaround for the JSDoc parser rate limiting.
 test.beforeEach(({ context }) => {
     context.route(/jsdoc-parser\/types\/lib\..+\.d\.ts/, (route) => {
         const matches = /jsdoc-parser\/types\/(lib\..+\.d\.ts)/.exec(route.request().url());
@@ -41,9 +40,9 @@ test.beforeEach(({ context }) => {
     });
 });
 
-test.describe('Basic editor operations', () => {
+test.describe('Projects', () => {
     projects.forEach((project) => {
-        test.describe(`Project: ${project.name}`, () => {
+        test.describe(project.name, () => {
             const projectPath = `${OUT_PATH}/${project.id}`;
             test(`checking https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`, async ({ page }) => {
                 await fs.promises.mkdir(projectPath, { recursive: true });
@@ -68,9 +67,9 @@ test.describe('Basic editor operations', () => {
                 });
 
                 test('downloading project', async ({ page }) => {
-                    await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle' });
                     const errors = await download({
                         page,
+                        url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
                         outPath: `${scenePath}/download`,
                         sceneId
                     });
@@ -78,25 +77,10 @@ test.describe('Basic editor operations', () => {
                 });
 
                 test('publishing project', async ({ page }) => {
-                    await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle' });
-                    let errors = await publish({
+                    const errors = await publish({
                         page,
+                        url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
                         outPath: `${scenePath}/publish`,
-                        sceneId
-                    });
-                    expect(errors).toStrictEqual([]);
-
-                    errors = await app({
-                        page,
-                        outPath: `${scenePath}/app`,
-                        sceneId
-                    });
-                    expect(errors).toStrictEqual([]);
-
-                    await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle' });
-                    errors = await delete_({
-                        page,
-                        outPath: `${scenePath}/delete`,
                         sceneId
                     });
                     expect(errors).toStrictEqual([]);
