@@ -2,7 +2,7 @@ import fs from 'fs';
 
 /**
  * @param {object} options - Options.
- * @param {puppeteer.Page} options.page - The puppeteer page.
+ * @param {import('@playwright/test').Page} options.page - The page to navigate.
  * @param {string} options.outPath - The output path.
  * @param {function(string[])} options.fn - The function to run.
  * @returns {Promise<string[]>} - The number of errors.

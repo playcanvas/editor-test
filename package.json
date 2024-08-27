@@ -4,7 +4,11 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "test": "mocha --recursive --timeout 100000",
+    "test": "playwright test",
+    "test-debug": "playwright test --debug ",
+    "test-ui": "playwright test --ui",
+    "test-headed": "playwright test --headed",
+    "report": "playwright show-report",
     "login": "node src/login.mjs",
     "lint": "eslint . --ext .js,.mjs"
   },
@@ -12,11 +16,8 @@
   "license": "Properietary",
   "devDependencies": {
     "@playcanvas/eslint-config": "^1.7.4",
-    "chai": "^5.1.1",
-    "eslint": "^8.57.0",
-    "mocha": "^10.7.3",
-    "puppeteer": "^23.1.1",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "@playwright/test": "^1.46.1",
+    "@types/node": "^22.5.0",
+    "eslint": "^8.57.0"
   }
 }

@@ -2,7 +2,7 @@ import { capture } from './capture.mjs';
 
 /**
  * @param {object} options - Options.
- * @param {puppeteer.Page} options.page - The puppeteer page.
+ * @param {import('@playwright/test').Page} options.page - The page to navigate.
  * @param {string} options.outPath - The output path.
  * @param {string} options.sceneId - The scene ID.
  * @returns {Promise<string[]>} - The number of errors.

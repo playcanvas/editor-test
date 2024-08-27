@@ -1,17 +1,22 @@
-import puppeteer from 'puppeteer-extra';
-import stealthPlugin from 'puppeteer-extra-plugin-stealth';
+import fs from 'fs';
 
-puppeteer.use(stealthPlugin());
+import { chromium } from '@playwright/test';
 
-const USER_DATA_PATH = 'user_data';
+fs.mkdirSync('playwright/.auth', { recursive: true });
 
-const HOST = process.env.PC_HOST ?? 'playcanvas.com';
+const authFile = 'playwright/.auth/user.json';
 
-const browser = await puppeteer.launch({
-    userDataDir: USER_DATA_PATH,
-    headless: false
+const browser = await chromium.launch({
+    headless: false,
+    args: ['--disable-blink-features=AutomationControlled']
 });
-const page = (await browser.pages())[0];
-await page.setViewport({ width: 1270, height: 720 });
 
-await page.goto(`https://${HOST}`);
+const context = await browser.newContext();
+const page = await context.newPage();
+await page.goto('https://playcanvas.com/editor');
+
+await page.context().storageState({ path: authFile });
+
+page.on('close', async () => {
+    await browser.close();
+});

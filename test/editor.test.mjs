@@ -1,8 +1,6 @@
 import fs from 'fs';
 
-import { expect } from 'chai';
-import { describe, it, before, after } from 'mocha';
-import puppeteer from 'puppeteer';
+import { test, expect } from '@playwright/test';
 
 import projects from './fixtures/projects.mjs';
 import { app } from './lib/app.mjs';
@@ -10,15 +8,12 @@ import { delete_ } from './lib/delete.mjs';
 import { download } from './lib/download.mjs';
 import { navigate } from './lib/navigate.mjs';
 import { publish } from './lib/publish.mjs';
-import { throttler } from './lib/throttler.mjs';
 
-const USER_DATA_PATH = 'user_data';
 const OUT_PATH = 'out';
 
 const HOST = process.env.PC_HOST ?? 'playcanvas.com';
 const FRONTEND = process.env.PC_FRONTEND ?? '';
 const ENGINE = process.env.PC_ENGINE ?? '';
-const DEBUG = process.env.PC_DEBUG ?? '';
 
 const searchParams = {};
 if (FRONTEND) {
@@ -34,119 +29,88 @@ const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
     return `${key}=${value}`;
 }).join('&');
 
-const launchBrowser = async () => {
-    await fs.promises.rm(`${OUT_PATH}`, { recursive: true, force: true });
-    await fs.promises.mkdir(`${OUT_PATH}`);
+test.beforeEach(({ context }) => {
+    context.route(/jsdoc-parser\/types\/lib\..+\.d\.ts/, (route) => {
+        const matches = /jsdoc-parser\/types\/(lib\..+\.d\.ts)/.exec(route.request().url());
+        const filePath = `./test/fixtures/jsdoc-parser/types/${matches[1]}`;
+        route.fulfill({
+            status: 200,
+            contentType: 'text/plain',
+            body: fs.readFileSync(filePath, 'utf8')
+        });
+    });
+});
 
-    const launchArgs = { userDataDir: USER_DATA_PATH };
-    if (DEBUG) {
-        launchArgs.headless = false;
-        launchArgs.devtools = true;
-    }
-    const browser = await puppeteer.launch(launchArgs);
-    const page = (await browser.pages())[0];
-    await page.setViewport({ width: 1270, height: 720 });
-
-    console.log('Checking sign in status...');
-
-    await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle0' });
-    const url = await page.evaluate(() => window.location.href);
-    if (/login\./.test(url)) {
-        throw new Error('Please login to PlayCanvas by running `npm run login`');
-    }
-
-    return { browser, page };
-};
-
-const { browser, page } = await launchBrowser();
-const throttle = await throttler(page);
-
-describe(`Testing ${projects.length} projects`, () => {
+test.describe('Basic editor operations', () => {
     projects.forEach((project) => {
-        describe(`${project.name} (${project.id})`, () => {
-            let projectPath;
-            before(async () => {
-                projectPath = `${OUT_PATH}/${project.id}`;
-                await fs.promises.mkdir(projectPath);
-            });
-
-            it(`checking https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`, async () => {
+        test.describe(`Project: ${project.name}`, () => {
+            const projectPath = `${OUT_PATH}/${project.id}`;
+            test(`checking https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`, async ({ page }) => {
+                await fs.promises.mkdir(projectPath, { recursive: true });
                 const errors = await navigate({
                     page,
                     url: `https://${HOST}/editor/project/${project.id}?${SEARCH_PARAMS}`,
                     outPath: `${projectPath}/editor`
                 });
-                expect(errors).to.eql([]);
+                expect(errors).toStrictEqual([]);
             });
 
             project.scenes.forEach((sceneId) => {
-                describe(`scene (${sceneId})`, () => {
-                    let scenePath;
-                    before(async () => {
-                        scenePath = `${OUT_PATH}/${project.id}/${sceneId}`;
-                        await fs.promises.mkdir(scenePath);
+                const scenePath = `${projectPath}/${sceneId}`;
+                test(`checking https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, async ({ page }) => {
+                    await fs.promises.mkdir(scenePath, { recursive: true });
+                    const errors = await navigate({
+                        page,
+                        url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
+                        outPath: `${scenePath}/editor`
                     });
+                    expect(errors).toStrictEqual([]);
+                });
 
-                    it(`checking https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, async () => {
-                        const errors = await navigate({
-                            page,
-                            url: `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`,
-                            outPath: `${scenePath}/editor`
-                        });
-                        expect(errors).to.eql([]);
+                test('downloading project', async ({ page }) => {
+                    await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle' });
+                    const errors = await download({
+                        page,
+                        outPath: `${scenePath}/download`,
+                        sceneId
                     });
+                    expect(errors).toStrictEqual([]);
+                });
 
-                    it('downloading project', async () => {
-                        const errors = await download({
-                            page,
-                            outPath: `${scenePath}/download`,
-                            sceneId
-                        });
-                        expect(errors).to.eql([]);
+                test('publishing project', async ({ page }) => {
+                    await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle' });
+                    let errors = await publish({
+                        page,
+                        outPath: `${scenePath}/publish`,
+                        sceneId
                     });
+                    expect(errors).toStrictEqual([]);
 
-                    it('publishing project', async () => {
-                        const errors = await publish({
-                            page,
-                            outPath: `${scenePath}/publish`,
-                            sceneId
-                        });
-                        expect(errors).to.eql([]);
+                    errors = await app({
+                        page,
+                        outPath: `${scenePath}/app`,
+                        sceneId
                     });
+                    expect(errors).toStrictEqual([]);
 
-                    it('launching app', async () => {
-                        const errors = await app({
-                            page,
-                            outPath: `${scenePath}/app`,
-                            sceneId
-                        });
-                        expect(errors).to.eql([]);
+                    await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle' });
+                    errors = await delete_({
+                        page,
+                        outPath: `${scenePath}/delete`,
+                        sceneId
                     });
+                    expect(errors).toStrictEqual([]);
+                });
 
-                    it('deleting app', async () => {
-                        await page.goto(`https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`, { waitUntil: 'networkidle0' });
-                        const errors = await delete_({
-                            page,
-                            outPath: `${scenePath}/delete`,
-                            sceneId
-                        });
-                        expect(errors).to.eql([]);
+                test(`checking https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`, async ({ page }) => {
+                    const errors = await navigate({
+                        page,
+                        url: `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`,
+                        outPath: `${scenePath}/launch`
                     });
-
-                    it(`checking https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`, async () => {
-                        const errors = await navigate({
-                            page,
-                            url: `https://launch.${HOST}/${sceneId}?${SEARCH_PARAMS}`,
-                            outPath: `${scenePath}/launch`
-                        });
-                        expect(errors).to.eql([]);
-                    });
+                    expect(errors).toStrictEqual([]);
                 });
             });
         });
-    });
-
-    after(() => {
-        browser.close();
     });
 });
