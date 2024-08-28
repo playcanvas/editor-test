@@ -12,6 +12,7 @@
     "report": "playwright show-report",
     "codegen": "playwright codegen --load-storage playwright/.auth/user.json",
     "login": "node src/login.mjs",
+    "projects": "node src/projects.mjs",
     "lint": "eslint . --ext .js,.mjs"
   },
   "author": "",

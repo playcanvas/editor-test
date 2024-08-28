@@ -2,42 +2,25 @@ import fs from 'fs';
 
 import { test, expect } from '@playwright/test';
 
-import projects from './fixtures/projects.mjs';
-import { capture } from './lib/capture.mjs';
-import { jsdocHack } from './lib/hack.mjs';
-import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './lib/url.mjs';
-import { poll } from './lib/utils.mjs';
-import { initInterface } from './lib/web-interface.mjs';
+import { capture } from '../lib/capture.mjs';
+import { jsdocHack } from '../lib/hack.mjs';
+import { editorProjectUrl, editorSceneUrl, launchSceneUrl } from '../lib/url.mjs';
+import { poll } from '../lib/utils.mjs';
+import { initInterface } from '../lib/web-interface.mjs';
 
 const OUT_PATH = 'out';
+const PROJECTS = fs.existsSync('cache/projects.json') ? JSON.parse(fs.readFileSync('cache/projects.json', 'utf8')) : [];
 
 jsdocHack(test);
 
-projects.forEach((project) => {
-    test.describe(project.name, () => {
+test.describe.configure({
+    mode: 'serial'
+});
+
+PROJECTS.forEach((project) => {
+    test.describe(`${project.name} (${project.id})`, () => {
         const projectPath = `${OUT_PATH}/${project.id}`;
         const projectUrl = editorProjectUrl(project.id);
-        test('fork > delete forked', async ({ page }) => {
-            await fs.promises.mkdir(projectPath, { recursive: true });
-            expect(await capture({
-                page,
-                outPath: `${projectPath}/fork`,
-                fn: async () => {
-                    await page.goto(`https://${HOST}/project/${project.id}`);
-                    await page.getByText(' Fork').first().click();
-                    await page.getByPlaceholder('Project Name').fill(`${project.name} FORK`);
-                    await page.getByRole('button', { name: 'FORK' }).click();
-                    await page.waitForURL('**/project/**/overview/**-fork');
-
-                    await page.getByRole('link', { name: ' SETTINGS' }).click();
-                    await page.getByRole('button', { name: 'DELETE' }).click();
-                    await page.getByPlaceholder('type here').fill(`${project.name} FORK`);
-                    await page.locator('input[type="submit"]').click();
-                    await page.waitForURL('**/user/**');
-                }
-            })).toStrictEqual([]);
-        });
-
         test('goto editor (project id)', async ({ page }) => {
             await fs.promises.mkdir(projectPath, { recursive: true });
             expect(await capture({

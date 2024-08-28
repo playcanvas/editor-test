@@ -11,7 +11,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
     /* Timeout for each test */
-    timeout: 50000,
+    timeout: 30000,
     /* Directory to search for tests */
     testDir: './test',
     /* Run tests in files in parallel */
@@ -50,6 +50,15 @@ export default defineConfig({
                 storageState: 'playwright/.auth/user.json'
             },
             dependencies: ['setup']
+        },
+        {
+            name: 'cleanup',
+            testMatch: /.*\.cleanup\.mjs/,
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: 'playwright/.auth/user.json'
+            },
+            dependencies: ['chromium']
         }
     ]
 });

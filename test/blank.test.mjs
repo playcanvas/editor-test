@@ -2,9 +2,9 @@ import fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { capture } from './lib/capture.mjs';
-import { jsdocHack } from './lib/hack.mjs';
-import { HOST, editorProjectUrl, editorSceneUrl, launchSceneUrl } from './lib/url.mjs';
+import { capture } from '../lib/capture.mjs';
+import { jsdocHack } from '../lib/hack.mjs';
+import { HOST, editorProjectUrl, editorSceneUrl, launchSceneUrl } from '../lib/url.mjs';
 
 const OUT_PATH = 'out';
 
