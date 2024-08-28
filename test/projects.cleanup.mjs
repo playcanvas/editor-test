@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import { test as cleanup } from '@playwright/test';
 
 import { HOST } from '../lib/url.mjs';
