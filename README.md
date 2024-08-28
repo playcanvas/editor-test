@@ -2,8 +2,11 @@
 
 ## How to run tests
 
-1. Run `npm start` to open up browser window and sign in.
-2. Run `npm test` to begin the testing suite.
+1. Run `npm run login` to open up browser window and sign in.
+
+2. Run `npm run projects` to fetch and cache the list of projects you would like to test
+
+3. Run `npm test` to begin the testing suite.
 
 ## Changing hosts
 
