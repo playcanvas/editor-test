@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test as setup, expect } from '@playwright/test';
 
 import { HOST } from './lib/url.mjs';
 
-test('signed in', async ({ page }) => {
+setup('check if authed', async ({ page }) => {
     await page.goto(`https://${HOST}/editor`);
     await expect(page).toHaveTitle(/Editor/);
 });

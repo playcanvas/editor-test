@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import projects from './fixtures/projects.mjs';
 import { capture } from './lib/capture.mjs';
 import { jsdocHack } from './lib/hack.mjs';
-import { editorProjectUrl, editorSceneUrl, launchSceneUrl } from './lib/url.mjs';
+import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './lib/url.mjs';
 import { poll } from './lib/utils.mjs';
 import { initInterface } from './lib/web-interface.mjs';
 
@@ -23,7 +23,7 @@ projects.forEach((project) => {
                 page,
                 outPath: `${projectPath}/fork`,
                 fn: async () => {
-                    await page.goto(`https://playcanvas.com/project/${project.id}`);
+                    await page.goto(`https://${HOST}/project/${project.id}`);
                     await page.getByText(' Fork').first().click();
                     await page.getByPlaceholder('Project Name').fill(`${project.name} FORK`);
                     await page.getByRole('button', { name: 'FORK' }).click();

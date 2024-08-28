@@ -20,6 +20,7 @@
     "@playcanvas/eslint-config": "^1.7.4",
     "@playwright/test": "^1.46.1",
     "@types/node": "^22.5.0",
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.0",
+    "node-fetch": "^3.3.2"
   }
 }

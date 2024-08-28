@@ -9,6 +9,19 @@ export const initInterface = () => {
             };
         }
 
+        async getUser(name) {
+            const res = await fetch(`/api/users/${name}`, {
+                headers: this.headers
+            });
+            return await res.json();
+        }
+
+        async getProjects(userId) {
+            const res = await fetch(`/api/users/${userId}/projects`);
+            const json = await res.json();
+            return json.result ?? [];
+        }
+
         async getApps() {
             const res = await fetch(`/api/projects/${config.project.id}/apps?limit=0`, {
                 headers: this.headers
@@ -17,8 +30,8 @@ export const initInterface = () => {
             return json.result ?? [];
         }
 
-        async getScenes() {
-            const res = await fetch(`/api/projects/${config.project.id}/scenes`, {
+        async getScenes(projectId) {
+            const res = await fetch(`/api/projects/${projectId ?? config.project.id}/scenes`, {
                 headers: this.headers
             });
             const json = await res.json();

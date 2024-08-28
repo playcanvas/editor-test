@@ -1,5 +1,6 @@
 node_modules
 /out
+/test/fixtures/projects.cache.json
 /test-results/
 /playwright-report/
 /blob-report/

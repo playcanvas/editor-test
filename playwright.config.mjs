@@ -36,11 +36,20 @@ export default defineConfig({
     /* Configure projects for major browsers */
     projects: [
         {
-            name: 'chromium',
+            name: 'setup',
+            testMatch: /.*\.setup\.mjs/,
             use: {
                 ...devices['Desktop Chrome'],
                 storageState: 'playwright/.auth/user.json'
             }
+        },
+        {
+            name: 'chromium',
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: 'playwright/.auth/user.json'
+            },
+            dependencies: ['setup']
         }
     ]
 });
