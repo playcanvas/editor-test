@@ -50,15 +50,6 @@ export default defineConfig({
                 storageState: 'playwright/.auth/user.json'
             },
             dependencies: ['setup']
-        },
-        {
-            name: 'cleanup',
-            testMatch: /.*\.cleanup\.mjs/,
-            use: {
-                ...devices['Desktop Chrome'],
-                storageState: 'playwright/.auth/user.json'
-            },
-            dependencies: ['chromium']
         }
     ]
 });

@@ -3,7 +3,7 @@ import fs from 'fs';
 import { test, expect } from '@playwright/test';
 
 import { capture } from '../lib/capture.mjs';
-import { jsdocHack } from '../lib/hack.mjs';
+import { middleware } from '../lib/middleware.mjs';
 import { editorProjectUrl, editorSceneUrl, launchSceneUrl } from '../lib/url.mjs';
 import { poll } from '../lib/utils.mjs';
 import { initInterface } from '../lib/web-interface.mjs';
@@ -11,11 +11,11 @@ import { initInterface } from '../lib/web-interface.mjs';
 const OUT_PATH = 'out';
 const PROJECTS = fs.existsSync('cache/projects.json') ? JSON.parse(fs.readFileSync('cache/projects.json', 'utf8')) : [];
 
-jsdocHack(test);
+middleware(test);
 
-test.describe.configure({
-    mode: 'serial'
-});
+// test.describe.configure({
+//     mode: 'serial'
+// });
 
 PROJECTS.forEach((project) => {
     test.describe(`${project.name} (${project.id})`, () => {

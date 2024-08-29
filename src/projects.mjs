@@ -22,6 +22,10 @@ await page.evaluate(initInterface);
 
 const user = await page.evaluate(name => wi.getUser(name), USER);
 const projects = await page.evaluate(userId => wi.getProjects(userId), user.id);
+
+const forked = projects.filter(project => /FORK$/.test(project.name));
+await Promise.all(forked.map(project => page.evaluate(projectId => wi.deleteProject(projectId), project.id)));
+
 const filtered = projects.filter(project => !/FORK$/.test(project.name) && new Date(project.created).getFullYear() > YEAR);
 const data = await Promise.all(filtered.map(async (project) => {
     const scenes = await page.evaluate(projectId => wi.getScenes(projectId), project.id);

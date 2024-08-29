@@ -3,12 +3,12 @@ import fs from 'fs';
 import { expect, test } from '@playwright/test';
 
 import { capture } from '../lib/capture.mjs';
-import { jsdocHack } from '../lib/hack.mjs';
+import { middleware } from '../lib/middleware.mjs';
 import { HOST, editorProjectUrl, editorSceneUrl, launchSceneUrl } from '../lib/url.mjs';
 
 const OUT_PATH = 'out';
 
-jsdocHack(test);
+middleware(test);
 
 const projectPath = `${OUT_PATH}/blank`;
 test('create > fork > delete forked > goto editor > goto launcher > delete', async ({ page }) => {
