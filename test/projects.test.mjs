@@ -13,9 +13,9 @@ const PROJECTS = fs.existsSync('cache/projects.json') ? JSON.parse(fs.readFileSy
 
 middleware(test);
 
-// test.describe.configure({
-//     mode: 'serial'
-// });
+test.describe.configure({
+    mode: 'serial'
+});
 
 PROJECTS.forEach((project) => {
     test.describe(`${project.name} (${project.id})`, () => {
