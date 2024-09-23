@@ -21,6 +21,7 @@ test('create > fork > delete forked > goto editor > goto launcher > delete', asy
             await page.goto(`https://${HOST}`);
 
             await page.getByText('NEW', { exact: true }).click();
+            await page.getByText('Accept All Cookies', { exact: true }).click();
             await page.getByRole('button', { name: 'CREATE' }).click();
             await page.waitForURL('**/project/**');
             projectId = /project\/(\d+)/.exec(page.url())[1];
