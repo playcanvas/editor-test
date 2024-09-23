@@ -2,10 +2,9 @@ import fs from 'fs';
 
 import { chromium } from '@playwright/test';
 
-import { HOST } from '../lib/url.mjs';
+import { USERNAME, HOST } from '../lib/url.mjs';
 import { initInterface } from '../lib/web-interface.mjs';
 
-const USER = 'kpal';
 const YEAR = 2020;
 const AUTH_PATH = 'playwright/.auth/user.json';
 
@@ -20,7 +19,7 @@ const page = await context.newPage();
 await page.goto(`https://${HOST}/editor`);
 await page.evaluate(initInterface);
 
-const user = await page.evaluate(name => wi.getUser(name), USER);
+const user = await page.evaluate(name => wi.getUser(name), USERNAME);
 const projects = await page.evaluate(userId => wi.getProjects(userId), user.id);
 
 const forked = projects.filter(project => /FORK$/.test(project.name));
