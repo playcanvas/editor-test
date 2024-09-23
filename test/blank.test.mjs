@@ -84,7 +84,7 @@ test('create > fork > delete forked > goto editor > goto launcher > delete', asy
         page,
         outPath: `${projectPath}/delete`,
         fn: async () => {
-            await page.goto(`https://${HOST}/project/${projectId}`);
+            await page.goto(`https://${HOST}/project/${projectId}`, { waitUntil: 'networkidle' });
             await page.getByRole('link', { name: ' SETTINGS' }).click();
             await page.getByRole('button', { name: 'DELETE' }).click();
             await page.getByPlaceholder('type here').fill('Blank Project');
