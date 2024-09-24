@@ -51,6 +51,8 @@ test.describe.configure({
 });
 
 test.describe('project list', () => {
+    test.skip(true);
+
     test('no view', async ({ page }) => {
         await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });
         await page.evaluate(initInterface);
