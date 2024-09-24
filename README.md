@@ -1,4 +1,6 @@
-# Editor Testing Suite
+<img width="200" src="https://s3-eu-west-1.amazonaws.com/static.playcanvas.com/platform/images/logo/playcanvas-logo-medium.png"/>
+
+# PlayCanvas Editor Testing Suite
 
 ## How to run tests
 
