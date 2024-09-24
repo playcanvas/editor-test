@@ -22,7 +22,7 @@ const sortKeys = (obj) => {
 
 const shapeEqual = (a, b) => {
     expect(typeof a).toBe(typeof b);
-    if (typeof a === 'string' && !isNaN(new Date(a))) {
+    if (typeof a === 'string' && !isNaN(+new Date(a))) {
         expect(+new Date(a.split('.')[0])).toEqual(+new Date(b.split('.')[0]));
         return true;
     }
