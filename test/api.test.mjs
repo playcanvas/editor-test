@@ -49,7 +49,7 @@ test.describe.configure({
 });
 
 test.describe('project list', () => {
-    test.skip(true);
+    test.skip(/local\.playcanvas\.com/.test(HOST));
 
     test('no view', async ({ page }) => {
         await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });
