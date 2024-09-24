@@ -46,19 +46,35 @@ const shapeEqual = (a, b) => {
     return true;
 };
 
-test('project list', async ({ page }) => {
-    await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });
-    await page.evaluate(initInterface);
+test.describe.configure({
+    mode: 'serial'
+});
 
-    let projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id)));
-    let projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id)));
-    expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
+test.describe('project list', () => {
+    test('no view', async ({ page }) => {
+        await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });
+        await page.evaluate(initInterface);
 
-    projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id, 'store')));
-    projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id, 'store')));
-    expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
+        const projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id)));
+        const projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id)));
+        expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
+    });
 
-    projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id, 'profile')));
-    projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id, 'profile')));
-    expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
+    test('view=profile', async ({ page }) => {
+        await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });
+        await page.evaluate(initInterface);
+
+        const projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id, 'profile')));
+        const projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id, 'profile')));
+        expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
+    });
+
+    test('view=store', async ({ page }) => {
+        await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });
+        await page.evaluate(initInterface);
+
+        const projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id, 'store')));
+        const projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id, 'store')));
+        expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
+    });
 });
