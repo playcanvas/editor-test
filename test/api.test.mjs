@@ -50,8 +50,15 @@ test('project list', async ({ page }) => {
     await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });
     await page.evaluate(initInterface);
 
-    const projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id)));
-    const projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id)));
+    let projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id)));
+    let projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id)));
+    expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
 
+    projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id, 'store')));
+    projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id, 'store')));
+    expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
+
+    projectsV1 = sortKeys(await page.evaluate(() => wi.getProjects(config.user.id, 'profile')));
+    projectsV2 = sortKeys(await page.evaluate(() => wi.with({ api: '/api/v2' }).getProjects(config.user.id, 'profile')));
     expect(shapeEqual(projectsV1, projectsV2)).toBeTruthy();
 });
