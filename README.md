@@ -11,6 +11,7 @@ PC_GMAIL=<gmail-email>
 PC_PASSWORD=<password>
 PC_USERNAME=<playcanvas-username>
 PC_HOST=playcanvas.com
+PC_LOGIN_HOST=login.playcanvas.com
 PC_LAUNCH_HOST=launch.playcanvas.com
 ```
 

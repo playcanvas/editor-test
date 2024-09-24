@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { chromium } from '@playwright/test';
 
-import { GMAIL, PASSWORD, HOST } from '../lib/url.mjs';
+import { GMAIL, PASSWORD, LOGIN_HOST } from '../lib/url.mjs';
 
 const AUTH_PATH = 'playwright/.auth/user.json';
 
@@ -15,7 +15,7 @@ const browser = await chromium.launch({
 
 const context = await browser.newContext();
 const page = await context.newPage();
-await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
+await page.goto(`https://${LOGIN_HOST}`);
 await page.context().storageState({ path: AUTH_PATH });
 
 const page1Promise = page.waitForEvent('popup');
@@ -26,7 +26,7 @@ await page1.getByRole('button', { name: 'Next' }).click();
 await page1.getByLabel('Enter your password').fill(PASSWORD);
 await page1.getByRole('button', { name: 'Next' }).click();
 await page1.waitForEvent('close');
-await page.waitForURL('**/editor/');
+await page.waitForURL('**/user/**');
 
 console.log('Authenticated');
 
