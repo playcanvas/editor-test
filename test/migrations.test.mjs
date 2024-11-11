@@ -31,11 +31,11 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
     expect(await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
         // Check settings migration
         const settings = await page.evaluate(() => editor.call('settings:project').json());
-        await expect(settings.hasOwnProperty('deviceTypes')).toBe(false);
-        await expect(settings.hasOwnProperty('preferWebGl2')).toBe(false);
-        await expect(settings.hasOwnProperty('useLegacyAudio')).toBe(false);
-        await expect(settings.enableWebGpu).toBe(true);
-        await expect(settings.enableWebGl2).toBe(false);
+        expect(settings.hasOwnProperty('deviceTypes')).toBe(false);
+        expect(settings.hasOwnProperty('preferWebGl2')).toBe(false);
+        expect(settings.hasOwnProperty('useLegacyAudio')).toBe(false);
+        expect(settings.enableWebGpu).toBe(true);
+        expect(settings.enableWebGl2).toBe(false);
 
         // Check assets migration
         const assets = await page.evaluate((names) => {
@@ -44,31 +44,31 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         }, [MATERIAL_NAME, TEXTURE_NAME]);
 
         const material = assets[0];
-        await expect(material.data.hasOwnProperty('ambientTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('diffuseTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('emissiveTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('normalTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('opacityTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('heightTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('lightTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('metalnessTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('glossTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('clearCoatTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('clearCoatGlossTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('clearCoatNormalTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('sheenTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('sheenGlossTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('refractionTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('thicknessTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('iridescenceTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('iridescenceThicknessTint')).toBe(false);
-        await expect(material.data.hasOwnProperty('fresnelModel')).toBe(false);
-        await expect(material.data.hasOwnProperty('shader')).toBe(false);
-        await expect(material.data.hasOwnProperty('useGammaTonemap')).toBe(false);
-        await expect(material.data.hasOwnProperty('useGamma')).toBe(true);
+        expect(material.data.hasOwnProperty('ambientTint')).toBe(false);
+        expect(material.data.hasOwnProperty('diffuseTint')).toBe(false);
+        expect(material.data.hasOwnProperty('emissiveTint')).toBe(false);
+        expect(material.data.hasOwnProperty('normalTint')).toBe(false);
+        expect(material.data.hasOwnProperty('opacityTint')).toBe(false);
+        expect(material.data.hasOwnProperty('heightTint')).toBe(false);
+        expect(material.data.hasOwnProperty('lightTint')).toBe(false);
+        expect(material.data.hasOwnProperty('metalnessTint')).toBe(false);
+        expect(material.data.hasOwnProperty('glossTint')).toBe(false);
+        expect(material.data.hasOwnProperty('clearCoatTint')).toBe(false);
+        expect(material.data.hasOwnProperty('clearCoatGlossTint')).toBe(false);
+        expect(material.data.hasOwnProperty('clearCoatNormalTint')).toBe(false);
+        expect(material.data.hasOwnProperty('sheenTint')).toBe(false);
+        expect(material.data.hasOwnProperty('sheenGlossTint')).toBe(false);
+        expect(material.data.hasOwnProperty('refractionTint')).toBe(false);
+        expect(material.data.hasOwnProperty('thicknessTint')).toBe(false);
+        expect(material.data.hasOwnProperty('iridescenceTint')).toBe(false);
+        expect(material.data.hasOwnProperty('iridescenceThicknessTint')).toBe(false);
+        expect(material.data.hasOwnProperty('fresnelModel')).toBe(false);
+        expect(material.data.hasOwnProperty('shader')).toBe(false);
+        expect(material.data.hasOwnProperty('useGammaTonemap')).toBe(false);
+        expect(material.data.hasOwnProperty('useGamma')).toBe(true);
 
         const texture = assets[1];
-        await expect(texture.data.hasOwnProperty('srgb')).toBe(true);
+        expect(texture.data.hasOwnProperty('srgb')).toBe(true);
     })).toStrictEqual([]);
 
     // delete
