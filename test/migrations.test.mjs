@@ -11,6 +11,37 @@ const PROJECT_NAME = 'Migrations';
 const MATERIAL_NAME = 'TEST_MATERIAL';
 const TEXTURE_NAME = 'TEST_TEXTURE';
 
+// const resetSettings = () => {
+//     const settings = editor.call('settings:project');
+//     settings.set('deviceTypes', ['webgpu']);
+//     settings.set('preferWebGl2', true);
+//     settings.set('useLegacyAudio', false);
+
+//     settings.unset('enableWebGpu');
+//     settings.unset('enableWebGl2');
+// };
+
+// const resetMaterial = (id) => {
+//     const material = editor.call('assets:get', id);
+//     material.set('data.ambientTint', true);
+//     material.set('data.diffuseTint', false);
+//     material.set('data.emissiveTint', false);
+//     material.set('data.emissive', [1, 0, 0]);
+//     material.set('data.fresnelModel', 0);
+//     material.set('data.shader', 'phong');
+//     material.set('data.useGammaTonemap', false);
+
+//     material.unset('data.metalnessTint');
+//     material.unset('data.sheenTint');
+//     material.unset('data.sheenGlossTint');
+//     material.unset('data.useGamma');
+// };
+
+// const resetTexture = (id) => {
+//     const texture = editor.call('assets:get', id);
+//     texture.unset('data.srgb');
+// };
+
 middleware(test);
 
 test.describe.configure({
@@ -44,24 +75,13 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         }, [MATERIAL_NAME, TEXTURE_NAME]);
 
         const material = assets[0];
-        expect(material.data.hasOwnProperty('ambientTint')).toBe(false);
-        expect(material.data.hasOwnProperty('diffuseTint')).toBe(false);
-        expect(material.data.hasOwnProperty('emissiveTint')).toBe(false);
-        expect(material.data.hasOwnProperty('normalTint')).toBe(false);
-        expect(material.data.hasOwnProperty('opacityTint')).toBe(false);
-        expect(material.data.hasOwnProperty('heightTint')).toBe(false);
-        expect(material.data.hasOwnProperty('lightTint')).toBe(false);
-        expect(material.data.hasOwnProperty('metalnessTint')).toBe(false);
-        expect(material.data.hasOwnProperty('glossTint')).toBe(false);
-        expect(material.data.hasOwnProperty('clearCoatTint')).toBe(false);
-        expect(material.data.hasOwnProperty('clearCoatGlossTint')).toBe(false);
-        expect(material.data.hasOwnProperty('clearCoatNormalTint')).toBe(false);
-        expect(material.data.hasOwnProperty('sheenTint')).toBe(false);
-        expect(material.data.hasOwnProperty('sheenGlossTint')).toBe(false);
-        expect(material.data.hasOwnProperty('refractionTint')).toBe(false);
-        expect(material.data.hasOwnProperty('thicknessTint')).toBe(false);
-        expect(material.data.hasOwnProperty('iridescenceTint')).toBe(false);
-        expect(material.data.hasOwnProperty('iridescenceThicknessTint')).toBe(false);
+        expect(material.data.ambientTint).toBe(true);
+        expect(material.data.diffuseTint).toBe(true);
+        expect(material.data.emissiveTint).toBe(true);
+        expect(material.data.emissive).toStrictEqual([0, 0, 0]);
+        expect(material.data.metalnessTint).toBe(true);
+        expect(material.data.sheenTint).toBe(true);
+        expect(material.data.sheenGlossTint).toBe(true);
         expect(material.data.hasOwnProperty('fresnelModel')).toBe(false);
         expect(material.data.hasOwnProperty('shader')).toBe(false);
         expect(material.data.hasOwnProperty('useGammaTonemap')).toBe(false);
