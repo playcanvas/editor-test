@@ -23,8 +23,10 @@ const TEXTURE_NAME = 'TEST_TEXTURE';
 
 // const resetMaterial = (id) => {
 //     const material = editor.call('assets:get', id);
-//     material.set('data.ambientTint', true);
+//     material.set('data.ambientTint', false);
+//     material.set('data.ambient', [1, 0, 0]);
 //     material.set('data.diffuseTint', false);
+//     material.set('data.diffuse', [1, 0, 0]);
 //     material.set('data.emissiveTint', false);
 //     material.set('data.emissive', [1, 0, 0]);
 //     material.set('data.fresnelModel', 0);
@@ -76,9 +78,11 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 
         const material = assets[0];
         expect(material.data.ambientTint).toBe(true);
+        expect(material.data.ambient).toStrictEqual([1, 1, 1]);
         expect(material.data.diffuseTint).toBe(true);
+        expect(material.data.diffuse).toStrictEqual([1, 1, 1]);
         expect(material.data.emissiveTint).toBe(true);
-        expect(material.data.emissive).toStrictEqual([0, 0, 0]);
+        expect(material.data.emissive).toStrictEqual([1, 0, 0]);
         expect(material.data.metalnessTint).toBe(true);
         expect(material.data.sheenTint).toBe(true);
         expect(material.data.sheenGlossTint).toBe(true);
