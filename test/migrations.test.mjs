@@ -13,9 +13,10 @@ const TEXTURE_NAME = 'TEST_TEXTURE';
 
 // const resetSettings = () => {
 //     const settings = editor.call('settings:project');
-//     settings.set('deviceTypes', ['webgpu']);
-//     settings.set('preferWebGl2', true);
-//     settings.set('useLegacyAudio', false);
+//     settings.set('deviceTypes', ['webgpu'], false, true, true);
+//     settings.set('preferWebGl2', true, false, true, true);
+//     settings.set('useLegacyAudio', false, false, true, true);
+//     settings.set('useLegacyScripts', false, false, true, true);
 
 //     settings.unset('enableWebGpu');
 //     settings.unset('enableWebGl2');
@@ -25,14 +26,14 @@ const TEXTURE_NAME = 'TEST_TEXTURE';
 //     const material = editor.call('assets:get', id);
 //     material.set('data.ambientTint', false);
 //     material.set('data.ambient', [1, 0, 0]);
-//     material.set('data.diffuseTint', false);
-//     material.set('data.diffuse', [1, 0, 0]);
-//     material.set('data.emissiveTint', false);
-//     material.set('data.emissive', [1, 0, 0]);
+//     material.set('data.diffuse', [0, 0, 0]);
+//     material.set('data.emissive', [1, 1, 1]);
 //     material.set('data.fresnelModel', 0);
 //     material.set('data.shader', 'phong');
 //     material.set('data.useGammaTonemap', false);
 
+//     material.unset('data.diffuseTint');
+//     material.unset('data.emissiveTint');
 //     material.unset('data.metalnessTint');
 //     material.unset('data.sheenTint');
 //     material.unset('data.sheenGlossTint');
@@ -67,6 +68,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         expect(settings.hasOwnProperty('deviceTypes')).toBe(false);
         expect(settings.hasOwnProperty('preferWebGl2')).toBe(false);
         expect(settings.hasOwnProperty('useLegacyAudio')).toBe(false);
+        expect(settings.useLegacyScripts).toBe(false);
         expect(settings.enableWebGpu).toBe(true);
         expect(settings.enableWebGl2).toBe(false);
 
@@ -77,19 +79,19 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         }, [MATERIAL_NAME, TEXTURE_NAME]);
 
         const material = assets[0];
-        expect(material.data.ambientTint).toBe(true);
-        expect(material.data.ambient).toStrictEqual([1, 1, 1]);
-        expect(material.data.diffuseTint).toBe(true);
-        expect(material.data.diffuse).toStrictEqual([1, 1, 1]);
-        expect(material.data.emissiveTint).toBe(true);
-        expect(material.data.emissive).toStrictEqual([1, 0, 0]);
-        expect(material.data.metalnessTint).toBe(true);
-        expect(material.data.sheenTint).toBe(true);
-        expect(material.data.sheenGlossTint).toBe(true);
         expect(material.data.hasOwnProperty('fresnelModel')).toBe(false);
         expect(material.data.hasOwnProperty('shader')).toBe(false);
         expect(material.data.hasOwnProperty('useGammaTonemap')).toBe(false);
-        expect(material.data.hasOwnProperty('useGamma')).toBe(true);
+        expect(material.data.ambientTint).toBe(true);
+        expect(material.data.ambient).toStrictEqual([1, 1, 1]);
+        expect(material.data.diffuseTint).toBe(true);
+        expect(material.data.diffuse).toStrictEqual([0, 0, 0]);
+        expect(material.data.emissiveTint).toBe(true);
+        expect(material.data.emissive).toStrictEqual([1, 1, 1]);
+        expect(material.data.metalnessTint).toBe(true);
+        expect(material.data.sheenTint).toBe(true);
+        expect(material.data.sheenGlossTint).toBe(true);
+        expect(material.data.useGamma).toBe(false);
 
         const texture = assets[1];
         expect(texture.data.hasOwnProperty('srgb')).toBe(true);
