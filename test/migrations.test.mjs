@@ -80,7 +80,6 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 
         const material = assets[0];
         expect(material.data.hasOwnProperty('fresnelModel')).toBe(false);
-        expect(material.data.hasOwnProperty('shader')).toBe(false);
         expect(material.data.hasOwnProperty('useGammaTonemap')).toBe(false);
         expect(material.data.ambientTint).toBe(true);
         expect(material.data.ambient).toStrictEqual([1, 1, 1]);
@@ -92,6 +91,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         expect(material.data.sheenTint).toBe(true);
         expect(material.data.sheenGlossTint).toBe(true);
         expect(material.data.useGamma).toBe(false);
+        expect(material.data.shader).toBe('blinn');
 
         const texture = assets[1];
         expect(texture.data.hasOwnProperty('srgb')).toBe(true);
