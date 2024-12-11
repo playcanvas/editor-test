@@ -10,6 +10,7 @@ const OUT_PATH = 'out/migrations';
 const PROJECT_NAME = 'Migrations';
 const MATERIAL_NAME = 'TEST_MATERIAL';
 const TEXTURE_NAME = 'TEST_TEXTURE';
+const ENTITY_NAME = 'Root';
 
 // const resetSettings = () => {
 //     const settings = editor.call('settings:project');
@@ -17,6 +18,7 @@ const TEXTURE_NAME = 'TEST_TEXTURE';
 //     settings.set('preferWebGl2', true, false, true, true);
 //     settings.set('useLegacyAudio', false, false, true, true);
 //     settings.set('useLegacyScripts', false, false, true, true);
+//     settings.set('engineV2', true, false, true, true);
 
 //     settings.unset('enableWebGpu');
 //     settings.unset('enableWebGl2');
@@ -45,6 +47,14 @@ const TEXTURE_NAME = 'TEST_TEXTURE';
 //     texture.unset('data.srgb');
 // };
 
+// const resetEntity = (name) => {
+//     const entity = editor.call('entities:list').find(e => e.get('name') === name);
+//     entity.set('components.light.shadowType', 1);
+
+//     entity.unset('components.camera.toneMapping');
+//     entity.unset('components.camera.gammaCorrection');
+// };
+
 middleware(test);
 
 test.describe.configure({
@@ -68,6 +78,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         expect(settings.hasOwnProperty('deviceTypes')).toBe(false);
         expect(settings.hasOwnProperty('preferWebGl2')).toBe(false);
         expect(settings.hasOwnProperty('useLegacyAudio')).toBe(false);
+        expect(settings.engineV2).toBe(true);
         expect(settings.useLegacyScripts).toBe(false);
         expect(settings.enableWebGpu).toBe(true);
         expect(settings.enableWebGl2).toBe(false);
@@ -95,6 +106,20 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 
         const texture = assets[1];
         expect(texture.data.hasOwnProperty('srgb')).toBe(true);
+
+        // Check entity migration
+        const entity = await page.evaluate((name) => {
+            const entity = editor.call('entities:list').find(e => e.get('name') === name);
+            return entity.json();
+        }, ENTITY_NAME);
+
+        // light
+        expect(entity.components.light.shadowType).toBe(2); // VSM16
+
+        // camera
+        expect(entity.components.camera.toneMapping).toBe(0); // Linear
+        expect(entity.components.camera.gammaCorrection).toBe(1); // 2.2
+
     })).toStrictEqual([]);
 
     // delete
@@ -121,7 +146,6 @@ test('import > fork project > goto editor > fork project > delete', async ({ pag
     // delete
     expect(await deleteProject(page, `${projectPath}/delete`, projectId, PROJECT_NAME)).toStrictEqual([]);
 });
-
 
 test('import > goto editor > download > publish > goto app > delete app > delete', async ({ page }) => {
     const projectPath = `${OUT_PATH}/${nextId()}`;
