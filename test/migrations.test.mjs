@@ -68,7 +68,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // import
-    expect(await importProject(page, `${projectPath}/import`, 'test/fixtures/migrations.zip')).toStrictEqual([]);
+    expect(await importProject(page, `${projectPath}/import`, 'test/fixtures/projects/migrations.zip')).toStrictEqual([]);
     const projectId = getProjectId(page);
 
     // goto editor (project)
