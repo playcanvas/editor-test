@@ -3,6 +3,7 @@
       "@playcanvas/eslint-config"
     ],
     "globals": {
+      "config": false,
       "editor": false,
       "wi": false
     },

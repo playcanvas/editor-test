@@ -1,3 +1,6 @@
+// config
+declare var config: any;
+
 // editor
 declare var editor: any;
 
