@@ -31,6 +31,3 @@ await page.waitForURL('**/user/**');
 console.log('Authenticated');
 
 await browser.close();
-
-await import('./projects.mjs');
-console.log('Projects cached');

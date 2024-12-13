@@ -2,10 +2,11 @@ import fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { deleteProject, downloadProject, forkProject, getProjectId, getSceneId, importProject, publishProject, visitEditor } from '../lib/common.mjs';
+import { deleteProject, downloadProject, forkProject, importProject, publishProject, visitEditor } from '../lib/common.mjs';
 import { middleware } from '../lib/middleware.mjs';
 import { idGenerator } from '../lib/utils.mjs';
 
+const IN_PATH = 'test/fixtures/projects/migrations.zip';
 const OUT_PATH = 'out/migrations';
 const PROJECT_NAME = 'Migrations';
 const MATERIAL_NAME = 'TEST_MATERIAL';
@@ -68,11 +69,16 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // import
-    expect(await importProject(page, `${projectPath}/import`, 'test/fixtures/projects/migrations.zip')).toStrictEqual([]);
-    const projectId = getProjectId(page);
+    const {
+        errors: importErrors,
+        projectId
+    } = await importProject(page, `${projectPath}/import`, IN_PATH);
+    expect(importErrors).toStrictEqual([]);
 
     // goto editor (project)
-    expect(await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
+    const {
+        errors: editorErrors
+    } = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
         // Check settings migration
         const settings = await page.evaluate(() => editor.call('settings:project').json());
         expect(settings.hasOwnProperty('deviceTypes')).toBe(false);
@@ -120,10 +126,11 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         expect(entity.components.camera.toneMapping).toBe(0); // Linear
         expect(entity.components.camera.gammaCorrection).toBe(1); // 2.2
 
-    })).toStrictEqual([]);
+    });
+    expect(editorErrors).toStrictEqual([]);
 
     // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
 });
 
 test('import > fork project > goto editor > fork project > delete', async ({ page }) => {
@@ -131,20 +138,26 @@ test('import > fork project > goto editor > fork project > delete', async ({ pag
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // import
-    expect(await importProject(page, `${projectPath}/import`, 'test/fixtures/migrations.zip')).toStrictEqual([]);
-    const projectId = getProjectId(page);
+    const {
+        errors: importErrors,
+        projectId
+    } = await importProject(page, `${projectPath}/import`, IN_PATH);
+    expect(importErrors).toStrictEqual([]);
 
     // fork > delete forked
     expect(await forkProject(page, `${projectPath}/fork-before`, projectId, PROJECT_NAME)).toStrictEqual([]);
 
     // goto editor (project)
-    expect(await visitEditor(page, `${projectPath}/editor`, projectId)).toStrictEqual([]);
+    const {
+        errors: editorErrors
+    } = await visitEditor(page, `${projectPath}/editor`, projectId);
+    expect(editorErrors).toStrictEqual([]);
 
     // fork > delete forked
     expect(await forkProject(page, `${projectPath}/fork-after`, projectId, PROJECT_NAME)).toStrictEqual([]);
 
     // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
 });
 
 test('import > goto editor > download > publish > goto app > delete app > delete', async ({ page }) => {
@@ -152,12 +165,18 @@ test('import > goto editor > download > publish > goto app > delete app > delete
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // import
-    expect(await importProject(page, `${projectPath}/import`, 'test/fixtures/migrations.zip')).toStrictEqual([]);
-    const projectId = getProjectId(page);
+    const {
+        errors: importErrors,
+        projectId
+    } = await importProject(page, `${projectPath}/import`, IN_PATH);
+    expect(importErrors).toStrictEqual([]);
 
     // goto editor (project)
-    expect(await visitEditor(page, `${projectPath}/editor`, projectId)).toStrictEqual([]);
-    const sceneId = getSceneId(page);
+    const {
+        errors: editorErrors,
+        sceneId
+    } = await visitEditor(page, `${projectPath}/editor`, projectId);
+    expect(editorErrors).toStrictEqual([]);
 
     // download
     expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual([]);
@@ -166,5 +185,5 @@ test('import > goto editor > download > publish > goto app > delete app > delete
     expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual([]);
 
     // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
 });

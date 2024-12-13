@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { createProject, deleteProject, downloadProject, forkProject, getProjectId, getSceneId, getSetting, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common.mjs';
+import { createProject, deleteProject, downloadProject, forkProject, getSetting, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common.mjs';
 import { middleware } from '../lib/middleware.mjs';
 import { idGenerator } from '../lib/utils.mjs';
 
@@ -22,15 +22,21 @@ test('create > fork > delete forked > goto editor > goto launcher > delete', asy
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // create
-    expect(await createProject(page, `${projectPath}/create`, PROJECT_NAME)).toStrictEqual([]);
-    const projectId = getProjectId(page);
+    const {
+        errors: createErrors,
+        projectId
+    } = await createProject(page, `${projectPath}/create`, PROJECT_NAME);
+    expect(createErrors).toStrictEqual([]);
 
     // fork > delete forked
     expect(await forkProject(page, `${projectPath}/fork`, projectId, PROJECT_NAME)).toStrictEqual([]);
 
     // goto editor (project)
-    expect(await visitEditor(page, `${projectPath}/editor`, projectId)).toStrictEqual([]);
-    const sceneId = getSceneId(page);
+    const {
+        errors: editorErrors,
+        sceneId
+    } = await visitEditor(page, `${projectPath}/editor`, projectId);
+    expect(editorErrors).toStrictEqual([]);
 
     // goto editor (scene)
     const scenePath = `${projectPath}/${sceneId}`;
@@ -41,7 +47,7 @@ test('create > fork > delete forked > goto editor > goto launcher > delete', asy
     expect(await visitLauncher(page, `${projectPath}/launcher`, sceneId)).toStrictEqual([]);
 
     // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
 });
 
 test('create > goto editor > download > publish > goto app > delete app > delete', async ({ page }) => {
@@ -49,12 +55,18 @@ test('create > goto editor > download > publish > goto app > delete app > delete
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // create
-    expect(await createProject(page, `${projectPath}/create`, PROJECT_NAME)).toStrictEqual([]);
-    const projectId = getProjectId(page);
+    const {
+        errors: createErrors,
+        projectId
+    } = await createProject(page, `${projectPath}/create`, PROJECT_NAME);
+    expect(createErrors).toStrictEqual([]);
 
     // goto editor (project)
-    expect(await visitEditor(page, `${projectPath}/editor`, projectId)).toStrictEqual([]);
-    const sceneId = getSceneId(page);
+    const {
+        errors: editorErrors,
+        sceneId
+    } = await visitEditor(page, `${projectPath}/editor`, projectId);
+    expect(editorErrors).toStrictEqual([]);
 
     // download
     expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual([]);
@@ -63,7 +75,7 @@ test('create > goto editor > download > publish > goto app > delete app > delete
     expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual([]);
 
     // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
 });
 
 test('create > goto editor > check default settings > delete', async ({ page }) => {
@@ -71,14 +83,20 @@ test('create > goto editor > check default settings > delete', async ({ page }) 
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // create
-    expect(await createProject(page, `${projectPath}/create`, PROJECT_NAME)).toStrictEqual([]);
-    const projectId = getProjectId(page);
+    const {
+        errors: createErrors,
+        projectId
+    } = await createProject(page, `${projectPath}/create`, PROJECT_NAME);
+    expect(createErrors).toStrictEqual([]);
 
     // fork > delete forked
     expect(await forkProject(page, `${projectPath}/fork`, projectId, PROJECT_NAME)).toStrictEqual([]);
 
     // goto editor
-    expect(await visitEditor(page, `${projectPath}/editor`, projectId)).toStrictEqual([]);
+    const {
+        errors: editorErrors
+    } = await visitEditor(page, `${projectPath}/editor`, projectId);
+    expect(editorErrors).toStrictEqual([]);
 
     // open settings
     await page.getByRole('button', { name: '' }).click();
@@ -89,5 +107,5 @@ test('create > goto editor > check default settings > delete', async ({ page }) 
     expect(await getSetting(page, 'Create FBX Folder').getAttribute('class')).toContain('pcui-boolean-input-ticked');
 
     // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
 });
