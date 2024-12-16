@@ -19,7 +19,7 @@
   "license": "Properietary",
   "devDependencies": {
     "@playcanvas/eslint-config": "^1.7.4",
-    "@playwright/test": "^1.46.1",
+    "@playwright/test": "^1.49.1",
     "@types/node": "^22.5.0",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
