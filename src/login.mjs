@@ -9,11 +9,18 @@ const AUTH_PATH = 'playwright/.auth/user.json';
 fs.mkdirSync('playwright/.auth', { recursive: true });
 
 const browser = await chromium.launch({
-    headless: false,
-    args: ['--disable-blink-features=AutomationControlled']
+    headless: true,
+    args: [
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--disable-blink-features=AutomationControlled'
+    ]
 });
 
-const context = await browser.newContext();
+// Modified from https://github.com/microsoft/playwright/issues/24374
+const context = await browser.newContext({
+    bypassCSP: true,
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML. like Gecko) Chrome/94.0.4606.61 Safari/537.36'
+});
 const page = await context.newPage();
 await page.goto(`https://${LOGIN_HOST}`);
 await page.context().storageState({ path: AUTH_PATH });
