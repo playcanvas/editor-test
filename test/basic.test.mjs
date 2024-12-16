@@ -17,8 +17,9 @@ test.describe.configure({
 const nextId = idGenerator();
 
 PROJECTS.forEach((project) => {
+    const FILE_NAME = project.split('.')[0];
     const IN_PATH = `test/fixtures/projects/basic/${project}`;
-    const OUT_PATH = `out/${project.split('.')[0]}`;
+    const OUT_PATH = `out/${FILE_NAME}`;
 
     test.describe(project, () => {
         test('import > goto editor (project) > goto editor (scene) > goto launcher > delete', async ({ page }) => {

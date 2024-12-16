@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { createProject, deleteProject, downloadProject, forkProject, getSetting, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common.mjs';
+import { createProject, deleteProject, downloadProject, getSetting, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common.mjs';
 import { middleware } from '../lib/middleware.mjs';
 import { idGenerator } from '../lib/utils.mjs';
 
@@ -29,7 +29,12 @@ test('create > fork > delete forked > goto editor > goto launcher > delete', asy
     expect(createErrors).toStrictEqual([]);
 
     // fork > delete forked
-    expect(await forkProject(page, `${projectPath}/fork`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    const {
+        errors: forkErrors,
+        projectId: forkedProjectId
+    } = await createProject(page, `${projectPath}/fork-create`, `${PROJECT_NAME} FORK`, projectId);
+    expect(forkErrors).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/fork-delete`, forkedProjectId)).toStrictEqual([]);
 
     // goto editor (project)
     const {
@@ -88,9 +93,6 @@ test('create > goto editor > check default settings > delete', async ({ page }) 
         projectId
     } = await createProject(page, `${projectPath}/create`, PROJECT_NAME);
     expect(createErrors).toStrictEqual([]);
-
-    // fork > delete forked
-    expect(await forkProject(page, `${projectPath}/fork`, projectId, PROJECT_NAME)).toStrictEqual([]);
 
     // goto editor
     const {

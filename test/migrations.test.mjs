@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { deleteProject, downloadProject, forkProject, importProject, publishProject, visitEditor } from '../lib/common.mjs';
+import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common.mjs';
 import { middleware } from '../lib/middleware.mjs';
 import { idGenerator } from '../lib/utils.mjs';
 
@@ -145,7 +145,12 @@ test('import > fork project > goto editor > fork project > delete', async ({ pag
     expect(importErrors).toStrictEqual([]);
 
     // fork > delete forked
-    expect(await forkProject(page, `${projectPath}/fork-before`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    const {
+        errors: forkBeforeErrors,
+        projectId: forkedBeforeProjectId
+    } = await createProject(page, `${projectPath}/fork-before-create`, `${PROJECT_NAME} FORK`, projectId);
+    expect(forkBeforeErrors).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/fork-before-delete`, forkedBeforeProjectId)).toStrictEqual([]);
 
     // goto editor (project)
     const {
@@ -154,7 +159,12 @@ test('import > fork project > goto editor > fork project > delete', async ({ pag
     expect(editorErrors).toStrictEqual([]);
 
     // fork > delete forked
-    expect(await forkProject(page, `${projectPath}/fork-after`, projectId, PROJECT_NAME)).toStrictEqual([]);
+    const {
+        errors: forkAfterErrors,
+        projectId: forkedAfterProjectId
+    } = await createProject(page, `${projectPath}/fork-after-create`, `${PROJECT_NAME} FORK`, projectId);
+    expect(forkAfterErrors).toStrictEqual([]);
+    expect(await deleteProject(page, `${projectPath}/fork-after-delete`, forkedAfterProjectId)).toStrictEqual([]);
 
     // delete
     expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
