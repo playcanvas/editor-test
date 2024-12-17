@@ -6,7 +6,7 @@ import { deleteProject, downloadProject, importProject, publishProject, visitEdi
 import { middleware } from '../lib/middleware.mjs';
 import { idGenerator } from '../lib/utils.mjs';
 
-const PROJECTS = fs.readdirSync('test/fixtures/projects/basic');
+const PROJECTS = fs.existsSync('projects') ? fs.readdirSync('projects') : [];
 
 middleware(test);
 
@@ -18,7 +18,7 @@ const nextId = idGenerator();
 
 PROJECTS.forEach((project) => {
     const FILE_NAME = project.split('.')[0];
-    const IN_PATH = `test/fixtures/projects/basic/${project}`;
+    const IN_PATH = `projects/${project}`;
     const OUT_PATH = `out/${FILE_NAME}`;
 
     test.describe(project, () => {
