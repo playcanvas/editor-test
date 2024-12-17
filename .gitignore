@@ -2,7 +2,7 @@
 node_modules
 /cache
 /out
-/test/fixtures/projects.cache.json
+/test/fixtures/NOTES.md
 /test-results/
 /playwright-report/
 /blob-report/

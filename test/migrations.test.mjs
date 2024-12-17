@@ -13,49 +13,6 @@ const MATERIAL_NAME = 'TEST_MATERIAL';
 const TEXTURE_NAME = 'TEST_TEXTURE';
 const ENTITY_NAME = 'Root';
 
-// const resetSettings = () => {
-//     const settings = editor.call('settings:project');
-//     settings.set('deviceTypes', ['webgpu'], false, true, true);
-//     settings.set('preferWebGl2', true, false, true, true);
-//     settings.set('useLegacyAudio', false, false, true, true);
-//     settings.set('useLegacyScripts', false, false, true, true);
-//     settings.set('engineV2', true, false, true, true);
-
-//     settings.unset('enableWebGpu');
-//     settings.unset('enableWebGl2');
-// };
-
-// const resetMaterial = (id) => {
-//     const material = editor.call('assets:get', id);
-//     material.set('data.ambientTint', false);
-//     material.set('data.ambient', [1, 0, 0]);
-//     material.set('data.diffuse', [0, 0, 0]);
-//     material.set('data.emissive', [1, 1, 1]);
-//     material.set('data.fresnelModel', 0);
-//     material.set('data.shader', 'phong');
-//     material.set('data.useGammaTonemap', false);
-
-//     material.unset('data.diffuseTint');
-//     material.unset('data.emissiveTint');
-//     material.unset('data.metalnessTint');
-//     material.unset('data.sheenTint');
-//     material.unset('data.sheenGlossTint');
-//     material.unset('data.useGamma');
-// };
-
-// const resetTexture = (id) => {
-//     const texture = editor.call('assets:get', id);
-//     texture.unset('data.srgb');
-// };
-
-// const resetEntity = (name) => {
-//     const entity = editor.call('entities:list').find(e => e.get('name') === name);
-//     entity.set('components.light.shadowType', 1);
-
-//     entity.unset('components.camera.toneMapping');
-//     entity.unset('components.camera.gammaCorrection');
-// };
-
 middleware(test);
 
 test.describe.configure({
