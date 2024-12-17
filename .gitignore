@@ -3,7 +3,7 @@ node_modules
 /cache
 /projects
 /out
-/test/fixtures/NOTES.md
+/test/fixtures/projects/*.mongodb.js
 /test-results/
 /playwright-report/
 /blob-report/
