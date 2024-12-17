@@ -36,15 +36,16 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
     const {
         errors: editorErrors
     } = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
-        // Check settings migration
-        const settings = await page.evaluate(() => editor.call('settings:project').json());
-        expect(settings.hasOwnProperty('deviceTypes')).toBe(false);
-        expect(settings.hasOwnProperty('preferWebGl2')).toBe(false);
-        expect(settings.hasOwnProperty('useLegacyAudio')).toBe(false);
-        expect(settings.engineV2).toBe(true);
-        expect(settings.useLegacyScripts).toBe(false);
-        expect(settings.enableWebGpu).toBe(true);
-        expect(settings.enableWebGl2).toBe(false);
+
+        // Check project settings migration
+        const projectSettings = await page.evaluate(() => editor.call('settings:project').json());
+        expect(projectSettings.hasOwnProperty('deviceTypes')).toBe(false);
+        expect(projectSettings.hasOwnProperty('preferWebGl2')).toBe(false);
+        expect(projectSettings.hasOwnProperty('useLegacyAudio')).toBe(false);
+        expect(projectSettings.engineV2).toBe(true);
+        expect(projectSettings.useLegacyScripts).toBe(false);
+        expect(projectSettings.enableWebGpu).toBe(true);
+        expect(projectSettings.enableWebGl2).toBe(false);
 
         // Check assets migration
         const assets = await page.evaluate((names) => {
@@ -80,7 +81,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         expect(entity.components.light.shadowType).toBe(2); // VSM16
 
         // camera
-        expect(entity.components.camera.toneMapping).toBe(0); // Linear
+        expect(entity.components.camera.toneMapping).toBe(4); // ACES2
         expect(entity.components.camera.gammaCorrection).toBe(1); // 2.2
 
     });
