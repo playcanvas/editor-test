@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { test, expect } from '@playwright/test';
 
-import { deleteProject, importProject, visitEditor, visitEditorScene } from '../lib/common.mjs';
+import { deleteProject, importProject, visitEditor } from '../lib/common.mjs';
 import { middleware } from '../lib/middleware.mjs';
 import { idGenerator } from '../lib/utils.mjs';
 
