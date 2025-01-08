@@ -35,7 +35,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
     // goto editor (project)
     const {
         errors: editorErrors
-    } = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
+    } = await visitEditor(page, `${projectPath}/editor`, projectId, false, async () => {
 
         // Check project settings migration
         const projectSettings = await page.evaluate(() => editor.call('settings:project').json());
