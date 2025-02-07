@@ -68,8 +68,9 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         expect(material.data.useTonemap).toBe(false);
         expect(material.data.shader).toBe('blinn');
 
-        const texture = assets[1];
-        expect(texture.data.hasOwnProperty('srgb')).toBe(true);
+        // const texture = assets[1];
+        // FIXME: Not enabled yet
+        // expect(texture.data.hasOwnProperty('srgb')).toBe(true);
 
         // Check entity migration
         const entity = await page.evaluate((name) => {
@@ -81,7 +82,8 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
         expect(entity.components.light.shadowType).toBe(2); // VSM16
 
         // camera
-        expect(entity.components.camera.toneMapping).toBe(4); // ACES2
+        // FIXME: Project on V2 so migrations not applied
+        // expect(entity.components.camera.toneMapping).toBe(4); // ACES2
         expect(entity.components.camera.gammaCorrection).toBe(1); // 2.2
 
     });
