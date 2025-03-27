@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/extensions
 import 'dotenv/config';
 
 export const GMAIL = process.env.PC_GMAIL ?? '';
@@ -10,7 +9,10 @@ export const LAUNCH_HOST = process.env.PC_LAUNCH_HOST ?? 'launch.playcanvas.com'
 export const FRONTEND = process.env.PC_FRONTEND ?? '';
 export const ENGINE = process.env.PC_ENGINE ?? '';
 
-const searchParams = {};
+const searchParams: {
+    use_local_frontend?: string;
+    use_local_engine?: string;
+} = {};
 if (FRONTEND) {
     searchParams.use_local_frontend = FRONTEND;
 }
@@ -24,7 +26,7 @@ const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
     return `${key}=${value}`;
 }).join('&');
 
-export const homeProjectUrl = projectId => `https://${HOST}/project/${projectId}`;
-export const editorProjectUrl = projectId => `https://${HOST}/editor/project/${projectId}?${SEARCH_PARAMS}`;
-export const editorSceneUrl = sceneId => `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`;
-export const launchSceneUrl = sceneId => `https://${LAUNCH_HOST}/${sceneId}?${SEARCH_PARAMS}`;
+export const homeProjectUrl = (projectId: number) => `https://${HOST}/project/${projectId}`;
+export const editorProjectUrl = (projectId: number) => `https://${HOST}/editor/project/${projectId}?${SEARCH_PARAMS}`;
+export const editorSceneUrl = (sceneId: number) => `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`;
+export const launchSceneUrl = (sceneId: number) => `https://${LAUNCH_HOST}/${sceneId}?${SEARCH_PARAMS}`;

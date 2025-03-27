@@ -1,10 +1,10 @@
-import fs from 'fs';
+import * as fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common.mjs';
-import { middleware } from '../lib/middleware.mjs';
-import { idGenerator } from '../lib/utils.mjs';
+import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common';
+import { middleware } from '../lib/middleware';
+import { idGenerator } from '../lib/utils';
 
 const IN_PATH = 'test/fixtures/projects/migrations.zip';
 const OUT_PATH = 'out/migrations';

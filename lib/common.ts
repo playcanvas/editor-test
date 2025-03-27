@@ -1,14 +1,16 @@
-import { capture } from './capture.mjs';
-import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './url.mjs';
-import { poll, wait } from './utils.mjs';
-import { initInterface } from './web-interface.mjs';
+import { type Page } from '@playwright/test';
+
+import { capture } from './capture';
+import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './url';
+import { poll, wait } from './utils';
+import { initInterface } from './web-interface';
 
 /**
  * @param {import('@playwright/test').Page} page - The page to search in.
  * @param {string} name - The name of the setting to find.
  * @returns {import('@playwright/test').Locator} - The div containing the setting.
  */
-export const getSetting = (page, name) => {
+export const getSetting = (page: Page, name: string) => {
     return page.locator('div').filter({ hasText: new RegExp(`^${name}$`) }).locator('div');
 };
 
@@ -21,7 +23,7 @@ export const getSetting = (page, name) => {
  * @param {number} [masterProjectId] - The master project id.
  * @returns {Promise<{ errors: string[], projectId: number }>} The data result.
  */
-export const createProject = async (page, outPath, projectName, masterProjectId) => {
+export const createProject = async (page: Page, outPath: string, projectName: string, masterProjectId?: number) => {
     let projectId = 0;
     const errors = await capture({
         page,
@@ -67,7 +69,7 @@ export const createProject = async (page, outPath, projectName, masterProjectId)
  * @param {string} importPath - The path to the import file.
  * @returns {Promise<{ errors: string[], projectId: number }>} The data result.
  */
-export const importProject = async (page, outPath, importPath) => {
+export const importProject = async (page: Page, outPath: string, importPath: string) => {
     let projectId = 0;
     const errors = await capture({
         page,
@@ -112,7 +114,7 @@ export const importProject = async (page, outPath, importPath) => {
  * @param {(projectUrl: string) => void} callback - The callback
  * @returns {Promise<{ errors: string[], sceneId: number }>} The data result.
  */
-export const visitEditor = async (page, outPath, projectId, callback = () => {}) => {
+export const visitEditor = async (page: Page, outPath: string, projectId: number, callback: (projectId: string) => void = () => {}) => {
     const projectUrl = editorProjectUrl(projectId);
     let sceneId = 0;
     const errors = await capture({
@@ -121,7 +123,7 @@ export const visitEditor = async (page, outPath, projectId, callback = () => {})
         callback: async () => {
             await page.goto(projectUrl, { waitUntil: 'networkidle' });
             await page.waitForURL('**/scene/**');
-            sceneId = parseInt(/scene\/(\d+)/.exec(page.url())[1], 10) || 0;
+            sceneId = parseInt(/scene\/(\d+)/.exec(page.url())?.[1] ?? '', 10) || 0;
             await page.screenshot({ path: `${outPath}/editor.png` });
             await callback(projectUrl);
         }
@@ -138,7 +140,7 @@ export const visitEditor = async (page, outPath, projectId, callback = () => {})
  * @param {(sceneUrl: string) => void} callback - The callback.
  * @returns {Promise<string[]>} The errors.
  */
-export const visitEditorScene = async (page, outPath, sceneId, callback = () => {}) => {
+export const visitEditorScene = async (page: Page, outPath: string, sceneId: number, callback: (sceneUrl: string) => void = () => {}) => {
     const sceneUrl = editorSceneUrl(sceneId);
     const errors = await capture({
         page,
@@ -161,7 +163,7 @@ export const visitEditorScene = async (page, outPath, sceneId, callback = () => 
  * @param {(sceneLaunchUrl: string) => void} callback - The callback.
  * @returns {Promise<string[]>} The errors.
  */
-export const visitLauncher = async (page, outPath, sceneId, callback = () => {}) => {
+export const visitLauncher = async (page: Page, outPath: string, sceneId: number, callback: (sceneLaunchUrl: string) => void = () => {}) => {
     const sceneLaunchUrl = launchSceneUrl(sceneId);
     const errors = await capture({
         page,
@@ -183,7 +185,7 @@ export const visitLauncher = async (page, outPath, sceneId, callback = () => {})
  * @param {number} sceneId - The scene id.
  * @returns {Promise<string[]>} The errors.
  */
-export const downloadProject = async (page, outPath, sceneId) => {
+export const downloadProject = async (page: Page, outPath: string, sceneId: number) => {
     const sceneUrl = editorSceneUrl(sceneId);
     const errors = await capture({
         page,
@@ -235,7 +237,7 @@ export const downloadProject = async (page, outPath, sceneId) => {
  * @param {number} sceneId - The scene id.
  * @returns {Promise<string[]>} The errors.
  */
-export const publishProject = async (page, outPath, sceneId) => {
+export const publishProject = async (page: Page, outPath: string, sceneId: number) => {
     const sceneUrl = editorSceneUrl(sceneId);
     const errors = await capture({
         page,
@@ -306,7 +308,7 @@ export const publishProject = async (page, outPath, sceneId) => {
  * @param {number} projectId - The project id.
  * @returns {Promise<string[]>} The errors.
  */
-export const deleteProject = async (page, outPath, projectId) => {
+export const deleteProject = async (page: Page, outPath: string, projectId: number) => {
     const errors = await capture({
         page,
         outPath,

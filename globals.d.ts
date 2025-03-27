@@ -1,8 +1,5 @@
-// config
-declare var config: any;
+declare const wi: import('./lib/web-interface').WebInterface;
 
-// editor
-declare var editor: any;
+declare const config: any;
 
-// web interface
-declare var wi: any;
+declare const editor: any;

@@ -1,10 +1,10 @@
-import fs from 'fs';
+import * as fs from 'fs';
 
 import { test, expect } from '@playwright/test';
 
-import { deleteProject, downloadProject, importProject, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common.mjs';
-import { middleware } from '../lib/middleware.mjs';
-import { idGenerator } from '../lib/utils.mjs';
+import { deleteProject, downloadProject, importProject, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common';
+import { middleware } from '../lib/middleware';
+import { idGenerator } from '../lib/utils';
 
 const PROJECTS = fs.existsSync('projects') ? fs.readdirSync('projects') : [];
 

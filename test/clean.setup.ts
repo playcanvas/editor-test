@@ -1,7 +1,7 @@
 import { test as setup, expect } from '@playwright/test';
 
-import { HOST } from '../lib/url.mjs';
-import { initInterface } from '../lib/web-interface.mjs';
+import { HOST } from '../lib/url';
+import { initInterface } from '../lib/web-interface';
 
 setup('removing old projects', async ({ page }) => {
     await page.goto(`https://${HOST}/editor`);

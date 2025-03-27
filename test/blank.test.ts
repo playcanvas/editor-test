@@ -1,10 +1,10 @@
-import fs from 'fs';
+import * as fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { createProject, deleteProject, downloadProject, getSetting, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common.mjs';
-import { middleware } from '../lib/middleware.mjs';
-import { idGenerator } from '../lib/utils.mjs';
+import { createProject, deleteProject, downloadProject, getSetting, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common';
+import { middleware } from '../lib/middleware';
+import { idGenerator } from '../lib/utils';
 
 const OUT_PATH = 'out/blank';
 const PROJECT_NAME = 'Blank Project';

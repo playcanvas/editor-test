@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { chromium } from '@playwright/test';
 
-import { HOST } from '../lib/url.mjs';
+import { HOST } from '../lib/url';
 
 const AUTH_PATH = 'playwright/.auth/user.json';
 
