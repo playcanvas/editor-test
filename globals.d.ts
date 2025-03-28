@@ -1,4 +1,5 @@
-declare const wi: import('./lib/web-interface').WebInterface;
+/* eslint-disable no-unused-vars */
+declare const wi: any;
 
 declare const config: any;
 
