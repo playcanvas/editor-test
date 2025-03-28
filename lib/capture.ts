@@ -9,11 +9,11 @@ type CaptureOptions = {
 }
 
 /**
- * @param {object} options - Options.
- * @param {import('@playwright/test').Page} options.page - The page to navigate.
- * @param {string} options.outPath - The output path.
- * @param {function} options.callback - The function to run.
- * @returns {Promise<string[]>} - The number of errors.
+ * @param options - Options.
+ * @param options.page - The page to navigate.
+ * @param options.outPath - The output path.
+ * @param options.callback - The function to run.
+ * @returns - The number of errors.
  */
 export const capture = async ({ page, outPath, callback }: CaptureOptions): Promise<string[]> => {
     const errors: string[] = [];

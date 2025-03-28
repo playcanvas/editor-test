@@ -6,9 +6,9 @@ import { poll, wait } from './utils';
 import { initInterface } from './web-interface';
 
 /**
- * @param {import('@playwright/test').Page} page - The page to search in.
- * @param {string} name - The name of the setting to find.
- * @returns {import('@playwright/test').Locator} - The div containing the setting.
+ * @param page - The page to search in.
+ * @param name - The name of the setting to find.
+ * @returns - The div containing the setting.
  */
 export const getSetting = (page: Page, name: string) => {
     return page.locator('div').filter({ hasText: new RegExp(`^${name}$`) }).locator('div');
@@ -17,11 +17,11 @@ export const getSetting = (page: Page, name: string) => {
 /**
  * Create a project. If masterProjectId is provided, the project will be forked from the master project.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {string} projectName - The project name.
- * @param {number} [masterProjectId] - The master project id.
- * @returns {Promise<{ errors: string[], projectId: number }>} The data result.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param projectName - The project name.
+ * @param [masterProjectId] - The master project id.
+ * @returns The data result.
  */
 export const createProject = async (page: Page, outPath: string, projectName: string, masterProjectId?: number) => {
     let projectId = 0;
@@ -64,10 +64,10 @@ export const createProject = async (page: Page, outPath: string, projectName: st
 /**
  * Import a project.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {string} importPath - The path to the import file.
- * @returns {Promise<{ errors: string[], projectId: number }>} The data result.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param importPath - The path to the import file.
+ * @returns The data result.
  */
 export const importProject = async (page: Page, outPath: string, importPath: string) => {
     let projectId = 0;
@@ -108,11 +108,11 @@ export const importProject = async (page: Page, outPath: string, importPath: str
 /**
  * Visit the editor.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {number} projectId - The project id.
- * @param {(projectUrl: string) => void} callback - The callback
- * @returns {Promise<{ errors: string[], sceneId: number }>} The data result.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param projectId - The project id.
+ * @param callback - The callback
+ * @returns The data result.
  */
 export const visitEditor = async (page: Page, outPath: string, projectId: number, callback: (projectId: string) => void = () => {}) => {
     const projectUrl = editorProjectUrl(projectId);
@@ -134,11 +134,11 @@ export const visitEditor = async (page: Page, outPath: string, projectId: number
 /**
  * Visit the editor scene.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {number} sceneId - The scene id.
- * @param {(sceneUrl: string) => void} callback - The callback.
- * @returns {Promise<string[]>} The errors.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param sceneId - The scene id.
+ * @param callback - The callback.
+ * @returns The errors.
  */
 export const visitEditorScene = async (page: Page, outPath: string, sceneId: number, callback: (sceneUrl: string) => void = () => {}) => {
     const sceneUrl = editorSceneUrl(sceneId);
@@ -157,11 +157,11 @@ export const visitEditorScene = async (page: Page, outPath: string, sceneId: num
 /**
  * Visit the launcher.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {number} sceneId - The scene id.
- * @param {(sceneLaunchUrl: string) => void} callback - The callback.
- * @returns {Promise<string[]>} The errors.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param sceneId - The scene id.
+ * @param callback - The callback.
+ * @returns The errors.
  */
 export const visitLauncher = async (page: Page, outPath: string, sceneId: number, callback: (sceneLaunchUrl: string) => void = () => {}) => {
     const sceneLaunchUrl = launchSceneUrl(sceneId);
@@ -180,10 +180,10 @@ export const visitLauncher = async (page: Page, outPath: string, sceneId: number
 /**
  * Download a project.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {number} sceneId - The scene id.
- * @returns {Promise<string[]>} The errors.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param sceneId - The scene id.
+ * @returns The errors.
  */
 export const downloadProject = async (page: Page, outPath: string, sceneId: number) => {
     const sceneUrl = editorSceneUrl(sceneId);
@@ -232,10 +232,10 @@ export const downloadProject = async (page: Page, outPath: string, sceneId: numb
 /**
  * Publish a project.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {number} sceneId - The scene id.
- * @returns {Promise<string[]>} The errors.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param sceneId - The scene id.
+ * @returns The errors.
  */
 export const publishProject = async (page: Page, outPath: string, sceneId: number) => {
     const sceneUrl = editorSceneUrl(sceneId);
@@ -303,10 +303,10 @@ export const publishProject = async (page: Page, outPath: string, sceneId: numbe
 /**
  * Delete a project.
  *
- * @param {import('@playwright/test').Page} page - The page.
- * @param {string} outPath - The path to the project.
- * @param {number} projectId - The project id.
- * @returns {Promise<string[]>} The errors.
+ * @param page - The page.
+ * @param outPath - The path to the project.
+ * @param projectId - The project id.
+ * @returns The errors.
  */
 export const deleteProject = async (page: Page, outPath: string, projectId: number) => {
     const errors = await capture({
