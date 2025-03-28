@@ -1,10 +1,10 @@
-import fs from 'fs';
+import * as fs from 'fs';
 
 import { expect, test } from '@playwright/test';
 
-import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common.mjs';
-import { middleware } from '../lib/middleware.mjs';
-import { idGenerator } from '../lib/utils.mjs';
+import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common';
+import { middleware } from '../lib/middleware';
+import { idGenerator } from '../lib/utils';
 
 const IN_PATH = 'test/fixtures/projects/migrations.zip';
 const OUT_PATH = 'out/migrations';
@@ -38,7 +38,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
     } = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
 
         // Check project settings migration
-        const projectSettings = await page.evaluate(() => editor.call('settings:project').json());
+        const projectSettings = await page.evaluate(() => window.editor.call('settings:project').json());
         expect(projectSettings.hasOwnProperty('deviceTypes')).toBe(false);
         expect(projectSettings.hasOwnProperty('preferWebGl2')).toBe(false);
         expect(projectSettings.hasOwnProperty('useLegacyAudio')).toBe(false);
@@ -49,8 +49,8 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 
         // Check assets migration
         const assets = await page.evaluate((names) => {
-            const assets = editor.call('assets:list');
-            return names.map(name => assets.find(asset => asset.get('name') === name).json());
+            const assets = window.editor.call('assets:list');
+            return names.map(name => assets.find((asset: any) => asset.get('name') === name).json());
         }, [MATERIAL_NAME, TEXTURE_NAME]);
 
         const material = assets[0];
@@ -74,7 +74,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 
         // Check entity migration
         const entity = await page.evaluate((name) => {
-            const entity = editor.call('entities:list').find(e => e.get('name') === name);
+            const entity = window.editor.call('entities:list').find((e: any) => e.get('name') === name);
             return entity.json();
         }, ENTITY_NAME);
 

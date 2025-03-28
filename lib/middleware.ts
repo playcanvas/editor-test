@@ -1,4 +1,6 @@
-export const middleware = (test) => {
+import { type PlaywrightTestArgs, type PlaywrightTestOptions, type PlaywrightWorkerArgs, type PlaywrightWorkerOptions, type TestType } from '@playwright/test';
+
+export const middleware = (test: TestType<PlaywrightTestArgs & PlaywrightTestOptions, PlaywrightWorkerArgs & PlaywrightWorkerOptions>) => {
     test.beforeEach(async ({ context }) => {
         // FIXME: This delays the response for the PlayCanvas API.
         await context.route(/playcanvas\.com\/api/, (route, request) => {

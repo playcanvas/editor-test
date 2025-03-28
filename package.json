@@ -11,18 +11,22 @@
     "test-headed": "playwright test --headed",
     "report": "playwright show-report",
     "codegen": "playwright codegen --load-storage playwright/.auth/user.json",
-    "login": "node src/login.mjs",
-    "home": "node src/home.mjs",
-    "lint": "eslint . --ext .js,.mjs"
+    "login": "tsx src/login.ts",
+    "home": "tsx src/home.ts",
+    "lint": "eslint . --ext .ts,.mjs",
+    "typecheck": "tsc --declaration --emitDeclarationOnly"
   },
   "author": "",
   "license": "Properietary",
   "devDependencies": {
-    "@playcanvas/eslint-config": "^1.7.4",
+    "@playcanvas/eslint-config": "^2.0.9",
     "@playwright/test": "^1.49.1",
     "@types/node": "^22.5.0",
+    "@typescript-eslint/parser": "^8.28.0",
     "dotenv": "^16.4.5",
-    "eslint": "^8.57.0",
-    "node-fetch": "^3.3.2"
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
+    "node-fetch": "^3.3.2",
+    "tsx": "^4.19.3"
   }
 }

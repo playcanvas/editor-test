@@ -1,12 +1,12 @@
 /**
  * Poll a function until it returns a value.
  *
- * @param {function(any): any} fn - The function to poll.
- * @param {*} interval - The interval to poll the function.
- * @returns {Promise<any>} - The result of the function.
+ * @param fn - The function to poll.
+ * @param interval - The interval to poll the function.
+ * @returns The result of the function.
  */
-export const poll = (fn, interval = 500) => {
-    return new Promise((resolve, reject) => {
+export const poll = (fn: (...args: any[]) => any, interval: number = 500) => {
+    return new Promise<ReturnType<typeof fn>>((resolve, reject) => {
         const int = setInterval(async () => {
             try {
                 const res = await fn();
@@ -25,11 +25,11 @@ export const poll = (fn, interval = 500) => {
 /**
  * Wait for a period of time.
  *
- * @param {number} ms - The time to wait.
- * @returns {Promise<void>} - A promise that resolves after the time.
+ * @param ms - The time to wait.
+ * @returns A promise that resolves after the time.
  */
-export const wait = (ms) => {
-    return new Promise((resolve) => {
+export const wait = (ms: number) => {
+    return new Promise<void>((resolve) => {
         setTimeout(resolve, ms);
     });
 };
@@ -37,7 +37,7 @@ export const wait = (ms) => {
 /**
  * Generate a new id.
  *
- * @returns {() => number} A function that returns a new id.
+ * @returns A function that returns a new id.
  */
 export const idGenerator = () => {
     let id = 0;
