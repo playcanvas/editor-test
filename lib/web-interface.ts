@@ -18,9 +18,10 @@ class WebInterface {
      * @param url - The URL
      * @param data - The data
      * @param auth - Whether to use authentication
+     * @param retries - The number of retries
      * @returns The response
      */
-    private async _ajax(method: string, url: string, data?: object | FormData, auth: boolean = true): Promise<Response> {
+    private async _ajax(method: string, url: string, data?: object | FormData, auth: boolean = true, retries = 5): Promise<Response> {
         const headers = {
             Authorization: `Bearer ${this._token}`,
             'Content-Type': 'application/json'
@@ -41,10 +42,13 @@ class WebInterface {
 
         // if rate limited, wait and retry
         if (res.status === 429) {
-            await new Promise<void>((resolve) => {
-                setTimeout(resolve, 1000);
-            });
-            return await this._ajax(method, url, data, auth);
+            if (retries > 0) {
+                await new Promise<void>((resolve) => {
+                    setTimeout(resolve, 1000);
+                });
+                return await this._ajax(method, url, data, auth, retries - 1);
+            }
+            throw new Error(`Rate limit exceeded: ${res.status}`);
         }
         return res;
     }
