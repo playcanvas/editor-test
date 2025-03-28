@@ -1,4 +1,10 @@
-import { type PlaywrightTestArgs, type PlaywrightTestOptions, type PlaywrightWorkerArgs, type PlaywrightWorkerOptions, type TestType } from '@playwright/test';
+import {
+    type PlaywrightTestArgs,
+    type PlaywrightTestOptions,
+    type PlaywrightWorkerArgs,
+    type PlaywrightWorkerOptions,
+    type TestType
+} from '@playwright/test';
 
 export const middleware = (test: TestType<PlaywrightTestArgs & PlaywrightTestOptions, PlaywrightWorkerArgs & PlaywrightWorkerOptions>) => {
     test.beforeEach(async ({ context }) => {
