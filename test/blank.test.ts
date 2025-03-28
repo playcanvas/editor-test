@@ -11,6 +11,10 @@ const PROJECT_NAME = 'Blank Project';
 
 middleware(test);
 
+test.describe.configure({
+    mode: 'serial'
+});
+
 const next = id();
 
 test('create > fork > delete forked > goto editor > goto launcher > delete', async ({ page }) => {
