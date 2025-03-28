@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 
 import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common';
 import { middleware } from '../lib/middleware';
-import { idGenerator } from '../lib/utils';
+import { id } from '../lib/utils';
 
 const IN_PATH = 'test/fixtures/projects/migrations.zip';
 const OUT_PATH = 'out/migrations';
@@ -19,10 +19,10 @@ test.describe.configure({
     mode: 'serial'
 });
 
-const nextId = idGenerator();
+const next = id();
 
 test('import > goto editor > check migrations > delete', async ({ page }) => {
-    const projectPath = `${OUT_PATH}/${nextId()}`;
+    const projectPath = `${OUT_PATH}/${next()}`;
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // import
@@ -94,7 +94,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 });
 
 test('import > fork project > goto editor > fork project > delete', async ({ page }) => {
-    const projectPath = `${OUT_PATH}/${nextId()}`;
+    const projectPath = `${OUT_PATH}/${next()}`;
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // import
@@ -131,7 +131,7 @@ test('import > fork project > goto editor > fork project > delete', async ({ pag
 });
 
 test('import > goto editor > download > publish > goto app > delete app > delete', async ({ page }) => {
-    const projectPath = `${OUT_PATH}/${nextId()}`;
+    const projectPath = `${OUT_PATH}/${next()}`;
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // import

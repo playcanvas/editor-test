@@ -4,21 +4,17 @@ import { expect, test } from '@playwright/test';
 
 import { createProject, deleteProject, downloadProject, getSetting, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common';
 import { middleware } from '../lib/middleware';
-import { idGenerator } from '../lib/utils';
+import { id } from '../lib/utils';
 
 const OUT_PATH = 'out/blank';
 const PROJECT_NAME = 'Blank Project';
 
 middleware(test);
 
-test.describe.configure({
-    mode: 'serial'
-});
-
-const nextId = idGenerator();
+const next = id();
 
 test('create > fork > delete forked > goto editor > goto launcher > delete', async ({ page }) => {
-    const projectPath = `${OUT_PATH}/${nextId()}`;
+    const projectPath = `${OUT_PATH}/${next()}`;
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // create
@@ -56,7 +52,7 @@ test('create > fork > delete forked > goto editor > goto launcher > delete', asy
 });
 
 test('create > goto editor > download > publish > goto app > delete app > delete', async ({ page }) => {
-    const projectPath = `${OUT_PATH}/${nextId()}`;
+    const projectPath = `${OUT_PATH}/${next()}`;
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // create
@@ -84,7 +80,7 @@ test('create > goto editor > download > publish > goto app > delete app > delete
 });
 
 test('create > goto editor > check default settings > delete', async ({ page }) => {
-    const projectPath = `${OUT_PATH}/${nextId()}`;
+    const projectPath = `${OUT_PATH}/${next()}`;
     await fs.promises.mkdir(projectPath, { recursive: true });
 
     // create

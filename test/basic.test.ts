@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 
 import { deleteProject, downloadProject, importProject, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common';
 import { middleware } from '../lib/middleware';
-import { idGenerator } from '../lib/utils';
+import { id } from '../lib/utils';
 
 const PROJECTS = fs.existsSync('projects') ? fs.readdirSync('projects') : [];
 
@@ -14,7 +14,7 @@ test.describe.configure({
     mode: 'serial'
 });
 
-const nextId = idGenerator();
+const next = id();
 
 PROJECTS.forEach((project) => {
     const FILE_NAME = project.split('.')[0];
@@ -23,7 +23,7 @@ PROJECTS.forEach((project) => {
 
     test.describe(project, () => {
         test('import > goto editor (project) > goto editor (scene) > goto launcher > delete', async ({ page }) => {
-            const projectPath = `${OUT_PATH}/${nextId()}`;
+            const projectPath = `${OUT_PATH}/${next()}`;
             await fs.promises.mkdir(projectPath, { recursive: true });
 
             // import
@@ -53,7 +53,7 @@ PROJECTS.forEach((project) => {
         });
 
         test('import > goto editor > download > publish > goto app > delete app > delete', async ({ page }) => {
-            const projectPath = `${OUT_PATH}/${nextId()}`;
+            const projectPath = `${OUT_PATH}/${next()}`;
             await fs.promises.mkdir(projectPath, { recursive: true });
 
             // import

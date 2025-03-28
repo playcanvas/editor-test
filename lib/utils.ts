@@ -39,7 +39,7 @@ export const wait = (ms: number) => {
  *
  * @returns A function that returns a new id.
  */
-export const idGenerator = () => {
+export const id = () => {
     let id = 0;
     return () => id++;
 };
