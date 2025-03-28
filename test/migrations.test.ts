@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common';
 import { middleware } from '../lib/middleware';
@@ -21,139 +21,176 @@ test.describe.configure({
 
 const next = id();
 
-test('import > goto editor > check migrations > delete', async ({ page }) => {
+test.describe('fork', () => {
     const projectPath = `${OUT_PATH}/${next()}`;
-    await fs.promises.mkdir(projectPath, { recursive: true });
+    let projectId: number;
+    let forkedProjectId: number;
+    let page: Page;
 
-    // import
-    const {
-        errors: importErrors,
-        projectId
-    } = await importProject(page, `${projectPath}/import`, IN_PATH);
-    expect(importErrors).toStrictEqual([]);
-
-    // goto editor (project)
-    const {
-        errors: editorErrors
-    } = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
-
-        // Check project settings migration
-        const projectSettings = await page.evaluate(() => window.editor.call('settings:project').json());
-        expect(projectSettings.hasOwnProperty('deviceTypes')).toBe(false);
-        expect(projectSettings.hasOwnProperty('preferWebGl2')).toBe(false);
-        expect(projectSettings.hasOwnProperty('useLegacyAudio')).toBe(false);
-        expect(projectSettings.engineV2).toBe(true);
-        expect(projectSettings.useLegacyScripts).toBe(false);
-        expect(projectSettings.enableWebGpu).toBe(true);
-        expect(projectSettings.enableWebGl2).toBe(false);
-
-        // Check assets migration
-        const assets = await page.evaluate((names) => {
-            const assets = window.editor.call('assets:list');
-            return names.map(name => assets.find((asset: any) => asset.get('name') === name).json());
-        }, [MATERIAL_NAME, TEXTURE_NAME]);
-
-        const material = assets[0];
-        expect(material.data.hasOwnProperty('fresnelModel')).toBe(false);
-        expect(material.data.ambientTint).toBe(true);
-        expect(material.data.ambient).toStrictEqual([1, 1, 1]);
-        expect(material.data.diffuseTint).toBe(true);
-        expect(material.data.diffuse).toStrictEqual([0, 0, 0]);
-        expect(material.data.emissiveTint).toBe(true);
-        expect(material.data.emissive).toStrictEqual([1, 1, 1]);
-        expect(material.data.metalnessTint).toBe(true);
-        expect(material.data.sheenTint).toBe(true);
-        expect(material.data.sheenGlossTint).toBe(true);
-        expect(material.data.useGammaTonemap).toBe(false);
-        expect(material.data.useTonemap).toBe(false);
-        expect(material.data.shader).toBe('blinn');
-
-        // const texture = assets[1];
-        // FIXME: Not enabled yet
-        // expect(texture.data.hasOwnProperty('srgb')).toBe(true);
-
-        // Check entity migration
-        const entity = await page.evaluate((name) => {
-            const entity = window.editor.call('entities:list').find((e: any) => e.get('name') === name);
-            return entity.json();
-        }, ENTITY_NAME);
-
-        // light
-        expect(entity.components.light.shadowType).toBe(2); // VSM16
-
-        // camera
-        // FIXME: Project on V2 so migrations not applied
-        // expect(entity.components.camera.toneMapping).toBe(4); // ACES2
-        expect(entity.components.camera.gammaCorrection).toBe(1); // 2.2
-
+    test.describe.configure({
+        mode: 'serial'
     });
-    expect(editorErrors).toStrictEqual([]);
 
-    // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage();
+        await fs.promises.mkdir(projectPath, { recursive: true });
+    });
+
+    test.afterAll(async () => {
+        await page.close();
+    });
+
+    test('import project', async () => {
+        const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+        expect(res.errors).toStrictEqual([]);
+        expect(res.projectId).toBeDefined();
+        projectId = res.projectId;
+    });
+
+    test('fork project', async () => {
+        const res = await createProject(page, `${projectPath}/fork-create`, `${PROJECT_NAME} FORK`, projectId);
+        expect(res.errors).toStrictEqual([]);
+        expect(res.projectId).toBeDefined();
+        forkedProjectId = res.projectId;
+    });
+
+    test('delete forked project', async () => {
+        expect(await deleteProject(page, `${projectPath}/fork-delete`, forkedProjectId)).toStrictEqual([]);
+    });
+
+    test('delete project', async () => {
+        expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+    });
 });
 
-test('import > fork project > goto editor > fork project > delete', async ({ page }) => {
+test.describe('migrations', () => {
     const projectPath = `${OUT_PATH}/${next()}`;
-    await fs.promises.mkdir(projectPath, { recursive: true });
+    let projectId: number;
+    let page: Page;
 
-    // import
-    const {
-        errors: importErrors,
-        projectId
-    } = await importProject(page, `${projectPath}/import`, IN_PATH);
-    expect(importErrors).toStrictEqual([]);
+    test.describe.configure({
+        mode: 'serial'
+    });
 
-    // fork > delete forked
-    const {
-        errors: forkBeforeErrors,
-        projectId: forkedBeforeProjectId
-    } = await createProject(page, `${projectPath}/fork-before-create`, `${PROJECT_NAME} FORK`, projectId);
-    expect(forkBeforeErrors).toStrictEqual([]);
-    expect(await deleteProject(page, `${projectPath}/fork-before-delete`, forkedBeforeProjectId)).toStrictEqual([]);
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage();
+        await fs.promises.mkdir(projectPath, { recursive: true });
+    });
 
-    // goto editor (project)
-    const {
-        errors: editorErrors
-    } = await visitEditor(page, `${projectPath}/editor`, projectId);
-    expect(editorErrors).toStrictEqual([]);
+    test.afterAll(async () => {
+        await page.close();
+    });
 
-    // fork > delete forked
-    const {
-        errors: forkAfterErrors,
-        projectId: forkedAfterProjectId
-    } = await createProject(page, `${projectPath}/fork-after-create`, `${PROJECT_NAME} FORK`, projectId);
-    expect(forkAfterErrors).toStrictEqual([]);
-    expect(await deleteProject(page, `${projectPath}/fork-after-delete`, forkedAfterProjectId)).toStrictEqual([]);
+    test('import project', async () => {
+        const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+        expect(res.errors).toStrictEqual([]);
+        expect(res.projectId).toBeDefined();
+        projectId = res.projectId;
+    });
 
-    // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+    test('check migrations', async () => {
+        const res = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
+
+            // Check project settings migration
+            const projectSettings = await page.evaluate(() => window.editor.call('settings:project').json());
+            expect(projectSettings.hasOwnProperty('deviceTypes')).toBe(false);
+            expect(projectSettings.hasOwnProperty('preferWebGl2')).toBe(false);
+            expect(projectSettings.hasOwnProperty('useLegacyAudio')).toBe(false);
+            expect(projectSettings.engineV2).toBe(true);
+            expect(projectSettings.useLegacyScripts).toBe(false);
+            expect(projectSettings.enableWebGpu).toBe(true);
+            expect(projectSettings.enableWebGl2).toBe(false);
+
+            // Check assets migration
+            const assets = await page.evaluate((names) => {
+                const assets = window.editor.call('assets:list');
+                return names.map(name => assets.find((asset: any) => asset.get('name') === name).json());
+            }, [MATERIAL_NAME, TEXTURE_NAME]);
+
+            const material = assets[0];
+            expect(material.data.hasOwnProperty('fresnelModel')).toBe(false);
+            expect(material.data.ambientTint).toBe(true);
+            expect(material.data.ambient).toStrictEqual([1, 1, 1]);
+            expect(material.data.diffuseTint).toBe(true);
+            expect(material.data.diffuse).toStrictEqual([0, 0, 0]);
+            expect(material.data.emissiveTint).toBe(true);
+            expect(material.data.emissive).toStrictEqual([1, 1, 1]);
+            expect(material.data.metalnessTint).toBe(true);
+            expect(material.data.sheenTint).toBe(true);
+            expect(material.data.sheenGlossTint).toBe(true);
+            expect(material.data.useGammaTonemap).toBe(false);
+            expect(material.data.useTonemap).toBe(false);
+            expect(material.data.shader).toBe('blinn');
+
+            // const texture = assets[1];
+            // FIXME: Not enabled yet
+            // expect(texture.data.hasOwnProperty('srgb')).toBe(true);
+
+            // Check entity migration
+            const entity = await page.evaluate((name) => {
+                const entity = window.editor.call('entities:list').find((e: any) => e.get('name') === name);
+                return entity.json();
+            }, ENTITY_NAME);
+
+            // light
+            expect(entity.components.light.shadowType).toBe(2); // VSM16
+
+            // camera
+            // FIXME: Project on V2 so migrations not applied
+            // expect(entity.components.camera.toneMapping).toBe(4); // ACES2
+            expect(entity.components.camera.gammaCorrection).toBe(1); // 2.2
+
+        });
+        expect(res.errors).toStrictEqual([]);
+    });
+
+    test('delete project', async () => {
+        expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+    });
 });
 
-test('import > goto editor > download > publish > goto app > delete app > delete', async ({ page }) => {
+test.describe('publish/download', () => {
     const projectPath = `${OUT_PATH}/${next()}`;
-    await fs.promises.mkdir(projectPath, { recursive: true });
+    let projectId: number;
+    let sceneId: number;
+    let page: Page;
 
-    // import
-    const {
-        errors: importErrors,
-        projectId
-    } = await importProject(page, `${projectPath}/import`, IN_PATH);
-    expect(importErrors).toStrictEqual([]);
+    test.describe.configure({
+        mode: 'serial'
+    });
 
-    // goto editor (project)
-    const {
-        errors: editorErrors,
-        sceneId
-    } = await visitEditor(page, `${projectPath}/editor`, projectId);
-    expect(editorErrors).toStrictEqual([]);
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage();
+        await fs.promises.mkdir(projectPath, { recursive: true });
+    });
 
-    // download
-    expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual([]);
+    test.afterAll(async () => {
+        await page.close();
+    });
 
-    // publish
-    expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual([]);
+    test('import project', async () => {
+        const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+        expect(res.errors).toStrictEqual([]);
+        expect(res.projectId).toBeDefined();
+        projectId = res.projectId;
+    });
 
-    // delete
-    expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+    test('goto editor (project)', async () => {
+        const res = await visitEditor(page, `${projectPath}/editor`, projectId);
+        expect(res.errors).toStrictEqual([]);
+        expect(res.sceneId).toBeDefined();
+        sceneId = res.sceneId;
+    });
+
+    test('download app', async () => {
+        expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual([]);
+    });
+
+    test('publish app', async () => {
+        expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual([]);
+    });
+
+    test('delete project', async () => {
+        expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+    });
 });
