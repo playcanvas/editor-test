@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
-declare const wi: any;
+interface Window {
+    config: any;
 
-declare const config: any;
+    editor: any;
 
-declare const editor: any;
+    wi: any;
+}

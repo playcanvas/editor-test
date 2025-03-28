@@ -2,17 +2,17 @@ export const initInterface = () => {
     class WebInterface {
         private _api = '/api';
 
-        private _token: string = config.accessToken;
+        private _token: string = window.config.accessToken;
 
-        private _userId: string = config.self.id;
+        private _userId: string = window.config.self.id;
 
-        private _username: string = config.self.username;
+        private _username: string = window.config.self.username;
 
-        private _projectId: string = config.project.id;
+        private _projectId: string = window.config.project.id;
 
-        private _branchId: string = config.self.branch.id;
+        private _branchId: string = window.config.self.branch.id;
 
-        private _engineVersion: string = config.engineVersions.current.version;
+        private _engineVersion: string = window.config.engineVersions.current.version;
 
         /**
          * @param method - The method
@@ -340,7 +340,5 @@ export const initInterface = () => {
         }
     }
 
-    const wi = window.wi = new WebInterface();
-
-    return wi;
+    window.wi = new WebInterface();
 };

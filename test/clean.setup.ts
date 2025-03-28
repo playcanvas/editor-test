@@ -7,12 +7,12 @@ setup('removing old projects', async ({ page }) => {
     await page.goto(`https://${HOST}/editor`);
     await page.evaluate(initInterface);
 
-    const projects = await page.evaluate(() => wi.getProjects(config.self.id));
+    const projects = await page.evaluate(() => window.wi.getProjects(window.config.self.id));
 
     let deletePromise = Promise.resolve();
     for (const project of projects) {
         deletePromise = deletePromise.then(async () => {
-            expect(await page.evaluate(id => wi.deleteProject(id), project.id)).toBe(true);
+            expect(await page.evaluate(id => window.wi.deleteProject(id), project.id)).toBe(true);
         });
     }
 

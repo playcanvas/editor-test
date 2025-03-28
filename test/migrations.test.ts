@@ -38,7 +38,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
     } = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
 
         // Check project settings migration
-        const projectSettings = await page.evaluate(() => editor.call('settings:project').json());
+        const projectSettings = await page.evaluate(() => window.editor.call('settings:project').json());
         expect(projectSettings.hasOwnProperty('deviceTypes')).toBe(false);
         expect(projectSettings.hasOwnProperty('preferWebGl2')).toBe(false);
         expect(projectSettings.hasOwnProperty('useLegacyAudio')).toBe(false);
@@ -49,8 +49,8 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 
         // Check assets migration
         const assets = await page.evaluate((names) => {
-            const assets = editor.call('assets:list');
-            return names.map(name => assets.find(asset => asset.get('name') === name).json());
+            const assets = window.editor.call('assets:list');
+            return names.map(name => assets.find((asset: any) => asset.get('name') === name).json());
         }, [MATERIAL_NAME, TEXTURE_NAME]);
 
         const material = assets[0];
@@ -74,7 +74,7 @@ test('import > goto editor > check migrations > delete', async ({ page }) => {
 
         // Check entity migration
         const entity = await page.evaluate((name) => {
-            const entity = editor.call('entities:list').find(e => e.get('name') === name);
+            const entity = window.editor.call('entities:list').find((e: any) => e.get('name') === name);
             return entity.json();
         }, ENTITY_NAME);
 

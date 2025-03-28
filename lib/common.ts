@@ -32,7 +32,7 @@ export const createProject = async (page: Page, outPath: string, projectName: st
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
             await page.evaluate(initInterface);
 
-            const create = await page.evaluate(([name, id]) => wi.createProject(name, id), [projectName, masterProjectId]);
+            const create = await page.evaluate(([name, id]) => window.wi.createProject(name, id), [projectName, masterProjectId]);
             if (create.error) {
                 errors.push(`[CREATE PROJECT ERROR] ${create.error}`);
                 return;
@@ -45,7 +45,7 @@ export const createProject = async (page: Page, outPath: string, projectName: st
                 return;
             }
             const job = await poll(async () => {
-                const job = await page.evaluate(jobId => wi.checkJob(jobId), create.id);
+                const job = await page.evaluate(jobId => window.wi.checkJob(jobId), create.id);
                 if (job.status !== 'running') {
                     return job;
                 }
@@ -79,7 +79,7 @@ export const importProject = async (page: Page, outPath: string, importPath: str
             await page.evaluate(initInterface);
 
             const fileChooserPromise = page.waitForEvent('filechooser');
-            const importProjectPromise = page.evaluate(() => wi.startImport());
+            const importProjectPromise = page.evaluate(() => window.wi.startImport());
             const fileChooser = await fileChooserPromise;
             await fileChooser.setFiles(importPath);
             const importProject = await importProjectPromise;
@@ -89,7 +89,7 @@ export const importProject = async (page: Page, outPath: string, importPath: str
             }
 
             const job = await poll(async () => {
-                const job = await page.evaluate(jobId => wi.checkJob(jobId), importProject.id);
+                const job = await page.evaluate(jobId => window.wi.checkJob(jobId), importProject.id);
                 if (job.status !== 'running') {
                     return job;
                 }
@@ -194,27 +194,27 @@ export const downloadProject = async (page: Page, outPath: string, sceneId: numb
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
             await page.evaluate(initInterface);
 
-            const scenes = await page.evaluate(() => wi.getScenes());
+            const scenes = await page.evaluate(() => window.wi.getScenes());
             if (!scenes.length) {
                 errors.push('[FETCH ERROR] Scenes not found');
                 return;
             }
             const sceneIds = scenes
-            .map(scene => scene.id)
-            .sort((a, b) => {
+            .map((scene: any) => scene.id)
+            .sort((a: number, b: number) => {
                 if (a === sceneId) return -1;
                 if (b === sceneId) return 1;
                 return 0;
             });
 
-            const download = await page.evaluate(sceneIds => wi.startDownload(sceneIds), sceneIds);
+            const download = await page.evaluate(sceneIds => window.wi.startDownload(sceneIds), sceneIds);
             if (download.error) {
                 errors.push(`[JOB ERROR] ${download.error}`);
                 return;
             }
 
             const job = await poll(async () => {
-                const job = await page.evaluate(jobId => wi.checkJob(jobId), download.id);
+                const job = await page.evaluate(jobId => window.wi.checkJob(jobId), download.id);
                 if (job.status !== 'running') {
                     return job;
                 }
@@ -246,28 +246,28 @@ export const publishProject = async (page: Page, outPath: string, sceneId: numbe
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
             await page.evaluate(initInterface);
 
-            const scenes = await page.evaluate(() => wi.getScenes());
+            const scenes = await page.evaluate(() => window.wi.getScenes());
             if (!scenes.length) {
                 errors.push('[FETCH ERROR] Scenes not found');
                 return;
             }
             const sceneIds = scenes
-            .map(scene => scene.id)
-            .sort((a, b) => {
+            .map((scene: any) => scene.id)
+            .sort((a: number, b: number) => {
                 if (a === sceneId) return -1;
                 if (b === sceneId) return 1;
                 return 0;
             });
 
-            const app = await page.evaluate(sceneIds => wi.startPublish(sceneIds), sceneIds);
+            const app = await page.evaluate(sceneIds => window.wi.startPublish(sceneIds), sceneIds);
             if (app.task.error) {
                 errors.push(`[JOB ERROR] ${app.task.error}`);
                 return;
             }
 
             const job = await poll(async () => {
-                const apps = await page.evaluate(() => wi.getApps());
-                const job = apps.find(_app => _app.id === app.id)?.task ?? { error: 'Job not found' };
+                const apps = await page.evaluate(() => window.wi.getApps());
+                const job = apps.find((_app: any) => _app.id === app.id)?.task ?? { error: 'Job not found' };
                 if (job.status !== 'running') {
                     return job;
                 }
@@ -289,7 +289,7 @@ export const publishProject = async (page: Page, outPath: string, sceneId: numbe
             // delete app
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
             await page.evaluate(initInterface);
-            const delJob = await page.evaluate(appId => wi.deleteApp(appId), app.id);
+            const delJob = await page.evaluate(appId => window.wi.deleteApp(appId), app.id);
             if (delJob.error) {
                 errors.push(`[JOB ERROR] ${delJob.error}`);
             } else if (delJob.status !== 'complete') {
@@ -316,7 +316,7 @@ export const deleteProject = async (page: Page, outPath: string, projectId: numb
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
             await page.evaluate(initInterface);
 
-            const success = await page.evaluate(id => wi.deleteProject(id), projectId);
+            const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
             if (!success) {
                 errors.push(`[DELETE ERROR] ${projectId}`);
             }

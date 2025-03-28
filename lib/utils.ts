@@ -6,7 +6,7 @@
  * @returns The result of the function.
  */
 export const poll = (fn: (...args: any[]) => any, interval: number = 500) => {
-    return new Promise((resolve, reject) => {
+    return new Promise<ReturnType<typeof fn>>((resolve, reject) => {
         const int = setInterval(async () => {
             try {
                 const res = await fn();
