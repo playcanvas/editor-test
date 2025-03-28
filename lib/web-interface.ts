@@ -1,69 +1,48 @@
 export const initInterface = () => {
     class WebInterface {
-        /**
-         * @private
-         * @type {string}
-         */
-        _api = '/api';
+        private _api = '/api';
+
+        private _token: string = config.accessToken;
+
+        private _userId: string = config.self.id;
+
+        private _username: string = config.self.username;
+
+        private _projectId: string = config.project.id;
+
+        private _branchId: string = config.self.branch.id;
+
+        private _engineVersion: string = config.engineVersions.current.version;
 
         /**
-         * @private
-         * @type {string}
+         * @param method - The method
+         * @param url - The URL
+         * @param data - The data
+         * @param auth - Whether to use authentication
+         * @returns The response
          */
-        _token = config.accessToken;
-
-        /**
-         * @private
-         * @type {string}
-         */
-        _userId = config.self.id;
-
-        /**
-         * @private
-         * @type {string}
-         */
-        _username = config.self.username;
-
-        /**
-         * @private
-         * @type {string}
-         */
-        _projectId = config.project.id;
-
-        /**
-         * @private
-         * @type {string}
-         */
-        _branchId = config.self.branch.id;
-
-        /**
-         * @private
-         * @type {string}
-         */
-        _engineVersion = config.engineVersions.current.version;
-
-        /**
-         * @private
-         * @param {string} method - The method
-         * @param {string} url - The URL
-         * @param {object} data - The data
-         * @param {boolean} auth - Whether to use authentication
-         * @returns {Promise<Response>} The response
-         */
-        async _ajax(method, url, data, auth = true) {
+        private async _ajax(method: string, url: string, data?: object | FormData, auth: boolean = true): Promise<Response> {
             const headers = {
                 Authorization: `Bearer ${this._token}`,
                 'Content-Type': 'application/json'
             };
+            let body;
+            if (data instanceof FormData) {
+                body = data;
+            } else {
+                headers['Content-Type'] = 'application/json';
+                body = JSON.stringify(data);
+            }
+
             const res = await fetch(url, {
                 method,
                 headers: auth ? headers : undefined,
-                body: JSON.stringify(data)
+                body
             });
 
             // if rate limited, wait and retry
             if (res.status === 429) {
-                await new Promise((resolve) => {
+                await new Promise<void>((resolve) => {
                     setTimeout(resolve, 1000);
                 });
                 return await this._ajax(method, url, data, auth);
@@ -74,15 +53,15 @@ export const initInterface = () => {
         /**
          * Set custom API and token
          *
-         * @param {object} options - The options
-         * @param {string} options.api - The API endpoint
-         * @param {string} options.token - The access token
-         * @param {string} options.userId - The user id
-         * @param {string} options.username - The user name
-         * @param {string} options.projectId - The project id
-         * @param {string} options.branchId - The branch id
-         * @param {string} options.engineVersion - The engine version
-         * @returns {WebInterface} The instance
+         * @param options - The options
+         * @param options.api - The API endpoint
+         * @param options.token - The access token
+         * @param options.userId - The user id
+         * @param options.username - The user name
+         * @param options.projectId - The project id
+         * @param options.branchId - The branch id
+         * @param options.engineVersion - The engine version
+         * @returns The instance
          */
         with({
             api,
@@ -92,32 +71,32 @@ export const initInterface = () => {
             projectId,
             branchId,
             engineVersion
-        } = {
-            api: this._api,
-            token: this._token,
-            userId: this._userId,
-            username: this._username,
-            projectId: this._projectId,
-            branchId: this._branchId,
-            engineVersion: this._engineVersion
-        }) {
-            this._api = api;
-            this._token = token;
-            this._userId = userId;
-            this._username = username;
-            this._projectId = projectId;
-            this._branchId = branchId;
-            this._engineVersion = engineVersion;
+        }: {
+            api?: string;
+            token?: string;
+            userId?: string;
+            username?: string;
+            projectId?: string;
+            branchId?: string;
+            engineVersion?: string;
+        } = {}) {
+            this._api = api ?? this._api;
+            this._token = token ?? this._token;
+            this._userId = userId ?? this._userId;
+            this._username = username ?? this._username;
+            this._projectId = projectId ?? this._projectId;
+            this._branchId = branchId ?? this._branchId;
+            this._engineVersion = engineVersion ?? this._engineVersion;
             return this;
         }
 
         /**
          * Get the user
          *
-         * @param {string} name - The user name
-         * @returns {Promise<object>} The user
+         * @param name - The user name
+         * @returns The user
          */
-        async getUser(name) {
+        async getUser(name: string) {
             const res = await this._ajax('GET', `${this._api}/users/${name}`, undefined, false);
             return await res.json();
         }
@@ -125,11 +104,11 @@ export const initInterface = () => {
         /**
          * Get the user's projects
          *
-         * @param {string} userId - The user id
-         * @param {string} view - The view
-         * @returns {Promise<object[]>} The projects
+         * @param userId - The user id
+         * @param view - The view
+         * @returns The projects
          */
-        async getProjects(userId, view = '') {
+        async getProjects(userId: string, view: string = '') {
             const res = await this._ajax('GET', `${this._api}/users/${userId}/projects?view=${view}`, undefined, false);
             const json = await res.json();
             return json.result ?? [];
@@ -138,10 +117,10 @@ export const initInterface = () => {
         /**
          * Get the project
          *
-         * @param {string} projectId - The project id
-         * @returns {Promise<object>} The project
+         * @param projectId - The project id
+         * @returns The project
          */
-        async getProject(projectId) {
+        async getProject(projectId: string) {
             const res = await this._ajax('GET', `${this._api}/projects/${projectId}`, undefined, true);
             return await res.json();
         }
@@ -149,10 +128,10 @@ export const initInterface = () => {
         /**
          * Get the project apps
          *
-         * @param {string} [projectId] - The project id
-         * @returns {Promise<object>} The project
+         * @param [projectId] - The project id
+         * @returns The project
          */
-        async getApps(projectId) {
+        async getApps(projectId: string) {
             const res = await this._ajax('GET', `${this._api}/projects/${projectId ?? this._projectId}/apps?limit=0`);
             const json = await res.json();
             return json.result ?? [];
@@ -161,10 +140,10 @@ export const initInterface = () => {
         /**
          * Get the project scenes
          *
-         * @param {string} [projectId] - The project id
-         * @returns {Promise<object[]>} The scenes
+         * @param [projectId] - The project id
+         * @returns The scenes
          */
-        async getScenes(projectId) {
+        async getScenes(projectId: string) {
             const res = await this._ajax('GET', `${this._api}/projects/${projectId ?? this._projectId}/scenes`);
             const json = await res.json();
             return json.result ?? [];
@@ -173,12 +152,12 @@ export const initInterface = () => {
         /**
          * Creates the project
          *
-         * @param {string} name - The name
-         * @param {string} projectId - The project id
-         * @returns {Promise<object>} The project
+         * @param name - The name
+         * @param projectId - The project id
+         * @returns The project
          */
-        async createProject(name, projectId) {
-            const data = {
+        async createProject(name: string, projectId: string) {
+            const data: Record<string, any> = {
                 name,
                 owner: this._username
             };
@@ -198,10 +177,10 @@ export const initInterface = () => {
         /**
          * Starts download of the project
          *
-         * @param {string[]} sceneIds - The scene ids
-         * @returns {Promise<object>} The job
+         * @param sceneIds - The scene ids
+         * @returns The job
          */
-        async startDownload(sceneIds) {
+        async startDownload(sceneIds: string[]) {
             const res = await this._ajax('POST', `${this._api}/apps/download`, {
                 name: 'TEST',
                 project_id: this._projectId,
@@ -215,10 +194,10 @@ export const initInterface = () => {
         /**
          * Starts publish of the project
          *
-         * @param {string[]} sceneIds - The scene ids
-         * @returns {Promise<object>} The job
+         * @param sceneIds - The scene ids
+         * @returns The job
          */
-        async startPublish(sceneIds) {
+        async startPublish(sceneIds: string[]) {
             const res = await this._ajax('POST', `${this._api}/apps`, {
                 name: 'TEST',
                 project_id: this._projectId,
@@ -232,11 +211,11 @@ export const initInterface = () => {
         /**
          * Uploads the project
          *
-         * @param {File} file - The file
-         * @param {number} [chunkSize] - The chunk size. Default is 20Mb
-         * @returns {Promise<string>} The S3 key
+         * @param file - The file
+         * @param [chunkSize] - The chunk size. Default is 20Mb
+         * @returns The S3 key
          */
-        async uploadProject(file, chunkSize = 20 * 1024 * 1024) {
+        async uploadProject(file: File, chunkSize: number = 20 * 1024 * 1024) {
             const chunkCount = Math.ceil(file.size / chunkSize);
 
             // start upload
@@ -275,7 +254,7 @@ export const initInterface = () => {
             const parts = [];
             for (let i = 0; i < uploadRes.length; i++) {
                 const res = uploadRes[i];
-                const etag = res.headers.get('ETag');
+                const etag = res.headers.get('ETag') ?? '';
                 const cleanEtag = etag.replace(/^"|"$/g, '');
                 parts.push({ PartNumber: i + 1, ETag: cleanEtag });
             }
@@ -293,7 +272,7 @@ export const initInterface = () => {
         /**
          * Starts import of the project
          *
-         * @returns {Promise<object>} The job
+         * @returns The job
          */
         async startImport() {
             const filePicker = document.createElement('input');
@@ -301,14 +280,14 @@ export const initInterface = () => {
             filePicker.type = 'file';
             filePicker.accept = 'application/zip';
             filePicker.click();
-            const files = await new Promise((resolve) => {
+            const files = await new Promise<FileList | null>((resolve) => {
                 filePicker.addEventListener('change', () => {
                     resolve(filePicker.files);
                 });
             });
             filePicker.remove();
 
-            if (files.length === 0) {
+            if (!files || files.length === 0) {
                 return { error: 'No files selected' };
             }
 
@@ -329,10 +308,10 @@ export const initInterface = () => {
         /**
          * Deletes the project
          *
-         * @param {string} [projectId] - The project id
-         * @returns {Promise<boolean>} Whether the project was deleted
+         * @param [projectId] - The project id
+         * @returns Whether the project was deleted
          */
-        async deleteProject(projectId) {
+        async deleteProject(projectId: string) {
             const res = await this._ajax('DELETE', `${this._api}/projects/${projectId ?? this._projectId}`, undefined, true);
             return res.status === 200;
         }
@@ -340,10 +319,10 @@ export const initInterface = () => {
         /**
          * Deletes the app
          *
-         * @param {string} appId - The app id
-         * @returns {Promise<object>} The job
+         * @param appId - The app id
+         * @returns The job
          */
-        async deleteApp(appId) {
+        async deleteApp(appId: string) {
             const res = await this._ajax('DELETE', `${this._api}/apps/${appId}`);
             const json = await res.json();
             return json.task ?? { error: 'Job not found' };
@@ -352,10 +331,10 @@ export const initInterface = () => {
         /**
          * Checks the job
          *
-         * @param {string} jobId - The job id
-         * @returns {Promise<object>} The task
+         * @param jobId - The job id
+         * @returns The task
          */
-        async checkJob(jobId) {
+        async checkJob(jobId: string) {
             const res = await this._ajax('GET', `${this._api}/jobs/${jobId}`);
             return await res.json();
         }
