@@ -37,7 +37,7 @@ export default defineConfig({
     projects: [
         {
             name: 'setup',
-            testMatch: /.*\.setup\.mjs/,
+            testMatch: /.*\.setup\.ts/,
             use: {
                 ...devices['Desktop Chrome'],
                 storageState: 'playwright/.auth/user.json'
