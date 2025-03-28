@@ -3,16 +3,15 @@ import { type Page } from '@playwright/test';
 import { capture } from './capture';
 import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './url';
 import { poll, wait } from './utils';
-import { initInterface as init } from './web-interface';
+import { WebInterface } from './web-interface';
 
 /**
- * Initialize the web interface.
+ * Inject the web interface into the page.
  *
- * @param page - The page to initialize.
- * @returns - The result of the initialization.
+ * @param page - The page to inject the interface into.
  */
-export const initInterface = (page: Page) => {
-    return page.evaluate(init);
+export const injectInterface = async (page: Page) => {
+    await page.evaluate(`window.wi = new (${WebInterface.toString()})(window.config)`);
 };
 
 /**
@@ -30,7 +29,7 @@ export const getSetting = (page: Page, name: string) => {
  * @param page - The page.
  * @param outPath - The path to the project.
  * @param projectName - The project name.
- * @param [masterProjectId] - The master project id.
+ * @param masterProjectId - The master project id.
  * @returns The data result.
  */
 export const createProject = async (page: Page, outPath: string, projectName: string, masterProjectId?: number) => {
@@ -40,9 +39,12 @@ export const createProject = async (page: Page, outPath: string, projectName: st
         outPath,
         callback: async (errors) => {
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
-            await initInterface(page);
+            await injectInterface(page);
 
-            const create = await page.evaluate(([name, id]) => window.wi.createProject(name, id), [projectName, masterProjectId]);
+            const create = await page.evaluate(({ name, id }) => window.wi.createProject(name, id), {
+                name: projectName,
+                id: masterProjectId
+            });
             if (create.error) {
                 errors.push(`[CREATE PROJECT ERROR] ${create.error}`);
                 return;
@@ -86,7 +88,7 @@ export const importProject = async (page: Page, outPath: string, importPath: str
         outPath,
         callback: async () => {
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
-            await initInterface(page);
+            await injectInterface(page);
 
             const fileChooserPromise = page.waitForEvent('filechooser');
             const importProjectPromise = page.evaluate(() => window.wi.startImport());
@@ -202,7 +204,7 @@ export const downloadProject = async (page: Page, outPath: string, sceneId: numb
         outPath,
         callback: async (errors) => {
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-            await initInterface(page);
+            await injectInterface(page);
 
             const scenes = await page.evaluate(() => window.wi.getScenes());
             if (!scenes.length) {
@@ -254,7 +256,7 @@ export const publishProject = async (page: Page, outPath: string, sceneId: numbe
         outPath,
         callback: async (errors) => {
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-            await initInterface(page);
+            await injectInterface(page);
 
             const scenes = await page.evaluate(() => window.wi.getScenes());
             if (!scenes.length) {
@@ -298,7 +300,7 @@ export const publishProject = async (page: Page, outPath: string, sceneId: numbe
 
             // delete app
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-            await initInterface(page);
+            await injectInterface(page);
             const delJob = await page.evaluate(appId => window.wi.deleteApp(appId), app.id);
             if (delJob.error) {
                 errors.push(`[JOB ERROR] ${delJob.error}`);
@@ -324,7 +326,7 @@ export const deleteProject = async (page: Page, outPath: string, projectId: numb
         outPath,
         callback: async (errors) => {
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
-            await initInterface(page);
+            await injectInterface(page);
 
             const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
             if (!success) {
