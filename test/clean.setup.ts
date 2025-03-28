@@ -1,11 +1,11 @@
 import { test as setup, expect } from '@playwright/test';
 
+import { initInterface } from '../lib/common';
 import { HOST } from '../lib/url';
-import { initInterface } from '../lib/web-interface';
 
 setup('removing old projects', async ({ page }) => {
     await page.goto(`https://${HOST}/editor`);
-    await page.evaluate(initInterface);
+    await initInterface(page);
 
     const projects = await page.evaluate(() => window.wi.getProjects(window.config.self.id));
 
