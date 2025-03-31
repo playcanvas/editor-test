@@ -1,8 +1,9 @@
 import 'dotenv/config';
 
+export const AUTH_STATE = '.auth/state.json';
+
 export const GMAIL = process.env.PC_GMAIL ?? '';
 export const PASSWORD = process.env.PC_PASSWORD ?? '';
-export const USERNAME = process.env.PC_USERNAME ?? '';
 export const HOST = process.env.PC_HOST ?? 'playcanvas.com';
 export const LOGIN_HOST = process.env.PC_LOGIN_HOST ?? 'login.playcanvas.com';
 export const LAUNCH_HOST = process.env.PC_LAUNCH_HOST ?? 'launch.playcanvas.com';

@@ -1,4 +1,5 @@
 .env
+.auth
 node_modules
 /cache
 /projects
@@ -8,4 +9,3 @@ node_modules
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-/playwright/.auth/

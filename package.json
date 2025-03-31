@@ -1,7 +1,9 @@
 {
   "name": "editor-test",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Editor Testing Suite",
+  "author": "PlayCanvas",
+  "license": "Properietary",
   "type": "module",
   "scripts": {
     "test": "playwright test",
@@ -11,13 +13,10 @@
     "test-headed": "playwright test --headed",
     "report": "playwright show-report",
     "codegen": "playwright codegen --load-storage playwright/.auth/user.json",
-    "login": "tsx src/login.ts",
     "home": "tsx src/home.ts",
     "lint": "eslint . --ext .ts,.mjs",
     "typecheck": "tsc --declaration --emitDeclarationOnly"
   },
-  "author": "",
-  "license": "Properietary",
   "devDependencies": {
     "@playcanvas/eslint-config": "^2.0.9",
     "@playwright/test": "^1.49.1",

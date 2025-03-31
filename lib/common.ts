@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import { capture } from './capture';
-import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './url';
+import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './config';
 import { poll, wait } from './utils';
 import { WebInterface } from './web-interface';
 

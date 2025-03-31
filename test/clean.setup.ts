@@ -1,7 +1,7 @@
 import { test as setup, expect } from '@playwright/test';
 
 import { injectInterface } from '../lib/common';
-import { HOST } from '../lib/url';
+import { HOST } from '../lib/config';
 
 setup('removing old projects', async ({ page }) => {
     await page.goto(`https://${HOST}/editor`);

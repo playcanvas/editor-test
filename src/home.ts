@@ -1,18 +1,12 @@
-import * as fs from 'fs';
-
 import { chromium } from '@playwright/test';
 
-import { HOST } from '../lib/url';
-
-const AUTH_PATH = 'playwright/.auth/user.json';
-
-fs.mkdirSync('playwright/.auth', { recursive: true });
+import { AUTH_STATE, HOST } from '../lib/config';
 
 const browser = await chromium.launch({
     headless: false
 });
 const context = await browser.newContext({
-    storageState: AUTH_PATH
+    storageState: AUTH_STATE
 });
 const page = await context.newPage();
 page.on('close', async () => {
