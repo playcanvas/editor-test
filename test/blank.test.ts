@@ -18,8 +18,6 @@ import { id } from '../lib/utils';
 const OUT_PATH = 'out/blank';
 const PROJECT_NAME = 'Blank Project';
 
-middleware(test);
-
 test.describe.configure({
     mode: 'serial'
 });
@@ -39,6 +37,7 @@ test.describe('create/delete', () => {
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
+        await middleware(page.context());
         await fs.promises.mkdir(projectPath, { recursive: true });
     });
 
@@ -98,6 +97,7 @@ test.describe('publish/download', () => {
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
+        await middleware(page.context());
         await fs.promises.mkdir(projectPath, { recursive: true });
     });
 
@@ -143,6 +143,7 @@ test.describe('settings', () => {
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
+        await middleware(page.context());
         await fs.promises.mkdir(projectPath, { recursive: true });
     });
 

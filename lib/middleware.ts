@@ -1,25 +1,9 @@
-import {
-    type PlaywrightTestArgs,
-    type PlaywrightTestOptions,
-    type PlaywrightWorkerArgs,
-    type PlaywrightWorkerOptions,
-    type TestType
-} from '@playwright/test';
+import { type BrowserContext } from '@playwright/test';
 
-export const middleware = (test: TestType<PlaywrightTestArgs & PlaywrightTestOptions, PlaywrightWorkerArgs & PlaywrightWorkerOptions>) => {
-    test.beforeEach(async ({ context }) => {
-        // FIXME: This delays the response for the PlayCanvas API.
-        await context.route(/playcanvas\.com\/api/, (route, request) => {
-            setTimeout(() => route.continue(), 1000);
-        });
-
-        // FIXME: This mocks the response for the PlayCanvas API tags routes (local).
-        await context.route(/playcanvas\.com\/api\/tags/, (route, request) => {
-            route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify({})
-            });
-        });
+export const middleware = async (context: BrowserContext) => {
+    // FIXME: This delays the response for the PlayCanvas API.
+    await context.route(/playcanvas\.com\/api/, (route, request) => {
+        console.log(request.url());
+        setTimeout(() => route.continue(), 1000);
     });
 };

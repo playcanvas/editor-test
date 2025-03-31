@@ -4,6 +4,7 @@ import { test as setup } from '@playwright/test';
 
 import { googleAuth } from '../lib/auth';
 import { GMAIL, PASSWORD, HOST, AUTH_STATE } from '../lib/config';
+import { middleware } from '../lib/middleware';
 
 const SESSION_EXISTS = fs.existsSync(AUTH_STATE);
 
@@ -14,6 +15,7 @@ if (SESSION_EXISTS) {
 }
 
 setup('authenticate user', async ({ page }) => {
+    await middleware(page.context());
     if (SESSION_EXISTS) {
         await page.goto(`https://${HOST}/editor`);
         const title = await page.title();

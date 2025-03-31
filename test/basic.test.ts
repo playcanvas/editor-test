@@ -8,8 +8,6 @@ import { id } from '../lib/utils';
 
 const PROJECTS = fs.existsSync('projects') ? fs.readdirSync('projects') : [];
 
-middleware(test);
-
 test.describe.configure({
     mode: 'serial'
 });
@@ -34,6 +32,7 @@ PROJECTS.forEach((project) => {
 
         test.beforeAll(async ({ browser }) => {
             page = await browser.newPage();
+            await middleware(page.context());
             await fs.promises.mkdir(projectPath, { recursive: true });
         });
 
@@ -82,6 +81,7 @@ PROJECTS.forEach((project) => {
 
         test.beforeAll(async ({ browser }) => {
             page = await browser.newPage();
+            await middleware(page.context());
             await fs.promises.mkdir(projectPath, { recursive: true });
         });
 

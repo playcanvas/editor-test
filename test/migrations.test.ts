@@ -13,8 +13,6 @@ const MATERIAL_NAME = 'TEST_MATERIAL';
 const TEXTURE_NAME = 'TEST_TEXTURE';
 const ENTITY_NAME = 'Root';
 
-middleware(test);
-
 test.describe.configure({
     mode: 'serial'
 });
@@ -33,6 +31,7 @@ test.describe('fork', () => {
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
+        await middleware(page.context());
         await fs.promises.mkdir(projectPath, { recursive: true });
     });
 
@@ -74,6 +73,7 @@ test.describe('migrations', () => {
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
+        await middleware(page.context());
         await fs.promises.mkdir(projectPath, { recursive: true });
     });
 
@@ -161,6 +161,7 @@ test.describe('publish/download', () => {
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
+        await middleware(page.context());
         await fs.promises.mkdir(projectPath, { recursive: true });
     });
 

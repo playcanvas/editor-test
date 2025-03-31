@@ -2,8 +2,10 @@ import { test as setup, expect } from '@playwright/test';
 
 import { injectInterface } from '../lib/common';
 import { HOST } from '../lib/config';
+import { middleware } from '../lib/middleware';
 
 setup('removing old projects', async ({ page }) => {
+    await middleware(page.context());
     await page.goto(`https://${HOST}/editor`);
     await injectInterface(page);
 
