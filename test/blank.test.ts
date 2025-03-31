@@ -18,10 +18,6 @@ import { id } from '../lib/utils';
 const OUT_PATH = 'out/blank';
 const PROJECT_NAME = 'Blank Project';
 
-test.describe.configure({
-    mode: 'serial'
-});
-
 const next = id();
 
 test.describe('create/delete', () => {
