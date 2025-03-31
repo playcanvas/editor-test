@@ -11,7 +11,8 @@ const PROJECTS = fs.existsSync('projects') ? fs.readdirSync('projects') : [];
 middleware(test);
 
 test.describe.configure({
-    mode: 'serial'
+    mode: 'serial',
+    timeout: 5 * 60 * 1000 // Increase timeout for importing large projects
 });
 
 const next = id();
