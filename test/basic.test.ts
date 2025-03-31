@@ -11,8 +11,7 @@ const PROJECTS = fs.existsSync('projects') ? fs.readdirSync('projects') : [];
 middleware(test);
 
 test.describe.configure({
-    mode: 'serial',
-    timeout: 5 * 60 * 1000 // Increase timeout for importing large projects
+    mode: 'serial'
 });
 
 const next = id();
@@ -29,7 +28,8 @@ PROJECTS.forEach((project) => {
         let page: Page;
 
         test.describe.configure({
-            mode: 'serial'
+            mode: 'serial',
+            timeout: 5 * 60 * 1000 // Increase timeout for importing large projects
         });
 
         test.beforeAll(async ({ browser }) => {
