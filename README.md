@@ -7,17 +7,14 @@
 1. Create a `.env` file with the following information: 
 
 ```
-PC_GMAIL=<gmail-email>
-PC_PASSWORD=<password>
-PC_USERNAME=<playcanvas-username>
 PC_HOST=playcanvas.com
 PC_LOGIN_HOST=login.playcanvas.com
 PC_LAUNCH_HOST=launch.playcanvas.com
+PC_GMAIL=<gmail-email>
+PC_PASSWORD=<password>
 ```
 
-1. Run `npm run login` to open up the browser to auto-sign-in (N.B. This will automatically fetch all projects and store them in `cache/projects.json`)
-
-3. Run `npm test` to begin the testing suite.
+2. Run `npm test` to begin the testing suite.
 
 ## Changing hosts
 
