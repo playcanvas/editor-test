@@ -13,6 +13,10 @@ import { middleware } from '../lib/middleware';
 
 const PROJECT_NAME = 'Blank Project';
 
+test.describe.configure({
+    mode: 'serial'
+});
+
 test.describe('create/delete', () => {
     let projectId: number;
     let forkedProjectId: number;
