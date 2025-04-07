@@ -6,7 +6,8 @@ import { deleteProject, downloadProject, importProject, publishProject, visitEdi
 import { middleware } from '../lib/middleware';
 import { id } from '../lib/utils';
 
-const PROJECTS = fs.existsSync('projects') ? fs.readdirSync('projects') : [];
+const PROJECTS_PATH = 'test/fixtures/projects/basic';
+const PROJECTS = fs.existsSync(PROJECTS_PATH) ? fs.readdirSync(PROJECTS_PATH) : [];
 
 test.describe.configure({
     mode: 'serial'
@@ -16,7 +17,7 @@ const next = id();
 
 PROJECTS.forEach((project) => {
     const FILE_NAME = project.split('.')[0];
-    const IN_PATH = `projects/${project}`;
+    const IN_PATH = `${PROJECTS_PATH}/${project}`;
     const OUT_PATH = `out/${FILE_NAME}`;
 
     test.describe(`${project}: import/delete`, () => {

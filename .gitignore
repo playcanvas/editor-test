@@ -2,9 +2,8 @@
 .auth
 node_modules
 /cache
-/projects
 /out
-/test/fixtures/projects/*.mongodb.js
+/test/fixtures/projects/basic/**
 /test-results/
 /playwright-report/
 /blob-report/
