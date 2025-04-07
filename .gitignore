@@ -3,7 +3,7 @@
 node_modules
 /cache
 /out
-/test/fixtures/projects/basic/**
+/test/fixtures/projects/basic
 /test-results/
 /playwright-report/
 /blob-report/
