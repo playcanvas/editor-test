@@ -222,7 +222,7 @@ test.describe('publish/download', () => {
         projectId = res.projectId;
     });
 
-    test('goto editor (project)', async () => {
+    test('goto editor', async () => {
         const res = await visitEditor(page, projectId);
         expect(res.errors).toStrictEqual(EXPECTED_ERRORS);
         expect(res.sceneId).toBeDefined();
