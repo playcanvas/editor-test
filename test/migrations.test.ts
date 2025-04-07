@@ -44,25 +44,25 @@ test.describe('fork', () => {
     });
 
     test('import project', async () => {
-        const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+        const res = await importProject(page, IN_PATH);
         expect(res.errors).toStrictEqual([]);
         expect(res.projectId).toBeDefined();
         projectId = res.projectId;
     });
 
     test('fork project', async () => {
-        const res = await createProject(page, `${projectPath}/fork-create`, `${PROJECT_NAME} FORK`, projectId);
+        const res = await createProject(page, `${PROJECT_NAME} FORK`, projectId);
         expect(res.errors).toStrictEqual([]);
         expect(res.projectId).toBeDefined();
         forkedProjectId = res.projectId;
     });
 
     test('delete forked project', async () => {
-        expect(await deleteProject(page, `${projectPath}/fork-delete`, forkedProjectId)).toStrictEqual([]);
+        expect(await deleteProject(page, forkedProjectId)).toStrictEqual([]);
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+        expect(await deleteProject(page, projectId)).toStrictEqual([]);
     });
 });
 
@@ -86,14 +86,14 @@ test.describe('migrations', () => {
     });
 
     test('import project', async () => {
-        const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+        const res = await importProject(page, IN_PATH);
         expect(res.errors).toStrictEqual([]);
         expect(res.projectId).toBeDefined();
         projectId = res.projectId;
     });
 
     test('prepare project', async () => {
-        const res = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
+        const res = await visitEditor(page, projectId, async () => {
             await page.evaluate(() => {
                 // settings
                 const settings = window.editor.call('settings:project');
@@ -137,7 +137,7 @@ test.describe('migrations', () => {
     });
 
     test('check migrations', async () => {
-        const res = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
+        const res = await visitEditor(page, projectId, async () => {
 
             // Check project settings migration
             const projectSettings = await page.evaluate(() => window.editor.call('settings:project').json());
@@ -191,7 +191,7 @@ test.describe('migrations', () => {
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+        expect(await deleteProject(page, projectId)).toStrictEqual([]);
     });
 });
 
@@ -216,28 +216,28 @@ test.describe('publish/download', () => {
     });
 
     test('import project', async () => {
-        const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+        const res = await importProject(page, IN_PATH);
         expect(res.errors).toStrictEqual([]);
         expect(res.projectId).toBeDefined();
         projectId = res.projectId;
     });
 
     test('goto editor (project)', async () => {
-        const res = await visitEditor(page, `${projectPath}/editor`, projectId);
+        const res = await visitEditor(page, projectId);
         expect(res.errors).toStrictEqual(EXPECTED_ERRORS);
         expect(res.sceneId).toBeDefined();
         sceneId = res.sceneId;
     });
 
     test('download app', async () => {
-        expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual(EXPECTED_ERRORS);
+        expect(await downloadProject(page, sceneId)).toStrictEqual(EXPECTED_ERRORS);
     });
 
     test('publish app', async () => {
-        expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual(EXPECTED_ERRORS);
+        expect(await publishProject(page, sceneId)).toStrictEqual(EXPECTED_ERRORS);
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+        expect(await deleteProject(page, projectId)).toStrictEqual([]);
     });
 });

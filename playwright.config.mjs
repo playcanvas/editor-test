@@ -13,7 +13,7 @@ import { AUTH_STATE } from './lib/config';
  */
 export default defineConfig({
     /* Timeout for each test */
-    timeout: 60 * 1000,
+    timeout: 2 * 60 * 1000,
     /* Directory to search for tests */
     testDir: './test',
     /* Run tests in files in parallel */

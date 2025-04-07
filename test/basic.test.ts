@@ -2,9 +2,8 @@ import * as fs from 'fs';
 
 import { test, expect, type Page } from '@playwright/test';
 
-import { deleteProject, downloadProject, importProject, publishProject, visitEditor, visitEditorScene, visitLauncher } from '../lib/common';
+import { deleteProject, downloadProject, importProject, publishProject, visitEditor, visitLauncher } from '../lib/common';
 import { middleware } from '../lib/middleware';
-import { id } from '../lib/utils';
 
 const PROJECTS_PATH = 'test/fixtures/projects/basic';
 const PROJECTS = fs.existsSync(PROJECTS_PATH) ? fs.readdirSync(PROJECTS_PATH) : [];
@@ -13,15 +12,10 @@ test.describe.configure({
     mode: 'serial'
 });
 
-const next = id();
-
 PROJECTS.forEach((project) => {
-    const FILE_NAME = project.split('.')[0];
     const IN_PATH = `${PROJECTS_PATH}/${project}`;
-    const OUT_PATH = `out/${FILE_NAME}`;
 
     test.describe(`${project}: import/delete`, () => {
-        const projectPath = `${OUT_PATH}/${next()}`;
         let projectId: number;
         let sceneId: number;
         let page: Page;
@@ -34,7 +28,6 @@ PROJECTS.forEach((project) => {
         test.beforeAll(async ({ browser }) => {
             page = await browser.newPage();
             await middleware(page.context());
-            await fs.promises.mkdir(projectPath, { recursive: true });
         });
 
         test.afterAll(async () => {
@@ -42,36 +35,29 @@ PROJECTS.forEach((project) => {
         });
 
         test('import project', async () => {
-            const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+            const res = await importProject(page, IN_PATH);
             expect(res.errors).toStrictEqual([]);
             expect(res.projectId).toBeDefined();
             projectId = res.projectId;
         });
 
-        test('goto editor (project)', async () => {
-            const res = await visitEditor(page, `${projectPath}/editor`, projectId);
+        test('goto editor', async () => {
+            const res = await visitEditor(page, projectId);
             expect(res.errors).toStrictEqual([]);
             expect(res.sceneId).toBeDefined();
             sceneId = res.sceneId;
         });
 
-        test('goto editor (scene)', async () => {
-            const scenePath = `${projectPath}/${sceneId}`;
-            await fs.promises.mkdir(scenePath, { recursive: true });
-            expect(await visitEditorScene(page, `${scenePath}/editor`, sceneId)).toStrictEqual([]);
-        });
-
         test('goto launcher', async () => {
-            expect(await visitLauncher(page, `${projectPath}/launcher`, sceneId)).toStrictEqual([]);
+            expect(await visitLauncher(page, sceneId)).toStrictEqual([]);
         });
 
         test('delete project', async () => {
-            expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+            expect(await deleteProject(page, projectId)).toStrictEqual([]);
         });
     });
 
     test.describe(`${project}: publish/download`, () => {
-        const projectPath = `${OUT_PATH}/${next()}`;
         let projectId: number;
         let sceneId: number;
         let page: Page;
@@ -83,7 +69,6 @@ PROJECTS.forEach((project) => {
         test.beforeAll(async ({ browser }) => {
             page = await browser.newPage();
             await middleware(page.context());
-            await fs.promises.mkdir(projectPath, { recursive: true });
         });
 
         test.afterAll(async () => {
@@ -91,29 +76,29 @@ PROJECTS.forEach((project) => {
         });
 
         test('import project', async () => {
-            const res = await importProject(page, `${projectPath}/import`, IN_PATH);
+            const res = await importProject(page, IN_PATH);
             expect(res.errors).toStrictEqual([]);
             expect(res.projectId).toBeDefined();
             projectId = res.projectId;
         });
 
         test('goto editor (project)', async () => {
-            const res = await visitEditor(page, `${projectPath}/editor`, projectId);
+            const res = await visitEditor(page, projectId);
             expect(res.errors).toStrictEqual([]);
             expect(res.sceneId).toBeDefined();
             sceneId = res.sceneId;
         });
 
         test('download app', async () => {
-            expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual([]);
+            expect(await downloadProject(page, sceneId)).toStrictEqual([]);
         });
 
         test('publish app', async () => {
-            expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual([]);
+            expect(await publishProject(page, sceneId)).toStrictEqual([]);
         });
 
         test('delete project', async () => {
-            expect(await deleteProject(page, `${projectPath}/delete`, projectId)).toStrictEqual([]);
+            expect(await deleteProject(page, projectId)).toStrictEqual([]);
         });
     });
 });

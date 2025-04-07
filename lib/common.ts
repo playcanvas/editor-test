@@ -27,16 +27,15 @@ export const getSetting = (page: Page, name: string) => {
  * Create a project. If masterProjectId is provided, the project will be forked from the master project.
  *
  * @param page - The page.
- * @param outPath - The path to the project.
  * @param projectName - The project name.
  * @param masterProjectId - The master project id.
  * @returns The data result.
  */
-export const createProject = async (page: Page, outPath: string, projectName: string, masterProjectId?: number) => {
+export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
     let projectId = 0;
     const errors = await capture({
+        name: 'Create Project',
         page,
-        outPath,
         callback: async (errors) => {
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
             await injectInterface(page);
@@ -77,15 +76,14 @@ export const createProject = async (page: Page, outPath: string, projectName: st
  * Import a project.
  *
  * @param page - The page.
- * @param outPath - The path to the project.
  * @param importPath - The path to the import file.
  * @returns The data result.
  */
-export const importProject = async (page: Page, outPath: string, importPath: string) => {
+export const importProject = async (page: Page, importPath: string) => {
     let projectId = 0;
     const errors = await capture({
+        name: 'Import Project',
         page,
-        outPath,
         callback: async () => {
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
             await injectInterface(page);
@@ -121,22 +119,20 @@ export const importProject = async (page: Page, outPath: string, importPath: str
  * Visit the editor.
  *
  * @param page - The page.
- * @param outPath - The path to the project.
  * @param projectId - The project id.
  * @param callback - The callback
  * @returns The data result.
  */
-export const visitEditor = async (page: Page, outPath: string, projectId: number, callback: (projectId: string) => void = () => {}) => {
+export const visitEditor = async (page: Page, projectId: number, callback: (projectId: string) => void = () => {}) => {
     const projectUrl = editorProjectUrl(projectId);
     let sceneId = 0;
     const errors = await capture({
+        name: 'Visit Editor',
         page,
-        outPath,
         callback: async () => {
             await page.goto(projectUrl, { waitUntil: 'networkidle' });
             await page.waitForURL('**/scene/**');
             sceneId = parseInt(/scene\/(\d+)/.exec(page.url())?.[1] ?? '', 10) || 0;
-            await page.screenshot({ path: `${outPath}/editor.png` });
             await callback(projectUrl);
         }
     });
@@ -144,45 +140,20 @@ export const visitEditor = async (page: Page, outPath: string, projectId: number
 };
 
 /**
- * Visit the editor scene.
- *
- * @param page - The page.
- * @param outPath - The path to the project.
- * @param sceneId - The scene id.
- * @param callback - The callback.
- * @returns The errors.
- */
-export const visitEditorScene = async (page: Page, outPath: string, sceneId: number, callback: (sceneUrl: string) => void = () => {}) => {
-    const sceneUrl = editorSceneUrl(sceneId);
-    const errors = await capture({
-        page,
-        outPath,
-        callback: async () => {
-            await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-            await page.screenshot({ path: `${outPath}/editor.png` });
-            await callback(sceneUrl);
-        }
-    });
-    return errors;
-};
-
-/**
  * Visit the launcher.
  *
  * @param page - The page.
- * @param outPath - The path to the project.
  * @param sceneId - The scene id.
  * @param callback - The callback.
  * @returns The errors.
  */
-export const visitLauncher = async (page: Page, outPath: string, sceneId: number, callback: (sceneLaunchUrl: string) => void = () => {}) => {
+export const visitLauncher = async (page: Page, sceneId: number, callback: (sceneLaunchUrl: string) => void = () => {}) => {
     const sceneLaunchUrl = launchSceneUrl(sceneId);
     const errors = await capture({
+        name: 'Visit Launcher',
         page,
-        outPath,
         callback: async () => {
             await page.goto(sceneLaunchUrl, { waitUntil: 'networkidle' });
-            await page.screenshot({ path: `${outPath}/launch.png` });
             await callback(sceneLaunchUrl);
         }
     });
@@ -193,15 +164,14 @@ export const visitLauncher = async (page: Page, outPath: string, sceneId: number
  * Download a project.
  *
  * @param page - The page.
- * @param outPath - The path to the project.
  * @param sceneId - The scene id.
  * @returns The errors.
  */
-export const downloadProject = async (page: Page, outPath: string, sceneId: number) => {
+export const downloadProject = async (page: Page, sceneId: number) => {
     const sceneUrl = editorSceneUrl(sceneId);
     const errors = await capture({
+        name: 'Download Project',
         page,
-        outPath,
         callback: async (errors) => {
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
             await injectInterface(page);
@@ -245,15 +215,14 @@ export const downloadProject = async (page: Page, outPath: string, sceneId: numb
  * Publish a project.
  *
  * @param page - The page.
- * @param outPath - The path to the project.
  * @param sceneId - The scene id.
  * @returns The errors.
  */
-export const publishProject = async (page: Page, outPath: string, sceneId: number) => {
+export const publishProject = async (page: Page, sceneId: number) => {
     const sceneUrl = editorSceneUrl(sceneId);
     const errors = await capture({
+        name: 'Publish Project',
         page,
-        outPath,
         callback: async (errors) => {
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
             await injectInterface(page);
@@ -296,7 +265,6 @@ export const publishProject = async (page: Page, outPath: string, sceneId: numbe
 
             // launch app
             await page.goto(app.url, { waitUntil: 'networkidle' });
-            await page.screenshot({ path: `${outPath}/publish.png` });
 
             // delete app
             await page.goto(sceneUrl, { waitUntil: 'networkidle' });
@@ -316,14 +284,13 @@ export const publishProject = async (page: Page, outPath: string, sceneId: numbe
  * Delete a project.
  *
  * @param page - The page.
- * @param outPath - The path to the project.
  * @param projectId - The project id.
  * @returns The errors.
  */
-export const deleteProject = async (page: Page, outPath: string, projectId: number) => {
+export const deleteProject = async (page: Page, projectId: number) => {
     const errors = await capture({
+        name: 'Delete Project',
         page,
-        outPath,
         callback: async (errors) => {
             await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
             await injectInterface(page);
