@@ -5,6 +5,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { createProject, deleteProject, downloadProject, importProject, publishProject, visitEditor } from '../lib/common';
 import { middleware } from '../lib/middleware';
 import { id } from '../lib/utils';
+import type { Observer } from '../observer';
 
 const IN_PATH = 'test/fixtures/projects/migrations.zip';
 const OUT_PATH = 'out/migrations';
@@ -12,6 +13,9 @@ const PROJECT_NAME = 'Migrations';
 const MATERIAL_NAME = 'TEST_MATERIAL';
 const TEXTURE_NAME = 'TEST_TEXTURE';
 const ENTITY_NAME = 'Root';
+const EXPECTED_ERRORS = [
+    'The TEST_TEXTURE has sRGB set to true. The Normal Map Asset property from Root requires sRGB to be false'
+];
 
 test.describe.configure({
     mode: 'serial'
@@ -88,6 +92,50 @@ test.describe('migrations', () => {
         projectId = res.projectId;
     });
 
+    test('prepare project', async () => {
+        const res = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
+            await page.evaluate(() => {
+                // settings
+                const settings = window.editor.call('settings:project');
+                settings.sync._paths = null;
+                settings.set('deviceTypes', ['webgpu']);
+                settings.set('preferWebGl2');
+                settings.set('useLegacyAudio');
+                settings.set('useLegacyScripts');
+                settings.set('engineV2', true);
+                settings.unset('enableWebGl2');
+                settings.unset('enableWebGpu');
+
+                // assets
+                const assets = window.editor.call('assets:list');
+                const material = assets.find((asset: Observer) => asset.get('name') === 'TEST_MATERIAL');
+                material.set('data.ambientTint', false);
+                material.set('data.ambient', [1, 0, 0]);
+                material.set('data.diffuse', [0, 0, 0]);
+                material.set('data.emissive', [1, 1, 1]);
+                material.set('data.fresnelModel', 0);
+                material.set('data.shader', 'phong');
+                material.set('data.useGammaTonemap', false);
+                material.unset('data.diffuseTint');
+                material.unset('data.emissiveTint');
+                material.unset('data.metalnessTint');
+                material.unset('data.sheenTint');
+                material.unset('data.sheenGlossTint');
+                material.unset('data.useGamma');
+                const texture = assets.find((asset: Observer) => asset.get('name') === 'TEST_TEXTURE');
+                texture.unset('data.srgb');
+
+                // entities
+                const entities = window.editor.call('entities:list');
+                const root = entities.find((entity: Observer) => entity.get('name') === 'Root');
+                root.set('components.light.shadowType', 1);
+                root.unset('components.camera.toneMapping');
+                root.unset('components.camera.gammaCorrection');
+            });
+        });
+        expect(res.errors).toStrictEqual(EXPECTED_ERRORS);
+    });
+
     test('check migrations', async () => {
         const res = await visitEditor(page, `${projectPath}/editor`, projectId, async () => {
 
@@ -104,7 +152,7 @@ test.describe('migrations', () => {
             // Check assets migration
             const assets = await page.evaluate((names) => {
                 const assets = window.editor.call('assets:list');
-                return names.map(name => assets.find((asset: any) => asset.get('name') === name).json());
+                return names.map(name => assets.find((asset: Observer) => asset.get('name') === name).json());
             }, [MATERIAL_NAME, TEXTURE_NAME]);
 
             const material = assets[0];
@@ -122,13 +170,13 @@ test.describe('migrations', () => {
             expect(material.data.useTonemap).toBe(false);
             expect(material.data.shader).toBe('blinn');
 
-            // const texture = assets[1];
-            // FIXME: Not enabled yet
-            // expect(texture.data.hasOwnProperty('srgb')).toBe(true);
+            // Check sRGB flag
+            const texture = assets[1];
+            expect(texture.data.hasOwnProperty('srgb')).toBe(true);
 
             // Check entity migration
             const entity = await page.evaluate((name) => {
-                const entity = window.editor.call('entities:list').find((e: any) => e.get('name') === name);
+                const entity = window.editor.call('entities:list').find((e: Observer) => e.get('name') === name);
                 return entity.json();
             }, ENTITY_NAME);
 
@@ -136,12 +184,10 @@ test.describe('migrations', () => {
             expect(entity.components.light.shadowType).toBe(2); // VSM16
 
             // camera
-            // FIXME: Project on V2 so migrations not applied
-            // expect(entity.components.camera.toneMapping).toBe(4); // ACES2
             expect(entity.components.camera.gammaCorrection).toBe(1); // 2.2
 
         });
-        expect(res.errors).toStrictEqual([]);
+        expect(res.errors).toStrictEqual(EXPECTED_ERRORS);
     });
 
     test('delete project', async () => {
@@ -178,17 +224,17 @@ test.describe('publish/download', () => {
 
     test('goto editor (project)', async () => {
         const res = await visitEditor(page, `${projectPath}/editor`, projectId);
-        expect(res.errors).toStrictEqual([]);
+        expect(res.errors).toStrictEqual(EXPECTED_ERRORS);
         expect(res.sceneId).toBeDefined();
         sceneId = res.sceneId;
     });
 
     test('download app', async () => {
-        expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual([]);
+        expect(await downloadProject(page, `${projectPath}/download`, sceneId)).toStrictEqual(EXPECTED_ERRORS);
     });
 
     test('publish app', async () => {
-        expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual([]);
+        expect(await publishProject(page, `${projectPath}/publish`, sceneId)).toStrictEqual(EXPECTED_ERRORS);
     });
 
     test('delete project', async () => {
