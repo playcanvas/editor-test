@@ -29,4 +29,5 @@ const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
 
 export const editorUrl = (projectId: number) => `https://${HOST}/editor/project/${projectId}?${SEARCH_PARAMS}`;
 export const editorSceneUrl = (sceneId: number) => `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`;
+export const codeEditorUrl = (projectId: number) => `https://${HOST}/editor/code/${projectId}?${SEARCH_PARAMS}`;
 export const launchSceneUrl = (sceneId: number) => `https://${LAUNCH_HOST}/${sceneId}?${SEARCH_PARAMS}`;
