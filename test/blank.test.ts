@@ -6,6 +6,7 @@ import {
     downloadProject,
     getSetting,
     publishProject,
+    visitCodeEditor,
     visitEditor,
     visitLauncher
 } from '../lib/common';
@@ -59,6 +60,10 @@ test.describe('create/delete', () => {
         expect(res.errors).toStrictEqual([]);
         expect(res.sceneId).toBeDefined();
         sceneId = res.sceneId;
+    });
+
+    test('goto code editor', async () => {
+        expect(await visitCodeEditor(page, projectId)).toStrictEqual([]);
     });
 
     test('goto launcher', async () => {
