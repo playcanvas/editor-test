@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import { capture } from './capture';
-import { editorProjectUrl, editorSceneUrl, HOST, launchSceneUrl } from './config';
+import { editorUrl, editorSceneUrl, HOST, launchSceneUrl } from './config';
 import { poll, wait } from './utils';
 import { WebInterface } from './web-interface';
 
@@ -124,7 +124,7 @@ export const importProject = async (page: Page, importPath: string) => {
  * @returns The data result.
  */
 export const visitEditor = async (page: Page, projectId: number, callback: (projectId: string) => void = () => {}) => {
-    const projectUrl = editorProjectUrl(projectId);
+    const projectUrl = editorUrl(projectId);
     let sceneId = 0;
     const errors = await capture({
         name: 'Visit Editor',

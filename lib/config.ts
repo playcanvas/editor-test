@@ -27,6 +27,6 @@ const SEARCH_PARAMS = Object.entries(searchParams).map(([key, value]) => {
     return `${key}=${value}`;
 }).join('&');
 
-export const editorProjectUrl = (projectId: number) => `https://${HOST}/editor/project/${projectId}?${SEARCH_PARAMS}`;
+export const editorUrl = (projectId: number) => `https://${HOST}/editor/project/${projectId}?${SEARCH_PARAMS}`;
 export const editorSceneUrl = (sceneId: number) => `https://${HOST}/editor/scene/${sceneId}?${SEARCH_PARAMS}`;
 export const launchSceneUrl = (sceneId: number) => `https://${LAUNCH_HOST}/${sceneId}?${SEARCH_PARAMS}`;

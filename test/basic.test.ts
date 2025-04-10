@@ -82,7 +82,7 @@ PROJECTS.forEach((project) => {
             projectId = res.projectId;
         });
 
-        test('goto editor (project)', async () => {
+        test('goto editor', async () => {
             const res = await visitEditor(page, projectId);
             expect(res.errors).toStrictEqual([]);
             expect(res.sceneId).toBeDefined();
