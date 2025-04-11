@@ -307,7 +307,22 @@ test.describe('version-control', () => {
                     srcBranchClose: true
                 }).promisify();
 
+                console.error('Merge created:', merge.id);
+
+                // Check for conflicts
+                if (merge.conflicts?.length) {
+                    // TODO: Resolve conflicts
+                    // await window.editor.api.globals.rest.conflicts.conflictsResolve({
+                    //     mergeId: merge.id,
+                    //     conflictIds: merge.conflicts.map((conflict) => conflict.itemId),
+                    // });
+                }
+
                 // TODO: Apply merge
+                // await window.editor.api.globals.rest.merge.mergeApply({
+                //     mergeId: merge.id,
+                //     finalize: true
+                // }).promisify();
             }, [mainBranchId, redBranchId]);
         });
         expect(res.errors).toStrictEqual([]);
