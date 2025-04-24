@@ -297,33 +297,98 @@ test.describe('version-control', () => {
         expect(res.sceneId).toBeDefined();
     });
 
+    test('switch to main branch', async () => {
+        const res = await visitEditor(page, projectId, async () => {
+            // Switch to main branch
+            await page.evaluate(async (mainBranchId) => {
+                await window.editor.api.globals.rest.branches.branchCheckout({
+                    branchId: mainBranchId
+                }).promisify();
+            }, mainBranchId);
+
+            // Wait for page to reload
+            await wait(5000);
+            await page.waitForLoadState('networkidle');
+        });
+        expect(res.errors).toStrictEqual([]);
+        expect(res.sceneId).toBeDefined();
+    });
+
     test('merge red branch', async () => {
         const res = await visitEditor(page, projectId, async () => {
             await page.evaluate(async ([mainBranchId, redBranchId]) => {
                 // Create merge
-                const merge = await window.editor.api.globals.rest.merge.mergeCreate({
+                let merge = await window.editor.api.globals.rest.merge.mergeCreate({
                     srcBranchId: redBranchId,
                     dstBranchId: mainBranchId,
                     srcBranchClose: true
                 }).promisify();
 
-                console.error('Merge created:', merge.id);
+                // Get details of the merge
+                merge = await window.editor.api.globals.rest.merge.mergeGet({
+                    mergeId: merge.id
+                }).promisify();
+
+                // Create diff
+                await window.editor.api.globals.rest.diff.diffCreate({
+                    srcBranchId: redBranchId,
+                    dstBranchId: mainBranchId
+                }).promisify();
+
+                // Apply merge
+                await window.editor.api.globals.rest.merge.mergeApply({
+                    mergeId: merge.id,
+                    finalize: true
+                }).promisify();
+            }, [mainBranchId, redBranchId]);
+        });
+        expect(res.errors).toStrictEqual([]);
+        expect(res.sceneId).toBeDefined();
+    });
+
+    test('merge green branch', async () => {
+        const res = await visitEditor(page, projectId, async () => {
+            await page.evaluate(async ([mainBranchId, greenBranchId]) => {
+                // Create merge
+                let merge = await window.editor.api.globals.rest.merge.mergeCreate({
+                    srcBranchId: greenBranchId,
+                    dstBranchId: mainBranchId,
+                    srcBranchClose: true
+                }).promisify();
+
+                // Get details of the merge
+                merge = await window.editor.api.globals.rest.merge.mergeGet({
+                    mergeId: merge.id
+                }).promisify();
 
                 // Check for conflicts
                 if (merge.conflicts?.length) {
-                    // TODO: Resolve conflicts
-                    // await window.editor.api.globals.rest.conflicts.conflictsResolve({
-                    //     mergeId: merge.id,
-                    //     conflictIds: merge.conflicts.map((conflict) => conflict.itemId),
-                    // });
+                    // Resolve conflicts
+                    await window.editor.api.globals.rest.conflicts.conflictsResolve({
+                        mergeId: merge.id,
+                        conflictIds: merge.conflicts.map(conflict => conflict.data.id),
+                        useDst: true
+                    }).promisify();
+
+                    // Apply conflicts
+                    await window.editor.api.globals.rest.merge.mergeApply({
+                        mergeId: merge.id,
+                        finalize: false
+                    }).promisify();
                 }
 
-                // TODO: Apply merge
-                // await window.editor.api.globals.rest.merge.mergeApply({
-                //     mergeId: merge.id,
-                //     finalize: true
-                // }).promisify();
-            }, [mainBranchId, redBranchId]);
+                // Create diff
+                await window.editor.api.globals.rest.diff.diffCreate({
+                    srcBranchId: greenBranchId,
+                    dstBranchId: mainBranchId
+                }).promisify();
+
+                // Apply merge
+                await window.editor.api.globals.rest.merge.mergeApply({
+                    mergeId: merge.id,
+                    finalize: true
+                }).promisify();
+            }, [mainBranchId, greenBranchId]);
         });
         expect(res.errors).toStrictEqual([]);
         expect(res.sceneId).toBeDefined();
