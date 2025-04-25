@@ -176,10 +176,8 @@ test.describe('version-control', () => {
     let mainCheckpointId: string;
 
     let redBranchId: string;
-    let redCheckpointId: string;
 
     let greenBranchId: string;
-    let greenCheckpointId: string;
 
     test.describe.configure({
         mode: 'serial'
@@ -242,19 +240,17 @@ test.describe('version-control', () => {
             await wait(5000);
             await page.waitForLoadState('networkidle');
 
-            redCheckpointId = await page.evaluate(async (materialId) => {
+            await page.evaluate(async (materialId) => {
                 // Set material color RED
                 const material = await window.editor.api.globals.assets.findOne((asset: Observer) => asset.get('id') === materialId);
                 material.set('data.diffuse', [1, 0, 0]);
 
                 // Create checkpoint
-                const checkpoint = await window.editor.api.globals.rest.checkpoints.checkpointCreate({
+                await window.editor.api.globals.rest.checkpoints.checkpointCreate({
                     projectId: window.editor.api.globals.projectId,
                     branchId: window.editor.api.globals.branchId,
                     description: 'RED'
                 }).promisify();
-
-                return checkpoint.id;
             }, materialId);
         });
         expect(res.errors).toStrictEqual([]);
@@ -278,19 +274,17 @@ test.describe('version-control', () => {
             await wait(5000);
             await page.waitForLoadState('networkidle');
 
-            greenCheckpointId = await page.evaluate(async (materialId) => {
+            await page.evaluate(async (materialId) => {
                 // Set material color GREEN
                 const material = await window.editor.api.globals.assets.findOne((asset: Observer) => asset.get('id') === materialId);
                 material.set('data.diffuse', [0, 1, 0]);
 
                 // Create checkpoint
-                const checkpoint = await window.editor.api.globals.rest.checkpoints.checkpointCreate({
+                await window.editor.api.globals.rest.checkpoints.checkpointCreate({
                     projectId: window.editor.api.globals.projectId,
                     branchId: window.editor.api.globals.branchId,
                     description: 'GREEN'
                 }).promisify();
-
-                return checkpoint.id;
             }, materialId);
         });
         expect(res.errors).toStrictEqual([]);
@@ -329,6 +323,22 @@ test.describe('version-control', () => {
                     mergeId: merge.id
                 }).promisify();
 
+                // Check for conflicts
+                if (merge.conflicts?.length) {
+                    // Resolve conflicts
+                    await window.editor.api.globals.rest.conflicts.conflictsResolve({
+                        mergeId: merge.id,
+                        conflictIds: merge.conflicts.flatMap(group => group.data.map(conflict => conflict.id)),
+                        useSrc: true
+                    }).promisify();
+
+                    // Apply conflicts
+                    await window.editor.api.globals.rest.merge.mergeApply({
+                        mergeId: merge.id,
+                        finalize: false
+                    }).promisify();
+                }
+
                 // Create diff
                 await window.editor.api.globals.rest.diff.diffCreate({
                     srcBranchId: redBranchId,
@@ -366,8 +376,8 @@ test.describe('version-control', () => {
                     // Resolve conflicts
                     await window.editor.api.globals.rest.conflicts.conflictsResolve({
                         mergeId: merge.id,
-                        conflictIds: merge.conflicts.map(conflict => conflict.data.id),
-                        useDst: true
+                        conflictIds: merge.conflicts.flatMap(group => group.data.map(conflict => conflict.id)),
+                        useSrc: true
                     }).promisify();
 
                     // Apply conflicts
@@ -394,7 +404,7 @@ test.describe('version-control', () => {
         expect(res.sceneId).toBeDefined();
     });
 
-    // test('delete project', async () => {
-    //     expect(await deleteProject(page, projectId)).toStrictEqual([]);
-    // });
+    test('delete project', async () => {
+        expect(await deleteProject(page, projectId)).toStrictEqual([]);
+    });
 });
