@@ -315,7 +315,7 @@ test.describe('version-control', () => {
                 let merge = await window.editor.api.globals.rest.merge.mergeCreate({
                     srcBranchId: redBranchId,
                     dstBranchId: mainBranchId,
-                    srcBranchClose: true
+                    srcBranchClose: false
                 }).promisify();
 
                 // Get details of the merge
@@ -363,7 +363,7 @@ test.describe('version-control', () => {
                 let merge = await window.editor.api.globals.rest.merge.mergeCreate({
                     srcBranchId: greenBranchId,
                     dstBranchId: mainBranchId,
-                    srcBranchClose: true
+                    srcBranchClose: false
                 }).promisify();
 
                 // Get details of the merge
@@ -399,6 +399,60 @@ test.describe('version-control', () => {
                     finalize: true
                 }).promisify();
             }, [mainBranchId, greenBranchId]);
+        });
+        expect(res.errors).toStrictEqual([]);
+        expect(res.sceneId).toBeDefined();
+    });
+
+    test('restore checkpoint', async () => {
+        const res = await visitEditor(page, projectId, async () => {
+            await page.evaluate(async ([mainBranchId, mainCheckpointId]) => {
+                // Restore checkpoint
+                await window.editor.api.globals.rest.checkpoints.checkpointRestore({
+                    branchId: mainBranchId,
+                    checkpointId: mainCheckpointId
+                }).promisify();
+            }, [mainBranchId, mainCheckpointId]);
+        });
+        expect(res.errors).toStrictEqual([]);
+        expect(res.sceneId).toBeDefined();
+    });
+
+    test('hard reset checkpoint', async () => {
+        const res = await visitEditor(page, projectId, async () => {
+            await page.evaluate(async ([mainBranchId, mainCheckpointId]) => {
+                // Hard reset checkpoint
+                await window.editor.api.globals.rest.checkpoints.checkpointHardReset({
+                    branchId: mainBranchId,
+                    checkpointId: mainCheckpointId
+                }).promisify();
+            }, [mainBranchId, mainCheckpointId]);
+        });
+        expect(res.errors).toStrictEqual([]);
+        expect(res.sceneId).toBeDefined();
+    });
+
+    test('delete red branch', async () => {
+        const res = await visitEditor(page, projectId, async () => {
+            await page.evaluate(async (redBranchId) => {
+                // Delete red branch
+                await window.editor.api.globals.rest.branches.branchDelete({
+                    branchId: redBranchId
+                }).promisify();
+            }, redBranchId);
+        });
+        expect(res.errors).toStrictEqual([]);
+        expect(res.sceneId).toBeDefined();
+    });
+
+    test('delete green branch', async () => {
+        const res = await visitEditor(page, projectId, async () => {
+            await page.evaluate(async (greenBranchId) => {
+                // Delete green branch
+                await window.editor.api.globals.rest.branches.branchDelete({
+                    branchId: greenBranchId
+                }).promisify();
+            }, greenBranchId);
         });
         expect(res.errors).toStrictEqual([]);
         expect(res.sceneId).toBeDefined();
