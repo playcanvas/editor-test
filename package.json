@@ -12,7 +12,7 @@
     "test-ui": "playwright test --ui",
     "test-headed": "playwright test --headed",
     "report": "playwright show-report",
-    "codegen": "playwright codegen --load-storage playwright/.auth/user.json",
+    "codegen": "playwright codegen --load-storage .auth/state.json",
     "home": "tsx src/home.ts",
     "lint": "eslint . --ext .ts,.mjs",
     "typecheck": "tsc --declaration --emitDeclarationOnly"
