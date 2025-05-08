@@ -12,7 +12,7 @@
     "test-ui": "playwright test --ui",
     "test-headed": "playwright test --headed",
     "docker-build": "docker build -t playcanvas/editor-test:latest .",
-    "docker-run": "docker run -it --rm playcanvas/editor-test:latest --name editor-test",
+    "docker-run": "docker run -it --rm --name editor-test playcanvas/editor-test:latest",
     "report": "playwright show-report",
     "codegen": "playwright codegen --load-storage .auth/state.json",
     "home": "tsx src/home.ts",
