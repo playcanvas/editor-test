@@ -49,8 +49,9 @@ export const createProject = async (page: Page, projectName: string, masterProje
                 return;
             }
             if (!masterProjectId && create.id) {
-                // wait 1 second for the project to be created
-                await wait(1000);
+                // FIXME: project creation should be complete after response returned by need to wait
+                // for route to be generated
+                await wait(3000);
 
                 projectId = create.id;
                 return;
