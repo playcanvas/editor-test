@@ -38,20 +38,18 @@ test.describe('settings', () => {
         projectId = res.projectId;
     });
 
-    test('goto editor', async () => {
-        const res = await visitEditor(page, projectId);
+    test('check settings', async () => {
+        const res = await visitEditor(page, projectId, async () => {
+            // open settings
+            await page.getByRole('button', { name: '' }).click();
+
+            // check asset tasks
+            await page.getByText('ASSET TASKS', { exact: true }).click();
+            expect(await getSetting(page, 'Convert to GLB').getAttribute('class')).toContain('pcui-boolean-input-ticked');
+            expect(await getSetting(page, 'Create FBX Folder').getAttribute('class')).toContain('pcui-boolean-input-ticked');
+        });
         expect(res.errors).toStrictEqual([]);
         expect(res.sceneId).toBeDefined();
-    });
-
-    test('open settings', async () => {
-        await page.getByRole('button', { name: '' }).click();
-    });
-
-    test('check asset tasks', async () => {
-        await page.getByText('ASSET TASKS', { exact: true }).click();
-        expect(await getSetting(page, 'Convert to GLB').getAttribute('class')).toContain('pcui-boolean-input-ticked');
-        expect(await getSetting(page, 'Create FBX Folder').getAttribute('class')).toContain('pcui-boolean-input-ticked');
     });
 
     test('delete project', async () => {
