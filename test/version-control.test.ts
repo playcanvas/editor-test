@@ -6,7 +6,7 @@ import {
     createProject,
     deleteProject
 } from '../lib/common';
-import { editorUrl } from '../lib/config';
+import { editorBlankUrl, editorUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 import { wait } from '../lib/utils';
 
@@ -42,10 +42,10 @@ test.describe('checkpoint/diff/merge/conficts', () => {
     });
 
     test('create project', async () => {
-        const res = await createProject(page, PROJECT_NAME);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.projectId).toBeDefined();
-        projectId = res.projectId;
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await createProject(page, PROJECT_NAME);
+        })).toStrictEqual([]);
     });
 
     test('prepare project', async () => {

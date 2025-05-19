@@ -8,7 +8,7 @@ import {
     downloadApp,
     publishApp
 } from '../lib/common';
-import { codeEditorUrl, editorSceneUrl, editorUrl, launchSceneUrl } from '../lib/config';
+import { codeEditorUrl, editorBlankUrl, editorSceneUrl, editorUrl, launchSceneUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const PROJECT_NAME = 'Blank Project';
@@ -37,17 +37,17 @@ test.describe('create/delete', () => {
     });
 
     test('create project', async () => {
-        const res = await createProject(page, PROJECT_NAME);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.projectId).toBeDefined();
-        projectId = res.projectId;
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await createProject(page, PROJECT_NAME);
+        })).toStrictEqual([]);
     });
 
     test('fork project', async () => {
-        const res = await createProject(page, `${PROJECT_NAME} FORK`, projectId);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.projectId).toBeDefined();
-        forkedProjectId = res.projectId;
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            forkedProjectId = await createProject(page, `${PROJECT_NAME} FORK`, projectId);
+        })).toStrictEqual([]);
     });
 
     test('delete forked project', async () => {
@@ -97,10 +97,10 @@ test.describe('publish/download', () => {
     });
 
     test('create project', async () => {
-        const res = await createProject(page, PROJECT_NAME);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.projectId).toBeDefined();
-        projectId = res.projectId;
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await createProject(page, PROJECT_NAME);
+        })).toStrictEqual([]);
     });
 
     test('goto editor', async () => {

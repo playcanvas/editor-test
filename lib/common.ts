@@ -56,33 +56,29 @@ export const pollJob = async (page: Page, jobId: number) => {
  * @returns The data result.
  */
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
-    let projectId = 0;
-    const errors = await capture('create-project', page, async () => {
-        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await injectInterface(page);
+    await injectInterface(page);
 
-        const create = await page.evaluate(({ name, id }) => window.wi.createProject(name, id), {
-            name: projectName,
-            id: masterProjectId
-        });
-        if (create.error) {
-            throw new Error(`Create error: ${create.error}`);
-        }
-        if (!masterProjectId && create.id) {
-            // FIXME: project creation should be complete after response returned by need to wait
-            // for route to be generated
-            await wait(3000);
-
-            projectId = create.id;
-            return;
-        }
-
-        // FIXME: Poll job completion
-        const job = await pollJob(page, create.id);
-
-        projectId = job.data?.forked_id ?? 0;
+    const create = await page.evaluate(({ name, id }) => window.wi.createProject(name, id), {
+        name: projectName,
+        id: masterProjectId
     });
-    return { errors, projectId };
+    if (create.error) {
+        throw new Error(`Create error: ${create.error}`);
+    }
+    if (!masterProjectId && create.id) {
+        // FIXME: project creation should be complete after response returned by need to wait
+        // for route to be generated
+        await wait(3000);
+
+        // Return project id
+        return create.id;
+    }
+
+    // FIXME: Poll job completion
+    const job = await pollJob(page, create.id);
+
+    // Return project id
+    return job.data?.forked_id ?? 0;
 };
 
 /**
