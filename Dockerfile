@@ -9,7 +9,7 @@ RUN cd /temp/dev && npm ci
 FROM base AS run
 COPY --from=install /temp/dev/node_modules ./node_modules
 COPY .auth ./.auth
-COPY .env ./.env
+COPY .env.dev ./.env
 COPY src ./src
 COPY lib ./lib
 COPY test ./test
