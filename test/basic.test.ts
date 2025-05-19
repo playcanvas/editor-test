@@ -1,14 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { capture } from '../lib/capture';
 import {
     createProject,
     deleteProject,
     downloadProject,
     publishProject,
-    visitCodeEditor,
     visitEditor,
     visitLauncher
 } from '../lib/common';
+import { codeEditorUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const PROJECT_NAME = 'Blank Project';
@@ -62,7 +63,9 @@ test.describe('create/delete', () => {
     });
 
     test('goto code editor', async () => {
-        expect(await visitCodeEditor(page, projectId)).toStrictEqual([]);
+        expect(await capture('code-editor', page, async () => {
+            await page.goto(codeEditorUrl(projectId), { waitUntil: 'networkidle' });
+        })).toStrictEqual([]);
     });
 
     test('goto launcher', async () => {
