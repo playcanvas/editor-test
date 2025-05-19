@@ -9,7 +9,7 @@ import { WebInterface } from './web-interface';
  * @param page - The page to inject the interface into.
  */
 export const injectInterface = async (page: Page) => {
-    await page.evaluate(`window.wi = new (${WebInterface.toString()})(window.config)`);
+    await page.evaluate(`window.wi = new (${WebInterface.toString()})()`);
 };
 
 /**
@@ -20,7 +20,10 @@ export const injectInterface = async (page: Page) => {
  * @returns - The div containing the setting.
  */
 export const getSetting = (page: Page, name: string) => {
-    return page.locator('div').filter({ hasText: new RegExp(`^${name}$`) }).locator('div');
+    return page
+    .locator('div')
+    .filter({ hasText: new RegExp(`^${name}$`) })
+    .locator('div');
 };
 
 /**
@@ -56,10 +59,13 @@ export const pollJob = async (page: Page, jobId: number) => {
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
     await injectInterface(page);
 
-    const create = await page.evaluate(({ name, id }) => window.wi.createProject(name, id), {
-        name: projectName,
-        id: masterProjectId
-    });
+    const create = await page.evaluate(
+        ({ name, id }) => window.wi.createProject(window.config.self.username, name, id),
+        {
+            name: projectName,
+            id: masterProjectId
+        }
+    );
     if (create.error) {
         throw new Error(`Create error: ${create.error}`);
     }
@@ -130,7 +136,7 @@ export const importProject = async (page: Page, importPath: string) => {
 
     // Start import
     const fileChooserPromise = page.waitForEvent('filechooser');
-    const importProjectPromise = page.evaluate(() => window.wi.startImport());
+    const importProjectPromise = page.evaluate(() => window.wi.startImport(window.config.self.id));
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(importPath);
     const importProject = await importProjectPromise;
@@ -146,7 +152,7 @@ export const importProject = async (page: Page, importPath: string) => {
 };
 
 const collectSceneIds = async (page: Page, sceneId: number): Promise<number[]> => {
-    const scenes = await page.evaluate(() => window.wi.getScenes());
+    const scenes = await page.evaluate(() => window.wi.getScenes(window.config.project.id));
     if (!scenes.length) {
         throw new Error('Scenes not found');
     }
@@ -173,7 +179,13 @@ export const downloadApp = async (page: Page, sceneId: number) => {
     const sceneIds = await collectSceneIds(page, sceneId);
 
     // Start download
-    const download = await page.evaluate(sceneIds => window.wi.startDownload(sceneIds), sceneIds);
+    const download = await page.evaluate(sceneIds => window.wi.startDownload(
+        'TEST',
+        window.config.project.id,
+        window.config.self.branch.id,
+        sceneIds,
+        window.config.engineVersions.current.version
+    ), sceneIds);
     if (download.error) {
         throw new Error(`Download error: ${download.error}`);
     }
@@ -189,21 +201,27 @@ export const downloadApp = async (page: Page, sceneId: number) => {
  * @param sceneId - The scene id.
  * @returns The errors.
  */
-export const publishApp = async (page: Page, sceneId: number): Promise<{ id: number, url: string }> => {
+export const publishApp = async (page: Page, sceneId: number): Promise<{ id: number; url: string }> => {
     await injectInterface(page);
 
     // Collect scene ids
     const sceneIds = await collectSceneIds(page, sceneId);
 
     // Start publish
-    const app = await page.evaluate(sceneIds => window.wi.startPublish(sceneIds), sceneIds);
+    const app = await page.evaluate(sceneIds => window.wi.startPublish(
+        'TEST',
+        window.config.project.id,
+        window.config.self.branch.id,
+        sceneIds,
+        window.config.engineVersions.current.version
+    ), sceneIds);
     if (app.task.error) {
         throw new Error(`Publish error: ${app.task.error}`);
     }
 
     // Poll publish job
     const job = await poll(async () => {
-        const apps = await page.evaluate(() => window.wi.getApps());
+        const apps = await page.evaluate(() => window.wi.getApps(window.config.project.id));
         const job = apps.find((_app: any) => _app.id === app.id)?.task ?? { error: 'Job not found' };
         if (job.status !== 'running') {
             return job;
