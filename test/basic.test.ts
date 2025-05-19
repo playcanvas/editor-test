@@ -51,7 +51,10 @@ test.describe('create/delete', () => {
     });
 
     test('delete forked project', async () => {
-        expect(await deleteProject(page, forkedProjectId)).toStrictEqual([]);
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, forkedProjectId);
+        })).toStrictEqual([]);
     });
 
     test('goto editor', async () => {
@@ -74,7 +77,10 @@ test.describe('create/delete', () => {
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, projectId)).toStrictEqual([]);
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
     });
 });
 
@@ -134,6 +140,9 @@ test.describe('publish/download', () => {
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, projectId)).toStrictEqual([]);
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
     });
 });

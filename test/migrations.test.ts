@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { capture } from '../lib/capture';
 import { deleteProject, importProject } from '../lib/common';
-import { editorUrl } from '../lib/config';
+import { editorBlankUrl, editorUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const IN_PATH = 'test/fixtures/projects/texture-blank.zip';
@@ -159,6 +159,9 @@ test.describe('migrations', () => {
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, projectId)).toStrictEqual([]);
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
     });
 });

@@ -89,16 +89,12 @@ export const createProject = async (page: Page, projectName: string, masterProje
  * @returns The errors.
  */
 export const deleteProject = async (page: Page, projectId: number) => {
-    const errors = await capture('delete-project', page, async () => {
-        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await injectInterface(page);
+    await injectInterface(page);
 
-        const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
-        if (!success) {
-            throw new Error('Failed to delete project');
-        }
-    });
-    return errors;
+    const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
+    if (!success) {
+        throw new Error('Failed to delete project');
+    }
 };
 
 /**

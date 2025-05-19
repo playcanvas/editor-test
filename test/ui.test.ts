@@ -54,6 +54,9 @@ test.describe('settings', () => {
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, projectId)).toStrictEqual([]);
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
     });
 });
