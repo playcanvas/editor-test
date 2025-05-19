@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import { capture } from './capture';
-import { editorUrl, editorSceneUrl, HOST } from './config';
+import { editorBlankUrl, editorSceneUrl } from './config';
 import { poll, wait } from './utils';
 import { WebInterface } from './web-interface';
 
@@ -34,7 +34,7 @@ export const getSetting = (page: Page, name: string) => {
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
     let projectId = 0;
     const errors = await capture('create-project', page, async (errors) => {
-        await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
         await injectInterface(page);
 
         const create = await page.evaluate(({ name, id }) => window.wi.createProject(name, id), {
@@ -78,7 +78,7 @@ export const createProject = async (page: Page, projectName: string, masterProje
  */
 export const deleteProject = async (page: Page, projectId: number) => {
     const errors = await capture('delete-project', page, async (errors) => {
-        await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
         await injectInterface(page);
 
         const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
@@ -99,7 +99,7 @@ export const deleteProject = async (page: Page, projectId: number) => {
 export const importProject = async (page: Page, importPath: string) => {
     let projectId = 0;
     const errors = await capture('import-project', page, async () => {
-        await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
         await injectInterface(page);
 
         const fileChooserPromise = page.waitForEvent('filechooser');
