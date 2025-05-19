@@ -96,6 +96,29 @@ export const deleteProject = async (page: Page, projectId: number) => {
 };
 
 /**
+ * Delete all projects.
+ *
+ * @param page - The page.
+ */
+export const deleteAllProjects = async (page: Page) => {
+    await injectInterface(page);
+
+    const projects = await page.evaluate(() => window.wi.getProjects(window.config.self.id));
+
+    let deletePromise = Promise.resolve();
+    for (const project of projects) {
+        deletePromise = deletePromise.then(async () => {
+            const success = await page.evaluate(id => window.wi.deleteProject(id), project.id);
+            if (!success) {
+                throw new Error('Failed to delete project');
+            }
+        });
+    }
+
+    await deletePromise;
+};
+
+/**
  * Import a project.
  *
  * @param page - The page.
