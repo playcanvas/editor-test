@@ -3,11 +3,12 @@ import { expect, test, type Page } from '@playwright/test';
 import { capture } from '../lib/capture';
 import {
     createProject,
+    deleteApp,
     deleteProject,
-    downloadProject,
-    publishProject
+    downloadApp,
+    publishApp
 } from '../lib/common';
-import { codeEditorUrl, editorUrl, launchSceneUrl } from '../lib/config';
+import { codeEditorUrl, editorSceneUrl, editorUrl, launchSceneUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const PROJECT_NAME = 'Blank Project';
@@ -110,11 +111,26 @@ test.describe('publish/download', () => {
     });
 
     test('download app', async () => {
-        expect(await downloadProject(page, sceneId)).toStrictEqual([]);
+        expect(await capture('download-project', page, async () => {
+            // download app
+            await page.goto(editorSceneUrl(sceneId), { waitUntil: 'networkidle' });
+            await downloadApp(page, sceneId);
+        })).toStrictEqual([]);
     });
 
     test('publish app', async () => {
-        expect(await publishProject(page, sceneId)).toStrictEqual([]);
+        expect(await capture('publish-project', page, async () => {
+            // publish app
+            await page.goto(editorSceneUrl(sceneId), { waitUntil: 'networkidle' });
+            const app = await publishApp(page, sceneId);
+
+            // launch app
+            await page.goto(app.url, { waitUntil: 'networkidle' });
+
+            // delete app
+            await page.goto(editorSceneUrl(sceneId), { waitUntil: 'networkidle' });
+            await deleteApp(page, app.id);
+        })).toStrictEqual([]);
     });
 
     test('delete project', async () => {

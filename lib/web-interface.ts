@@ -183,7 +183,7 @@ class WebInterface {
      * @param sceneIds - The scene ids
      * @returns The job
      */
-    async startDownload(sceneIds: string[]) {
+    async startDownload(sceneIds: number[]) {
         const res = await this._ajax('POST', `${this._api}/apps/download`, {
             name: 'TEST',
             project_id: this._projectId,
@@ -200,7 +200,7 @@ class WebInterface {
      * @param sceneIds - The scene ids
      * @returns The job
      */
-    async startPublish(sceneIds: string[]) {
+    async startPublish(sceneIds: number[]) {
         const res = await this._ajax('POST', `${this._api}/apps`, {
             name: 'TEST',
             project_id: this._projectId,
@@ -325,7 +325,7 @@ class WebInterface {
      * @param appId - The app id
      * @returns The job
      */
-    async deleteApp(appId: string) {
+    async deleteApp(appId: number) {
         const res = await this._ajax('DELETE', `${this._api}/apps/${appId}`);
         const json = await res.json();
         return json.task ?? { error: 'Job not found' };
@@ -337,7 +337,7 @@ class WebInterface {
      * @param jobId - The job id
      * @returns The task
      */
-    async checkJob(jobId: string) {
+    async checkJob(jobId: number) {
         const res = await this._ajax('GET', `${this._api}/jobs/${jobId}`);
         return await res.json();
     }
