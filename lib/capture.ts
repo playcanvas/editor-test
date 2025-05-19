@@ -3,18 +3,9 @@ import * as fs from 'fs';
 import { type Page, type ConsoleMessage, type Response } from '@playwright/test';
 
 const LOG_FILE = 'out/tests.log';
-const BAR = Array(5).fill('=').join('');
 
 await fs.promises.mkdir('out', { recursive: true });
 await fs.promises.writeFile(LOG_FILE, '');
-
-const header = (name: string) => {
-    return `${BAR} BEGIN (${name}) ${BAR}\n`;
-};
-
-const footer = (name: string) => {
-    return `${BAR} END (${name}) ${BAR}\n`;
-};
 
 /**
  * @param options - Options.
@@ -43,7 +34,7 @@ export const capture = async (name: string, page: Page, fn: (errors: string[]) =
         fs.promises.appendFile(LOG_FILE, `${msgStr}\n`);
     };
 
-    fs.promises.appendFile(LOG_FILE, header(name));
+    fs.promises.appendFile(LOG_FILE, `[capture] START ${name}\n`);
 
     page.on('console', onConsole);
     page.on('pageerror', onPageError);
@@ -55,7 +46,7 @@ export const capture = async (name: string, page: Page, fn: (errors: string[]) =
     page.removeListener('pageerror', onPageError);
     page.removeListener('response', onResponse);
 
-    fs.promises.appendFile(LOG_FILE, footer(name));
+    fs.promises.appendFile(LOG_FILE, `[capture] END ${name}\n`);
 
     return errors;
 };
