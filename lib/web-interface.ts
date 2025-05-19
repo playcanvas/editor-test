@@ -111,7 +111,7 @@ class WebInterface {
      * @param view - The view
      * @returns The projects
      */
-    async getProjects(userId: string, view: string = '') {
+    async getProjects(userId: number, view: string = '') {
         const res = await this._ajax('GET', `${this._api}/users/${userId}/projects?view=${view}`, undefined, false);
         const json = await res.json();
         return json.result ?? [];
