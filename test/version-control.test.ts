@@ -1,11 +1,12 @@
 import { type Observer } from '@playcanvas/observer';
 import { expect, test, type Page } from '@playwright/test';
 
+import { capture } from '../lib/capture';
 import {
     createProject,
-    deleteProject,
-    visitEditor
+    deleteProject
 } from '../lib/common';
+import { editorBlankUrl, editorUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 import { wait } from '../lib/utils';
 
@@ -41,14 +42,16 @@ test.describe('checkpoint/diff/merge/conficts', () => {
     });
 
     test('create project', async () => {
-        const res = await createProject(page, PROJECT_NAME);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.projectId).toBeDefined();
-        projectId = res.projectId;
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await createProject(page, PROJECT_NAME);
+        })).toStrictEqual([]);
     });
 
     test('prepare project', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             [materialId, mainBranchId, mainCheckpointId] = await page.evaluate(async () => {
                 // Setup material
                 const material = await window.editor.api.globals.assets.createMaterial({ name: 'TEST_MATERIAL' });
@@ -66,14 +69,15 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                     checkpoint.id
                 ];
             });
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('create red branch', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             redBranchId = await page.evaluate(async ([mainBranchId, mainCheckpointId]) => {
+                // Create red branch
                 const branch = await window.editor.api.globals.rest.branches.branchCreate({
                     name: 'red',
                     projectId: window.editor.api.globals.projectId,
@@ -100,14 +104,15 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                     description: 'RED'
                 }).promisify();
             }, materialId);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('create green branch', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             greenBranchId = await page.evaluate(async ([mainBranchId, mainCheckpointId]) => {
+                // Create green branch
                 const branch = await window.editor.api.globals.rest.branches.branchCreate({
                     name: 'green',
                     projectId: window.editor.api.globals.projectId,
@@ -134,13 +139,13 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                     description: 'GREEN'
                 }).promisify();
             }, materialId);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('switch to main branch', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             // Switch to main branch
             await page.evaluate(async (mainBranchId) => {
                 await window.editor.api.globals.rest.branches.branchCheckout({
@@ -151,13 +156,13 @@ test.describe('checkpoint/diff/merge/conficts', () => {
             // Wait for page to reload
             await wait(5000);
             await page.waitForLoadState('networkidle');
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('merge red branch', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             await page.evaluate(async ([mainBranchId, redBranchId]) => {
                 // Create merge
                 let merge = await window.editor.api.globals.rest.merge.mergeCreate({
@@ -199,13 +204,13 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                     finalize: true
                 }).promisify();
             }, [mainBranchId, redBranchId]);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('merge green branch', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             await page.evaluate(async ([mainBranchId, greenBranchId]) => {
                 // Create merge
                 let merge = await window.editor.api.globals.rest.merge.mergeCreate({
@@ -247,13 +252,13 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                     finalize: true
                 }).promisify();
             }, [mainBranchId, greenBranchId]);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('restore checkpoint', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             await page.evaluate(async ([mainBranchId, mainCheckpointId]) => {
                 // Restore checkpoint
                 await window.editor.api.globals.rest.checkpoints.checkpointRestore({
@@ -261,13 +266,13 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                     checkpointId: mainCheckpointId
                 }).promisify();
             }, [mainBranchId, mainCheckpointId]);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('hard reset checkpoint', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             await page.evaluate(async ([mainBranchId, mainCheckpointId]) => {
                 // Hard reset checkpoint
                 await window.editor.api.globals.rest.checkpoints.checkpointHardReset({
@@ -275,38 +280,39 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                     checkpointId: mainCheckpointId
                 }).promisify();
             }, [mainBranchId, mainCheckpointId]);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('delete red branch', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             await page.evaluate(async (redBranchId) => {
                 // Delete red branch
                 await window.editor.api.globals.rest.branches.branchDelete({
                     branchId: redBranchId
                 }).promisify();
             }, redBranchId);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('delete green branch', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             await page.evaluate(async (greenBranchId) => {
                 // Delete green branch
                 await window.editor.api.globals.rest.branches.branchDelete({
                     branchId: greenBranchId
                 }).promisify();
             }, greenBranchId);
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, projectId)).toStrictEqual([]);
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
     });
 });

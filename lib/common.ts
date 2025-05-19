@@ -1,7 +1,5 @@
 import { type Page } from '@playwright/test';
 
-import { capture } from './capture';
-import { editorUrl, editorSceneUrl, HOST, launchSceneUrl, codeEditorUrl } from './config';
 import { poll, wait } from './utils';
 import { WebInterface } from './web-interface';
 
@@ -11,16 +9,43 @@ import { WebInterface } from './web-interface';
  * @param page - The page to inject the interface into.
  */
 export const injectInterface = async (page: Page) => {
-    await page.evaluate(`window.wi = new (${WebInterface.toString()})(window.config)`);
+    await page.evaluate(`window.wi = new (${WebInterface.toString()})()`);
 };
 
 /**
+ * Find a setting by name.
+ *
  * @param page - The page to search in.
  * @param name - The name of the setting to find.
  * @returns - The div containing the setting.
  */
 export const getSetting = (page: Page, name: string) => {
-    return page.locator('div').filter({ hasText: new RegExp(`^${name}$`) }).locator('div');
+    return page
+    .locator('div')
+    .filter({ hasText: new RegExp(`^${name}$`) })
+    .locator('div');
+};
+
+/**
+ * Polls for a job to complete.
+ *
+ * @param page - The page to poll.
+ * @param jobId - The job id to poll.
+ * @returns The job result.
+ */
+export const pollJob = async (page: Page, jobId: number) => {
+    const job = await poll(async () => {
+        const job = await page.evaluate(jobId => window.wi.checkJob(jobId), jobId);
+        if (job.status !== 'running') {
+            return job;
+        }
+    });
+    if (job.error) {
+        throw new Error(`Job error: ${job.error}`);
+    } else if (job.status !== 'complete') {
+        throw new Error(`Job status: ${job.status}`);
+    }
+    return job;
 };
 
 /**
@@ -32,274 +57,32 @@ export const getSetting = (page: Page, name: string) => {
  * @returns The data result.
  */
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
-    let projectId = 0;
-    const errors = await capture({
-        name: 'Create Project',
-        page,
-        callback: async (errors) => {
-            await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
-            await injectInterface(page);
+    await injectInterface(page);
 
-            const create = await page.evaluate(({ name, id }) => window.wi.createProject(name, id), {
-                name: projectName,
-                id: masterProjectId
-            });
-            if (create.error) {
-                errors.push(`[CREATE PROJECT ERROR] ${create.error}`);
-                return;
-            }
-            if (!masterProjectId && create.id) {
-                // FIXME: project creation should be complete after response returned by need to wait
-                // for route to be generated
-                await wait(3000);
-
-                projectId = create.id;
-                return;
-            }
-            const job = await poll(async () => {
-                const job = await page.evaluate(jobId => window.wi.checkJob(jobId), create.id);
-                if (job.status !== 'running') {
-                    return job;
-                }
-            });
-            if (job.error) {
-                errors.push(`[JOB ERROR] ${job.error}`);
-            } else if (job.status !== 'complete') {
-                errors.push(`[JOB STATUS] ${job.status}`);
-            }
-            projectId = job.data?.forked_id ?? 0;
+    const create = await page.evaluate(
+        ({ name, id }) => window.wi.createProject(window.config.self.username, name, id),
+        {
+            name: projectName,
+            id: masterProjectId
         }
-    });
-    return { errors, projectId };
-};
+    );
+    if (create.error) {
+        throw new Error(`Create error: ${create.error}`);
+    }
+    if (!masterProjectId && create.id) {
+        // FIXME: project creation should be complete after response returned by need to wait
+        // for route to be generated
+        await wait(3000);
 
-/**
- * Import a project.
- *
- * @param page - The page.
- * @param importPath - The path to the import file.
- * @returns The data result.
- */
-export const importProject = async (page: Page, importPath: string) => {
-    let projectId = 0;
-    const errors = await capture({
-        name: 'Import Project',
-        page,
-        callback: async () => {
-            await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
-            await injectInterface(page);
+        // Return project id
+        return create.id;
+    }
 
-            const fileChooserPromise = page.waitForEvent('filechooser');
-            const importProjectPromise = page.evaluate(() => window.wi.startImport());
-            const fileChooser = await fileChooserPromise;
-            await fileChooser.setFiles(importPath);
-            const importProject = await importProjectPromise;
-            if (importProject.error) {
-                errors.push(`[IMPORT ERROR] ${importProject.error}`);
-                return;
-            }
+    // FIXME: Poll job completion
+    const job = await pollJob(page, create.id);
 
-            const job = await poll(async () => {
-                const job = await page.evaluate(jobId => window.wi.checkJob(jobId), importProject.id);
-                if (job.status !== 'running') {
-                    return job;
-                }
-            });
-            if (job.error) {
-                errors.push(`[JOB ERROR] ${job.error}`);
-            } else if (job.status !== 'complete') {
-                errors.push(`[JOB STATUS] ${job.status}`);
-            }
-            projectId = job.data?.project_id ?? 0;
-        }
-    });
-    return { errors, projectId };
-};
-
-/**
- * Visit the editor.
- *
- * @param page - The page.
- * @param projectId - The project id.
- * @param callback - The callback
- * @returns The data result.
- */
-export const visitEditor = async (page: Page, projectId: number, callback: (projectId: string) => void = () => {}) => {
-    const projectUrl = editorUrl(projectId);
-    let sceneId = 0;
-    const errors = await capture({
-        name: 'Visit Editor',
-        page,
-        callback: async () => {
-            await page.goto(projectUrl, { waitUntil: 'networkidle' });
-            await page.waitForURL('**/scene/**');
-            sceneId = parseInt(/scene\/(\d+)/.exec(page.url())?.[1] ?? '', 10) || 0;
-            await callback(projectUrl);
-        }
-    });
-    return { errors, sceneId };
-};
-
-/**
- * Visit the editor.
- *
- * @param page - The page.
- * @param projectId - The project id.
- * @param callback - The callback
- * @returns The data result.
- */
-export const visitCodeEditor = async (page: Page, projectId: number, callback: (projectId: string) => void = () => {}) => {
-    const projectUrl = codeEditorUrl(projectId);
-    const errors = await capture({
-        name: 'Visit Code Editor',
-        page,
-        callback: async () => {
-            await page.goto(projectUrl, { waitUntil: 'networkidle' });
-            await callback(projectUrl);
-        }
-    });
-    return errors;
-};
-
-/**
- * Visit the launcher.
- *
- * @param page - The page.
- * @param sceneId - The scene id.
- * @param callback - The callback.
- * @returns The errors.
- */
-export const visitLauncher = async (page: Page, sceneId: number, callback: (sceneLaunchUrl: string) => void = () => {}) => {
-    const sceneLaunchUrl = launchSceneUrl(sceneId);
-    const errors = await capture({
-        name: 'Visit Launcher',
-        page,
-        callback: async () => {
-            await page.goto(sceneLaunchUrl, { waitUntil: 'networkidle' });
-            await callback(sceneLaunchUrl);
-        }
-    });
-    return errors;
-};
-
-/**
- * Download a project.
- *
- * @param page - The page.
- * @param sceneId - The scene id.
- * @returns The errors.
- */
-export const downloadProject = async (page: Page, sceneId: number) => {
-    const sceneUrl = editorSceneUrl(sceneId);
-    const errors = await capture({
-        name: 'Download Project',
-        page,
-        callback: async (errors) => {
-            await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-            await injectInterface(page);
-
-            const scenes = await page.evaluate(() => window.wi.getScenes());
-            if (!scenes.length) {
-                errors.push('[FETCH ERROR] Scenes not found');
-                return;
-            }
-            const sceneIds = scenes
-            .map((scene: any) => scene.id)
-            .sort((a: number, b: number) => {
-                if (a === sceneId) return -1;
-                if (b === sceneId) return 1;
-                return 0;
-            });
-
-            const download = await page.evaluate(sceneIds => window.wi.startDownload(sceneIds), sceneIds);
-            if (download.error) {
-                errors.push(`[JOB ERROR] ${download.error}`);
-                return;
-            }
-
-            const job = await poll(async () => {
-                const job = await page.evaluate(jobId => window.wi.checkJob(jobId), download.id);
-                if (job.status !== 'running') {
-                    return job;
-                }
-            });
-            if (job.error) {
-                errors.push(`[JOB ERROR] ${job.error}`);
-            } else if (job.status !== 'complete') {
-                errors.push(`[JOB STATUS] ${job.status}`);
-            }
-        }
-    });
-    return errors;
-};
-
-/**
- * Publish a project.
- *
- * @param page - The page.
- * @param sceneId - The scene id.
- * @returns The errors.
- */
-export const publishProject = async (page: Page, sceneId: number) => {
-    const sceneUrl = editorSceneUrl(sceneId);
-    const errors = await capture({
-        name: 'Publish Project',
-        page,
-        callback: async (errors) => {
-            await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-            await injectInterface(page);
-
-            const scenes = await page.evaluate(() => window.wi.getScenes());
-            if (!scenes.length) {
-                errors.push('[FETCH ERROR] Scenes not found');
-                return;
-            }
-            const sceneIds = scenes
-            .map((scene: any) => scene.id)
-            .sort((a: number, b: number) => {
-                if (a === sceneId) return -1;
-                if (b === sceneId) return 1;
-                return 0;
-            });
-
-            const app = await page.evaluate(sceneIds => window.wi.startPublish(sceneIds), sceneIds);
-            if (app.task.error) {
-                errors.push(`[JOB ERROR] ${app.task.error}`);
-                return;
-            }
-
-            const job = await poll(async () => {
-                const apps = await page.evaluate(() => window.wi.getApps());
-                const job = apps.find((_app: any) => _app.id === app.id)?.task ?? { error: 'Job not found' };
-                if (job.status !== 'running') {
-                    return job;
-                }
-            });
-
-            if (job.error) {
-                errors.push(`[JOB ERROR] ${job.error}`);
-            } else if (job.status !== 'complete') {
-                errors.push(`[JOB STATUS] ${job.status}`);
-            }
-            if (errors.length) {
-                return;
-            }
-
-            // launch app
-            await page.goto(app.url, { waitUntil: 'networkidle' });
-
-            // delete app
-            await page.goto(sceneUrl, { waitUntil: 'networkidle' });
-            await injectInterface(page);
-            const delJob = await page.evaluate(appId => window.wi.deleteApp(appId), app.id);
-            if (delJob.error) {
-                errors.push(`[JOB ERROR] ${delJob.error}`);
-            } else if (delJob.status !== 'complete') {
-                errors.push(`[JOB STATUS] ${delJob.status}`);
-            }
-        }
-    });
-    return errors;
+    // Return project id
+    return job.data?.forked_id ?? 0;
 };
 
 /**
@@ -310,18 +93,164 @@ export const publishProject = async (page: Page, sceneId: number) => {
  * @returns The errors.
  */
 export const deleteProject = async (page: Page, projectId: number) => {
-    const errors = await capture({
-        name: 'Delete Project',
-        page,
-        callback: async (errors) => {
-            await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
-            await injectInterface(page);
+    await injectInterface(page);
 
-            const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
+    const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
+    if (!success) {
+        throw new Error('Failed to delete project');
+    }
+};
+
+/**
+ * Delete all projects.
+ *
+ * @param page - The page.
+ */
+export const deleteAllProjects = async (page: Page) => {
+    await injectInterface(page);
+
+    const projects = await page.evaluate(() => window.wi.getProjects(window.config.self.id));
+
+    let deletePromise = Promise.resolve();
+    for (const project of projects) {
+        deletePromise = deletePromise.then(async () => {
+            const success = await page.evaluate(id => window.wi.deleteProject(id), project.id);
             if (!success) {
-                errors.push(`[DELETE ERROR] ${projectId}`);
+                throw new Error('Failed to delete project');
             }
+        });
+    }
+
+    await deletePromise;
+};
+
+/**
+ * Import a project.
+ *
+ * @param page - The page.
+ * @param importPath - The path to the import file.
+ * @returns The data result.
+ */
+export const importProject = async (page: Page, importPath: string) => {
+    await injectInterface(page);
+
+    // Start import
+    const fileChooserPromise = page.waitForEvent('filechooser');
+    const importProjectPromise = page.evaluate(() => window.wi.startImport(window.config.self.id));
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles(importPath);
+    const importProject = await importProjectPromise;
+    if (importProject.error) {
+        throw new Error(`Import error: ${importProject.error}`);
+    }
+
+    // FIXME: Poll job completion
+    const job = await pollJob(page, importProject.id);
+
+    // Return project id
+    return job.data?.project_id ?? 0;
+};
+
+const collectSceneIds = async (page: Page, sceneId: number): Promise<number[]> => {
+    const scenes = await page.evaluate(() => window.wi.getScenes(window.config.project.id));
+    if (!scenes.length) {
+        throw new Error('Scenes not found');
+    }
+    return scenes
+    .map((scene: any) => scene.id)
+    .sort((a: number, b: number) => {
+        if (a === sceneId) return -1;
+        if (b === sceneId) return 1;
+        return 0;
+    });
+};
+
+/**
+ * Download project app.
+ *
+ * @param page - The page.
+ * @param sceneId - The scene id.
+ * @returns The errors.
+ */
+export const downloadApp = async (page: Page, sceneId: number) => {
+    await injectInterface(page);
+
+    // Collect scene ids
+    const sceneIds = await collectSceneIds(page, sceneId);
+
+    // Start download
+    const download = await page.evaluate(sceneIds => window.wi.startDownload(
+        'TEST',
+        window.config.project.id,
+        window.config.self.branch.id,
+        sceneIds,
+        window.config.engineVersions.current.version
+    ), sceneIds);
+    if (download.error) {
+        throw new Error(`Download error: ${download.error}`);
+    }
+
+    // FIXME: Poll job completion
+    await pollJob(page, download.id);
+};
+
+/**
+ * Publish a project app.
+ *
+ * @param page - The page.
+ * @param sceneId - The scene id.
+ * @returns The errors.
+ */
+export const publishApp = async (page: Page, sceneId: number): Promise<{ id: number; url: string }> => {
+    await injectInterface(page);
+
+    // Collect scene ids
+    const sceneIds = await collectSceneIds(page, sceneId);
+
+    // Start publish
+    const app = await page.evaluate(sceneIds => window.wi.startPublish(
+        'TEST',
+        window.config.project.id,
+        window.config.self.branch.id,
+        sceneIds,
+        window.config.engineVersions.current.version
+    ), sceneIds);
+    if (app.task.error) {
+        throw new Error(`Publish error: ${app.task.error}`);
+    }
+
+    // Poll publish job
+    const job = await poll(async () => {
+        const apps = await page.evaluate(() => window.wi.getApps(window.config.project.id));
+        const job = apps.find((_app: any) => _app.id === app.id)?.task ?? { error: 'Job not found' };
+        if (job.status !== 'running') {
+            return job;
         }
     });
-    return errors;
+    if (job.error) {
+        throw new Error(`Job error: ${job.error}`);
+    } else if (job.status !== 'complete') {
+        throw new Error(`Job status: ${job.status}`);
+    }
+
+    // Return app data
+    return {
+        id: app.id,
+        url: app.url
+    };
+};
+
+/**
+ * Delete an app.
+ *
+ * @param page - The page.
+ * @param appId - The app id.
+ */
+export const deleteApp = async (page: Page, appId: number) => {
+    await injectInterface(page);
+
+    const delJob = await page.evaluate(appId => window.wi.deleteApp(appId), appId);
+    if (delJob.error) {
+        throw new Error(`Delete error: ${delJob.error}`);
+    }
 };

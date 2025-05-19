@@ -1,18 +1,4 @@
 class WebInterface {
-    private _api = '/api';
-
-    private _token: string = window.config.accessToken;
-
-    private _userId: string = window.config.self.id;
-
-    private _username: string = window.config.self.username;
-
-    private _projectId: string = window.config.project.id;
-
-    private _branchId: string = window.config.self.branch.id;
-
-    private _engineVersion: string = window.config.engineVersions.current.version;
-
     /**
      * @param method - The method
      * @param url - The URL
@@ -23,7 +9,7 @@ class WebInterface {
      */
     private async _ajax(method: string, url: string, data?: object | FormData, auth: boolean = true, retries = 5): Promise<Response> {
         const headers = {
-            Authorization: `Bearer ${this._token}`,
+            Authorization: `Bearer ${window.config.accessToken}`,
             'Content-Type': 'application/json'
         };
         let body;
@@ -54,53 +40,13 @@ class WebInterface {
     }
 
     /**
-     * Set custom API and token
-     *
-     * @param options - The options
-     * @param options.api - The API endpoint
-     * @param options.token - The access token
-     * @param options.userId - The user id
-     * @param options.username - The user name
-     * @param options.projectId - The project id
-     * @param options.branchId - The branch id
-     * @param options.engineVersion - The engine version
-     * @returns The instance
-     */
-    with({
-        api,
-        token,
-        userId,
-        username,
-        projectId,
-        branchId,
-        engineVersion
-    }: {
-        api?: string;
-        token?: string;
-        userId?: string;
-        username?: string;
-        projectId?: string;
-        branchId?: string;
-        engineVersion?: string;
-    } = {}) {
-        this._api = api ?? this._api;
-        this._token = token ?? this._token;
-        this._userId = userId ?? this._userId;
-        this._username = username ?? this._username;
-        this._projectId = projectId ?? this._projectId;
-        this._branchId = branchId ?? this._branchId;
-        this._engineVersion = engineVersion ?? this._engineVersion;
-        return this;
-    }
-
-    /**
      * Get the user
      *
      * @param name - The user name
      * @returns The user
      */
     async getUser(name: string) {
-        const res = await this._ajax('GET', `${this._api}/users/${name}`, undefined, false);
+        const res = await this._ajax('GET', `/api/users/${name}`, undefined, false);
         return await res.json();
     }
 
@@ -111,8 +57,8 @@ class WebInterface {
      * @param view - The view
      * @returns The projects
      */
-    async getProjects(userId: string, view: string = '') {
-        const res = await this._ajax('GET', `${this._api}/users/${userId}/projects?view=${view}`, undefined, false);
+    async getProjects(userId: number, view: string = '') {
+        const res = await this._ajax('GET', `/api/users/${userId}/projects?view=${view}`, undefined, false);
         const json = await res.json();
         return json.result ?? [];
     }
@@ -123,8 +69,8 @@ class WebInterface {
      * @param projectId - The project id
      * @returns The project
      */
-    async getProject(projectId?: number) {
-        const res = await this._ajax('GET', `${this._api}/projects/${projectId ?? this._projectId}`, undefined, true);
+    async getProject(projectId: number) {
+        const res = await this._ajax('GET', `/api/projects/${projectId}`, undefined, true);
         return await res.json();
     }
 
@@ -134,8 +80,8 @@ class WebInterface {
      * @param projectId - The project id
      * @returns The project
      */
-    async getApps(projectId?: number) {
-        const res = await this._ajax('GET', `${this._api}/projects/${projectId ?? this._projectId}/apps?limit=0`);
+    async getApps(projectId: number) {
+        const res = await this._ajax('GET', `/api/projects/${projectId}/apps?limit=0`);
         const json = await res.json();
         return json.result ?? [];
     }
@@ -146,8 +92,8 @@ class WebInterface {
      * @param projectId - The project id
      * @returns The scenes
      */
-    async getScenes(projectId?: number) {
-        const res = await this._ajax('GET', `${this._api}/projects/${projectId ?? this._projectId}/scenes`);
+    async getScenes(projectId: number) {
+        const res = await this._ajax('GET', `/api/projects/${projectId}/scenes`);
         const json = await res.json();
         return json.result ?? [];
     }
@@ -156,13 +102,13 @@ class WebInterface {
      * Creates the project
      *
      * @param name - The name
-     * @param projectId - The project id
+     * @param projectId - The project id to fork from
      * @returns The project
      */
-    async createProject(name: string, projectId?: number) {
+    async createProject(username: string, name: string, projectId?: number) {
         const data: Record<string, any> = {
             name,
-            owner: this._username
+            owner: username
         };
 
         if (projectId) {
@@ -173,7 +119,7 @@ class WebInterface {
             data.settings = project.settings;
         }
 
-        const res = await this._ajax('POST', `${this._api}/projects`, data, true);
+        const res = await this._ajax('POST', '/api/projects', data, true);
         return await res.json();
     }
 
@@ -183,13 +129,13 @@ class WebInterface {
      * @param sceneIds - The scene ids
      * @returns The job
      */
-    async startDownload(sceneIds: string[]) {
-        const res = await this._ajax('POST', `${this._api}/apps/download`, {
-            name: 'TEST',
-            project_id: this._projectId,
-            branch_id: this._branchId,
+    async startDownload(name: string, projectId: number, branchId: string, sceneIds: number[], engineVersion: string) {
+        const res = await this._ajax('POST', '/api/apps/download', {
+            name: name,
+            project_id: projectId,
+            branch_id: branchId,
             scenes: sceneIds,
-            engine_version: this._engineVersion
+            engine_version: engineVersion
         });
         return await res.json();
     }
@@ -200,13 +146,13 @@ class WebInterface {
      * @param sceneIds - The scene ids
      * @returns The job
      */
-    async startPublish(sceneIds: string[]) {
-        const res = await this._ajax('POST', `${this._api}/apps`, {
-            name: 'TEST',
-            project_id: this._projectId,
-            branch_id: this._branchId,
+    async startPublish(name: string, projectId: number, branchId: string, sceneIds: number[], engineVersion: string) {
+        const res = await this._ajax('POST', '/api/apps', {
+            name: name,
+            project_id: projectId,
+            branch_id: branchId,
             scenes: sceneIds,
-            engine_version: this._engineVersion
+            engine_version: engineVersion
         });
         return await res.json();
     }
@@ -222,13 +168,13 @@ class WebInterface {
         const chunkCount = Math.ceil(file.size / chunkSize);
 
         // start upload
-        const startRes = await this._ajax('POST', `${this._api}/upload/start-upload`, {
+        const startRes = await this._ajax('POST', '/api/upload/start-upload', {
             fileName: file.name
         }, true);
         const startJson = await startRes.json();
 
         // get signed urls
-        const signedRes = await this._ajax('POST', `${this._api}/upload/signed-urls`, {
+        const signedRes = await this._ajax('POST', '/api/upload/signed-urls', {
             uploadId: startJson.uploadId,
             parts: chunkCount,
             key: startJson.key
@@ -263,7 +209,7 @@ class WebInterface {
         }
 
         // complete upload
-        await this._ajax('POST', `${this._api}/upload/complete-upload`, {
+        await this._ajax('POST', '/api/upload/complete-upload', {
             uploadId: startJson.uploadId,
             parts: parts,
             key: startJson.key
@@ -277,7 +223,7 @@ class WebInterface {
      *
      * @returns The job
      */
-    async startImport() {
+    async startImport(userId: number) {
         const filePicker = document.createElement('input');
         filePicker.id = 'file-picker';
         filePicker.type = 'file';
@@ -301,9 +247,9 @@ class WebInterface {
         const s3Key = await this.uploadProject(files[0]);
 
         // import project
-        const res = await this._ajax('POST', `${this._api}/projects/import`, {
+        const res = await this._ajax('POST', '/api/projects/import', {
             export_url: s3Key,
-            owner: this._userId
+            owner: userId
         });
         return await res.json();
     }
@@ -314,8 +260,8 @@ class WebInterface {
      * @param projectId - The project id
      * @returns Whether the project was deleted
      */
-    async deleteProject(projectId?: number) {
-        const res = await this._ajax('DELETE', `${this._api}/projects/${projectId ?? this._projectId}`, undefined, true);
+    async deleteProject(projectId: number) {
+        const res = await this._ajax('DELETE', `/api/projects/${projectId}`, undefined, true);
         return res.status === 200;
     }
 
@@ -325,8 +271,8 @@ class WebInterface {
      * @param appId - The app id
      * @returns The job
      */
-    async deleteApp(appId: string) {
-        const res = await this._ajax('DELETE', `${this._api}/apps/${appId}`);
+    async deleteApp(appId: number) {
+        const res = await this._ajax('DELETE', `/api/apps/${appId}`);
         const json = await res.json();
         return json.task ?? { error: 'Job not found' };
     }
@@ -337,8 +283,8 @@ class WebInterface {
      * @param jobId - The job id
      * @returns The task
      */
-    async checkJob(jobId: string) {
-        const res = await this._ajax('GET', `${this._api}/jobs/${jobId}`);
+    async checkJob(jobId: number) {
+        const res = await this._ajax('GET', `/api/jobs/${jobId}`);
         return await res.json();
     }
 }

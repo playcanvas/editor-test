@@ -1,7 +1,9 @@
 import type { Observer } from '@playcanvas/observer';
 import { expect, test, type Page } from '@playwright/test';
 
-import { deleteProject, importProject, visitEditor } from '../lib/common';
+import { capture } from '../lib/capture';
+import { deleteProject, importProject } from '../lib/common';
+import { editorBlankUrl, editorUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const IN_PATH = 'test/fixtures/projects/texture-blank.zip';
@@ -32,14 +34,16 @@ test.describe('migrations', () => {
     });
 
     test('import project', async () => {
-        const res = await importProject(page, IN_PATH);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.projectId).toBeDefined();
-        projectId = res.projectId;
+        expect(await capture('import-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await importProject(page, IN_PATH);
+        })).toStrictEqual([]);
     });
 
     test('prepare project', async () => {
-        await visitEditor(page, projectId);
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+        })).toStrictEqual([]);
 
         [textureId, materialId] = await page.evaluate(async (textureName) => {
             // Fetch Texture
@@ -89,7 +93,9 @@ test.describe('migrations', () => {
     });
 
     test('check migrations', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             // Check project settings migration
             const projectSettings = await page.evaluate(() => {
                 return window.editor.call('settings:project').json();
@@ -132,9 +138,7 @@ test.describe('migrations', () => {
             });
             expect(root.components.light.shadowType).toBe(2); // VSM16
             expect(root.components.camera.gammaCorrection).toBe(1); // 2.2
-
-        });
-        expect(res.errors).toContain(TEXTURE_ERROR);
+        })).toContain(TEXTURE_ERROR);
     });
 
     test('fix sRGB conflicts', async () => {
@@ -149,11 +153,15 @@ test.describe('migrations', () => {
         }, textureId);
 
         // Check for errors
-        const res = await visitEditor(page, projectId);
-        expect(res.errors).toStrictEqual([]);
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+        })).toStrictEqual([]);
     });
 
     test('delete project', async () => {
-        expect(await deleteProject(page, projectId)).toStrictEqual([]);
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
     });
 });

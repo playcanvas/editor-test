@@ -19,6 +19,7 @@ const queryString = (params: SearchParams) => {
     }).join('&');
 };
 
+export const editorBlankUrl = (params: SearchParams = {}) => `https://${HOST}/editor?${queryString(params)}`;
 export const editorUrl = (projectId: number, params: SearchParams = {}) => `https://${HOST}/editor/project/${projectId}?${queryString(params)}`;
 export const editorSceneUrl = (sceneId: number, params: SearchParams = {}) => `https://${HOST}/editor/scene/${sceneId}?${queryString(params)}`;
 export const codeEditorUrl = (projectId: number, params: SearchParams = {}) => `https://${HOST}/editor/code/${projectId}?${queryString(params)}`;

@@ -1,22 +1,13 @@
-import { test as setup, expect } from '@playwright/test';
+import { test as setup } from '@playwright/test';
 
-import { injectInterface } from '../lib/common';
-import { HOST } from '../lib/config';
+import { deleteAllProjects } from '../lib/common';
+import { editorBlankUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 setup('removing old projects', async ({ page }) => {
     await middleware(page.context());
-    await page.goto(`https://${HOST}/editor`);
-    await injectInterface(page);
 
-    const projects = await page.evaluate(() => window.wi.getProjects(window.config.self.id));
-
-    let deletePromise = Promise.resolve();
-    for (const project of projects) {
-        deletePromise = deletePromise.then(async () => {
-            expect(await page.evaluate(id => window.wi.deleteProject(id), project.id)).toBe(true);
-        });
-    }
-
-    await deletePromise;
+    // Delete all projects
+    await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+    await deleteAllProjects(page);
 });

@@ -2,25 +2,10 @@ import * as fs from 'fs';
 
 import { type Page, type ConsoleMessage, type Response } from '@playwright/test';
 
-type CaptureOptions = {
-    page: Page,
-    name: string,
-    callback: (errors: string[]) => Promise<void>,
-}
-
 const LOG_FILE = 'out/tests.log';
-const BAR = Array(5).fill('=').join('');
 
 await fs.promises.mkdir('out', { recursive: true });
 await fs.promises.writeFile(LOG_FILE, '');
-
-const header = (name: string) => {
-    return `${BAR} BEGIN (${name}) ${BAR}\n`;
-};
-
-const footer = (name: string) => {
-    return `${BAR} END (${name}) ${BAR}\n`;
-};
 
 /**
  * @param options - Options.
@@ -29,7 +14,7 @@ const footer = (name: string) => {
  * @param options.callback - The function to run.
  * @returns - The number of errors.
  */
-export const capture = async ({ name, page, callback }: CaptureOptions): Promise<string[]> => {
+export const capture = async (name: string, page: Page, fn: (errors: string[]) => Promise<void>): Promise<string[]> => {
     const errors: string[] = [];
 
     const onConsole = (msg: ConsoleMessage) => {
@@ -49,19 +34,19 @@ export const capture = async ({ name, page, callback }: CaptureOptions): Promise
         fs.promises.appendFile(LOG_FILE, `${msgStr}\n`);
     };
 
-    fs.promises.appendFile(LOG_FILE, header(name));
+    fs.promises.appendFile(LOG_FILE, `[capture] START ${name}\n`);
 
     page.on('console', onConsole);
     page.on('pageerror', onPageError);
     page.on('response', onResponse);
 
-    await callback(errors);
+    await fn(errors);
 
     page.removeListener('console', onConsole);
     page.removeListener('pageerror', onPageError);
     page.removeListener('response', onResponse);
 
-    fs.promises.appendFile(LOG_FILE, footer(name));
+    fs.promises.appendFile(LOG_FILE, `[capture] END ${name}\n`);
 
     return errors;
 };
