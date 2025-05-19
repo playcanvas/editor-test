@@ -4,6 +4,8 @@
 
 ## How to run tests
 
+### Locally
+
 1. Create a `.env` file with the following information: 
 
 ```
@@ -16,15 +18,7 @@ PC_PASSWORD=<password>
 
 2. Run `npm test` to begin the testing suite.
 
-## Changing hosts
+### Containerized
 
-Edit when running `npm start` or `npm test` use the env variables `PC_HOST` and `PC_LAUNCH_HOST` to change host.
-
-## Using custom frontend & engine
-
-Edit when running `npm test` use the env variable `PC_FRONTEND` to set `use_local_frontend`.
-Edit when running `npm test` use the env variable `PC_ENGINE` to set `use_local_engine`.
-
-## Adding more tests
-
-Add the testing account to the project team with **both** READ and WRITE access then rerun `npm run projects` to update the cache.
+1. Create an `.env.dev` file as per above
+2. Run `npm run docker` to compose the docker build and run
