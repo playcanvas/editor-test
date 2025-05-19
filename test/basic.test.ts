@@ -5,11 +5,9 @@ import {
     createProject,
     deleteProject,
     downloadProject,
-    publishProject,
-    visitEditor,
-    visitLauncher
+    publishProject
 } from '../lib/common';
-import { codeEditorUrl } from '../lib/config';
+import { codeEditorUrl, editorUrl, launchSceneUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const PROJECT_NAME = 'Blank Project';
@@ -56,10 +54,10 @@ test.describe('create/delete', () => {
     });
 
     test('goto editor', async () => {
-        const res = await visitEditor(page, projectId);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
-        sceneId = res.sceneId;
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+            sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
+        })).toStrictEqual([]);
     });
 
     test('goto code editor', async () => {
@@ -69,7 +67,9 @@ test.describe('create/delete', () => {
     });
 
     test('goto launcher', async () => {
-        expect(await visitLauncher(page, sceneId)).toStrictEqual([]);
+        expect(await capture('launcher', page, async () => {
+            await page.goto(launchSceneUrl(sceneId), { waitUntil: 'networkidle' });
+        })).toStrictEqual([]);
     });
 
     test('delete project', async () => {
@@ -103,10 +103,10 @@ test.describe('publish/download', () => {
     });
 
     test('goto editor', async () => {
-        const res = await visitEditor(page, projectId);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
-        sceneId = res.sceneId;
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+            sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
+        })).toStrictEqual([]);
     });
 
     test('download app', async () => {

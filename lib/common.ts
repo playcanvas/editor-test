@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import { capture } from './capture';
-import { editorUrl, editorSceneUrl, HOST, launchSceneUrl } from './config';
+import { editorUrl, editorSceneUrl, HOST } from './config';
 import { poll, wait } from './utils';
 import { WebInterface } from './web-interface';
 
@@ -126,43 +126,6 @@ export const importProject = async (page: Page, importPath: string) => {
         projectId = job.data?.project_id ?? 0;
     });
     return { errors, projectId };
-};
-
-/**
- * Visit the editor.
- *
- * @param page - The page.
- * @param projectId - The project id.
- * @param callback - The callback
- * @returns The data result.
- */
-export const visitEditor = async (page: Page, projectId: number, callback: (projectId: string) => void = () => {}) => {
-    const projectUrl = editorUrl(projectId);
-    let sceneId = 0;
-    const errors = await capture('editor', page, async () => {
-        await page.goto(projectUrl, { waitUntil: 'networkidle' });
-        await page.waitForURL('**/scene/**');
-        sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
-        await callback(projectUrl);
-    });
-    return { errors, sceneId };
-};
-
-/**
- * Visit the launcher.
- *
- * @param page - The page.
- * @param sceneId - The scene id.
- * @param callback - The callback.
- * @returns The errors.
- */
-export const visitLauncher = async (page: Page, sceneId: number, callback: (sceneLaunchUrl: string) => void = () => {}) => {
-    const sceneLaunchUrl = launchSceneUrl(sceneId);
-    const errors = await capture('launcher', page, async () => {
-        await page.goto(sceneLaunchUrl, { waitUntil: 'networkidle' });
-        await callback(sceneLaunchUrl);
-    });
-    return errors;
 };
 
 /**

@@ -1,11 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { capture } from '../lib/capture';
 import {
     createProject,
     deleteProject,
-    getSetting,
-    visitEditor
+    getSetting
 } from '../lib/common';
+import { editorUrl } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const PROJECT_NAME = 'Blank Project';
@@ -39,7 +40,9 @@ test.describe('settings', () => {
     });
 
     test('check settings', async () => {
-        const res = await visitEditor(page, projectId, async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             // open settings
             await page.getByRole('button', { name: '' }).click();
 
@@ -47,9 +50,7 @@ test.describe('settings', () => {
             await page.getByText('ASSET TASKS', { exact: true }).click();
             expect(await getSetting(page, 'Convert to GLB').getAttribute('class')).toContain('pcui-boolean-input-ticked');
             expect(await getSetting(page, 'Create FBX Folder').getAttribute('class')).toContain('pcui-boolean-input-ticked');
-        });
-        expect(res.errors).toStrictEqual([]);
-        expect(res.sceneId).toBeDefined();
+        })).toStrictEqual([]);
     });
 
     test('delete project', async () => {
