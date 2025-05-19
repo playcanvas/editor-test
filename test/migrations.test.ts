@@ -34,10 +34,10 @@ test.describe('migrations', () => {
     });
 
     test('import project', async () => {
-        const res = await importProject(page, IN_PATH);
-        expect(res.errors).toStrictEqual([]);
-        expect(res.projectId).toBeDefined();
-        projectId = res.projectId;
+        expect(await capture('import-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await importProject(page, IN_PATH);
+        })).toStrictEqual([]);
     });
 
     test('prepare project', async () => {

@@ -1,7 +1,5 @@
 import { type Page } from '@playwright/test';
 
-import { capture } from './capture';
-import { editorBlankUrl } from './config';
 import { poll, wait } from './utils';
 import { WebInterface } from './web-interface';
 
@@ -105,27 +103,23 @@ export const deleteProject = async (page: Page, projectId: number) => {
  * @returns The data result.
  */
 export const importProject = async (page: Page, importPath: string) => {
-    let projectId = 0;
-    const errors = await capture('import-project', page, async () => {
-        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await injectInterface(page);
+    await injectInterface(page);
 
-        // Start import
-        const fileChooserPromise = page.waitForEvent('filechooser');
-        const importProjectPromise = page.evaluate(() => window.wi.startImport());
-        const fileChooser = await fileChooserPromise;
-        await fileChooser.setFiles(importPath);
-        const importProject = await importProjectPromise;
-        if (importProject.error) {
-            throw new Error(`Import error: ${importProject.error}`);
-        }
+    // Start import
+    const fileChooserPromise = page.waitForEvent('filechooser');
+    const importProjectPromise = page.evaluate(() => window.wi.startImport());
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles(importPath);
+    const importProject = await importProjectPromise;
+    if (importProject.error) {
+        throw new Error(`Import error: ${importProject.error}`);
+    }
 
-        // FIXME: Poll job completion
-        const job = await pollJob(page, importProject.id);
+    // FIXME: Poll job completion
+    const job = await pollJob(page, importProject.id);
 
-        projectId = job.data?.project_id ?? 0;
-    });
-    return { errors, projectId };
+    // Return project id
+    return job.data?.project_id ?? 0;
 };
 
 const collectSceneIds = async (page: Page, sceneId: number): Promise<number[]> => {
