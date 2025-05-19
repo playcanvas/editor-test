@@ -1,25 +1,6 @@
 /* eslint-disable no-unused-vars */
 interface Window {
-    config: {
-        accessToken: string;
-        self: {
-            id: string;
-            username: string;
-            branch: {
-                id: string;
-                name: string;
-            };
-        };
-        project: {
-            id: string;
-            name: string;
-        };
-        engineVersions: {
-            current: {
-                version: string;
-            };
-        }
-    };
+    config: import('@playcanvas/editor-api').EditorConfig;
 
     editor: {
         call(method: string, ...args: any[]): any;

@@ -3,11 +3,11 @@ class WebInterface {
 
     private _token: string = window.config.accessToken;
 
-    private _userId: string = window.config.self.id;
+    private _userId: number = window.config.self.id;
 
     private _username: string = window.config.self.username;
 
-    private _projectId: string = window.config.project.id;
+    private _projectId: number = window.config.project.id;
 
     private _branchId: string = window.config.self.branch.id;
 
@@ -77,9 +77,9 @@ class WebInterface {
     }: {
         api?: string;
         token?: string;
-        userId?: string;
+        userId?: number;
         username?: string;
-        projectId?: string;
+        projectId?: number;
         branchId?: string;
         engineVersion?: string;
     } = {}) {
