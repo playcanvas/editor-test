@@ -40,17 +40,6 @@ class WebInterface {
     }
 
     /**
-     * Get the user
-     *
-     * @param name - The user name
-     * @returns The user
-     */
-    async getUser(name: string) {
-        const res = await this._ajax('GET', `/api/users/${name}`, undefined, false);
-        return await res.json();
-    }
-
-    /**
      * Get the user's projects
      *
      * @param userId - The user id
@@ -75,30 +64,6 @@ class WebInterface {
     }
 
     /**
-     * Get the project apps
-     *
-     * @param projectId - The project id
-     * @returns The project
-     */
-    async getApps(projectId: number) {
-        const res = await this._ajax('GET', `/api/projects/${projectId}/apps?limit=0`);
-        const json = await res.json();
-        return json.result ?? [];
-    }
-
-    /**
-     * Get the project scenes
-     *
-     * @param projectId - The project id
-     * @returns The scenes
-     */
-    async getScenes(projectId: number) {
-        const res = await this._ajax('GET', `/api/projects/${projectId}/scenes`);
-        const json = await res.json();
-        return json.result ?? [];
-    }
-
-    /**
      * Creates the project
      *
      * @param name - The name
@@ -120,40 +85,6 @@ class WebInterface {
         }
 
         const res = await this._ajax('POST', '/api/projects', data, true);
-        return await res.json();
-    }
-
-    /**
-     * Starts download of the project
-     *
-     * @param sceneIds - The scene ids
-     * @returns The job
-     */
-    async startDownload(name: string, projectId: number, branchId: string, sceneIds: number[], engineVersion: string) {
-        const res = await this._ajax('POST', '/api/apps/download', {
-            name: name,
-            project_id: projectId,
-            branch_id: branchId,
-            scenes: sceneIds,
-            engine_version: engineVersion
-        });
-        return await res.json();
-    }
-
-    /**
-     * Starts publish of the project
-     *
-     * @param sceneIds - The scene ids
-     * @returns The job
-     */
-    async startPublish(name: string, projectId: number, branchId: string, sceneIds: number[], engineVersion: string) {
-        const res = await this._ajax('POST', '/api/apps', {
-            name: name,
-            project_id: projectId,
-            branch_id: branchId,
-            scenes: sceneIds,
-            engine_version: engineVersion
-        });
         return await res.json();
     }
 

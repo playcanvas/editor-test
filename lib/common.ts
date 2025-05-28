@@ -151,20 +151,6 @@ export const importProject = async (page: Page, importPath: string) => {
     return job.data?.project_id ?? 0;
 };
 
-const collectSceneIds = async (page: Page, sceneId: number): Promise<number[]> => {
-    const scenes = await page.evaluate(() => window.wi.getScenes(window.config.project.id));
-    if (!scenes.length) {
-        throw new Error('Scenes not found');
-    }
-    return scenes
-    .map((scene: any) => scene.id)
-    .sort((a: number, b: number) => {
-        if (a === sceneId) return -1;
-        if (b === sceneId) return 1;
-        return 0;
-    });
-};
-
 /**
  * Download project app.
  *
@@ -173,25 +159,48 @@ const collectSceneIds = async (page: Page, sceneId: number): Promise<number[]> =
  * @returns The errors.
  */
 export const downloadApp = async (page: Page, sceneId: number) => {
-    await injectInterface(page);
+    const job = await page.evaluate(async (sceneId) => {
+        // Order scenes so that the scene with the given id is first
+        const { result: scenes = [] } = await window.editor.api.globals.rest.projects.projectScenes().promisify() as any;
+        if (!scenes.length) {
+            throw new Error('Scenes not found');
+        }
+        const sceneIds = scenes.reduce((ids: number[], scene: any) => {
+            if (scene.id !== sceneId) {
+                ids.unshift(scene.id);
+            } else  {
+                ids.push(scene.id);
+            }
+            return ids;
+        }, []);
 
-    // Collect scene ids
-    const sceneIds = await collectSceneIds(page, sceneId);
+        // Start download
+        const job: any = await window.editor.api.globals.rest.apps.appDownload({
+            name: 'TEST',
+            project_id: window.config.project.id,
+            branch_id: window.config.self.branch.id,
+            scenes: sceneIds,
+            engine_version: window.config.engineVersions.current.version
+        }).promisify();
 
-    // Start download
-    const download = await page.evaluate(sceneIds => window.wi.startDownload(
-        'TEST',
-        window.config.project.id,
-        window.config.self.branch.id,
-        sceneIds,
-        window.config.engineVersions.current.version
-    ), sceneIds);
-    if (download.error) {
-        throw new Error(`Download error: ${download.error}`);
+        // Check if job already finished
+        if (job.status !== 'running') {
+            return job;
+        }
+
+        // Wait for job to complete
+        return await new Promise<any>((resolve) => {
+            const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
+                if (name === 'job.update' && data.job.id === job.id) {
+                    handle.unbind();
+                    resolve(await window.editor.api.globals.rest.jobs.jobGet(data.job.id).promisify());
+                }
+            });
+        });
+    }, sceneId);
+    if (job.error) {
+        throw new Error(`Download error: ${job.error}`);
     }
-
-    // FIXME: Poll job completion
-    await pollJob(page, download.id);
 };
 
 /**
@@ -202,38 +211,48 @@ export const downloadApp = async (page: Page, sceneId: number) => {
  * @returns The errors.
  */
 export const publishApp = async (page: Page, sceneId: number): Promise<{ id: number; url: string }> => {
-    await injectInterface(page);
+    const app: any = await page.evaluate(async (sceneId) => {
+        // Order scenes so that the scene with the given id is first
+        const { result: scenes = [] } = await window.editor.api.globals.rest.projects.projectScenes().promisify() as any;
+        if (!scenes.length) {
+            throw new Error('Scenes not found');
+        }
+        const sceneIds = scenes.reduce((ids: number[], scene: any) => {
+            if (scene.id !== sceneId) {
+                ids.unshift(scene.id);
+            } else  {
+                ids.push(scene.id);
+            }
+            return ids;
+        }, []);
 
-    // Collect scene ids
-    const sceneIds = await collectSceneIds(page, sceneId);
+        // Start publish
+        const app: any = await window.editor.api.globals.rest.apps.appCreate({
+            name: 'TEST',
+            project_id: window.config.project.id,
+            branch_id: window.config.self.branch.id,
+            scenes: sceneIds,
+            engine_version: window.config.engineVersions.current.version
+        }).promisify();
 
-    // Start publish
-    const app = await page.evaluate(sceneIds => window.wi.startPublish(
-        'TEST',
-        window.config.project.id,
-        window.config.self.branch.id,
-        sceneIds,
-        window.config.engineVersions.current.version
-    ), sceneIds);
+        // Check if app already finished
+        if (app.task.status !== 'running') {
+            return app;
+        }
+
+        // Wait for app to complete
+        return await new Promise<any>((resolve) => {
+            const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
+                if (name === 'app.update' && data.app.id === app.id) {
+                    handle.unbind();
+                    resolve(await window.editor.api.globals.rest.apps.appGet(data.app.id).promisify());
+                }
+            });
+        });
+    }, sceneId);
     if (app.task.error) {
         throw new Error(`Publish error: ${app.task.error}`);
     }
-
-    // Poll publish job
-    const job = await poll(async () => {
-        const apps = await page.evaluate(() => window.wi.getApps(window.config.project.id));
-        const job = apps.find((_app: any) => _app.id === app.id)?.task ?? { error: 'Job not found' };
-        if (job.status !== 'running') {
-            return job;
-        }
-    });
-    if (job.error) {
-        throw new Error(`Job error: ${job.error}`);
-    } else if (job.status !== 'complete') {
-        throw new Error(`Job status: ${job.status}`);
-    }
-
-    // Return app data
     return {
         id: app.id,
         url: app.url

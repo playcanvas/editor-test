@@ -119,7 +119,6 @@ test.describe('publish/download', () => {
     test('download app', async () => {
         expect(await capture('download-project', page, async () => {
             // download app
-            await page.goto(editorSceneUrl(sceneId), { waitUntil: 'networkidle' });
             await downloadApp(page, sceneId);
         })).toStrictEqual([]);
     });
@@ -127,7 +126,6 @@ test.describe('publish/download', () => {
     test('publish app', async () => {
         expect(await capture('publish-project', page, async () => {
             // publish app
-            await page.goto(editorSceneUrl(sceneId), { waitUntil: 'networkidle' });
             const app = await publishApp(page, sceneId);
 
             // launch app
