@@ -158,7 +158,7 @@ export const importProject = async (page: Page, importPath: string) => {
  * @param sceneId - The scene id.
  * @returns The errors.
  */
-export const downloadApp = async (page: Page, sceneId: number) => {
+export const downloadApp = async (page: Page, sceneId: number): Promise<{ download_url: string }> => {
     const job = await page.evaluate(async (sceneId) => {
         // Order scenes so that the scene with the given id is first
         const { result: scenes = [] } = await window.editor.api.globals.rest.projects.projectScenes().promisify() as any;
@@ -183,11 +183,6 @@ export const downloadApp = async (page: Page, sceneId: number) => {
             engine_version: window.config.engineVersions.current.version
         }).promisify();
 
-        // Check if job already finished
-        if (job.status !== 'running') {
-            return job;
-        }
-
         // Wait for job to complete
         return await new Promise<any>((resolve) => {
             const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
@@ -201,6 +196,9 @@ export const downloadApp = async (page: Page, sceneId: number) => {
     if (job.error) {
         throw new Error(`Download error: ${job.error}`);
     }
+    return {
+        download_url: job.data.download_url
+    };
 };
 
 /**
@@ -234,11 +232,6 @@ export const publishApp = async (page: Page, sceneId: number): Promise<{ id: num
             scenes: sceneIds,
             engine_version: window.config.engineVersions.current.version
         }).promisify();
-
-        // Check if app already finished
-        if (app.task.status !== 'running') {
-            return app;
-        }
 
         // Wait for app to complete
         return await new Promise<any>((resolve) => {

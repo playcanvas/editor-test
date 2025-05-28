@@ -119,7 +119,10 @@ test.describe('publish/download', () => {
     test('download app', async () => {
         expect(await capture('download-project', page, async () => {
             // download app
-            await downloadApp(page, sceneId);
+            const job = await downloadApp(page, sceneId);
+
+            // check download URL
+            expect(job.download_url).toBeDefined();
         })).toStrictEqual([]);
     });
 
