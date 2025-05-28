@@ -30,7 +30,7 @@ export const capture = async (name: string, page: Page, fn: (errors: string[]) =
         fs.promises.appendFile(LOG_FILE, `${msgStr}\n`);
     };
     const onResponse = (response: Response) => {
-        const msgStr = `[http] ${response.status()} ${response.url()}`;
+        const msgStr = `[${response.request().method()}] ${response.status()} ${response.url()}`;
         fs.promises.appendFile(LOG_FILE, `${msgStr}\n`);
     };
 
