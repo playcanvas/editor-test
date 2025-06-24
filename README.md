@@ -12,8 +12,8 @@
 PC_HOST=playcanvas.com
 PC_LOGIN_HOST=login.playcanvas.com
 PC_LAUNCH_HOST=launch.playcanvas.com
-PC_GMAIL=<gmail-email>
-PC_PASSWORD=<password>
+PC_EMAIL=<playcanvas-email>
+PC_PASSWORD=<playcanvas-password>
 ```
 
 2. Run `npm test` to begin the testing suite.
