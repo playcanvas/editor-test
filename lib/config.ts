@@ -4,7 +4,7 @@ type SearchParams = Record<string, string | number | boolean>;
 
 export const AUTH_STATE = '.auth/state.json';
 
-export const GMAIL = process.env.PC_GMAIL ?? '';
+export const EMAIL = process.env.PC_EMAIL ?? '';
 export const PASSWORD = process.env.PC_PASSWORD ?? '';
 export const HOST = process.env.PC_HOST ?? 'playcanvas.com';
 export const LOGIN_HOST = process.env.PC_LOGIN_HOST ?? 'login.playcanvas.com';

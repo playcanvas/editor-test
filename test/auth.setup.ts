@@ -2,8 +2,8 @@ import * as fs from 'fs';
 
 import { test as setup } from '@playwright/test';
 
-import { googleAuth } from '../lib/auth';
-import { GMAIL, PASSWORD, HOST, AUTH_STATE } from '../lib/config';
+import { nativeAuth } from '../lib/auth';
+import { EMAIL, PASSWORD, HOST, AUTH_STATE } from '../lib/config';
 import { middleware } from '../lib/middleware';
 
 const SESSION_EXISTS = fs.existsSync(AUTH_STATE);
@@ -25,5 +25,5 @@ setup('authenticate user', async ({ page }) => {
         }
     }
 
-    await googleAuth(AUTH_STATE, GMAIL, PASSWORD);
+    await nativeAuth(AUTH_STATE, EMAIL, PASSWORD);
 });
