@@ -168,7 +168,7 @@ test.describe('checkpoint/diff/merge/conficts', () => {
                 let merge = await window.editor.api.globals.rest.merge.mergeCreate({
                     srcBranchId: redBranchId,
                     dstBranchId: mainBranchId,
-                    srcBranchClose: false
+                    srcBranchClose: true
                 }).promisify();
 
                 // Get details of the merge
