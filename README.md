@@ -2,6 +2,11 @@
 
 # PlayCanvas Editor Testing Suite
 
+This is the official testing suite for the PlayCanvas Editor. Tests are split into two categories:
+
+- `test/api` - tests for the Editor API behavior
+- `test/ui` - tests for the Editor UI behavior
+
 ## How to run tests
 
 ### Locally
