@@ -16,7 +16,7 @@ test.describe.configure({
     mode: 'serial'
 });
 
-test.describe('checkpoint/diff/merge/conficts', () => {
+test.describe('branch/checkpoint/diff/merge', () => {
     let projectId: number;
     let page: Page;
     let materialId: number;
