@@ -20,7 +20,6 @@ test.describe.configure({
 test.describe('create/delete', () => {
     let projectId: number;
     let forkedProjectId: number;
-    let sceneId: number;
     let page: Page;
 
     test.describe.configure({
@@ -54,6 +53,39 @@ test.describe('create/delete', () => {
         expect(await capture('delete-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await deleteProject(page, forkedProjectId);
+        })).toStrictEqual([]);
+    });
+
+    test('delete project', async () => {
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
+    });
+});
+
+test.describe('navigation', () => {
+    let projectId: number;
+    let sceneId: number;
+    let page: Page;
+
+    test.describe.configure({
+        mode: 'serial'
+    });
+
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage();
+        await middleware(page.context());
+    });
+
+    test.afterAll(async () => {
+        await page.close();
+    });
+
+    test('create project', async () => {
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await createProject(page, PROJECT_NAME);
         })).toStrictEqual([]);
     });
 
