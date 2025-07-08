@@ -46,10 +46,10 @@ test.describe('migrations', () => {
         })).toStrictEqual([]);
 
         [textureId, materialId] = await page.evaluate(async (textureName) => {
-            // Fetch Texture
+            // fetch Texture
             const texture = window.editor.api.globals.assets.findOne((asset: Observer) => asset.get('name') === textureName);
 
-            // Setup project settings
+            // setup project settings
             const projectSettings = window.editor.call('settings:project');
             projectSettings.sync._paths = null;
             projectSettings.set('deviceTypes', ['webgpu']);
@@ -60,7 +60,7 @@ test.describe('migrations', () => {
             projectSettings.unset('enableWebGl2');
             projectSettings.unset('enableWebGpu');
 
-            // Setup entities
+            // setup entities
             const root = window.editor.api.globals.entities.root;
             root.addComponent('audiosource');
             root.addComponent('camera');
@@ -71,7 +71,7 @@ test.describe('migrations', () => {
             root.set('components.particlesystem.colorMapAsset', texture.get('id'));
             root.set('components.particlesystem.normalMapAsset', texture.get('id'));
 
-            // Setup material
+            // setup material
             const material = await window.editor.api.globals.assets.createMaterial({ name: 'TEST_MATERIAL' });
             material.set('data.emissiveMap', texture.get('id'));
             material.set('data.ambientTint', false);
@@ -96,7 +96,7 @@ test.describe('migrations', () => {
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
 
-            // Check project settings migration
+            // check project settings migration
             const projectSettings = await page.evaluate(() => {
                 return window.editor.call('settings:project').json();
             });
@@ -108,7 +108,7 @@ test.describe('migrations', () => {
             expect(projectSettings.enableWebGpu).toBe(true);
             expect(projectSettings.enableWebGl2).toBe(false);
 
-            // Check material migration
+            // check material migration
             const material = await page.evaluate((id) => {
                 return window.editor.api.globals.assets.findOne((asset: Observer) => asset.get('id') === id).json();
             }, materialId);
@@ -126,13 +126,13 @@ test.describe('migrations', () => {
             expect(material.data.useTonemap).toBe(false);
             expect(material.data.shader).toBe('blinn');
 
-            // Check texture migration
+            // check texture migration
             const texture = await page.evaluate((id) => {
                 return window.editor.api.globals.assets.findOne((asset: Observer) => asset.get('id') === id).json();
             }, textureId);
             expect(texture.data.hasOwnProperty('srgb')).toBe(true);
 
-            // Check entity migration
+            // check entity migration
             const root = await page.evaluate(() => {
                 return window.editor.api.globals.entities.root.json();
             });
@@ -143,16 +143,16 @@ test.describe('migrations', () => {
 
     test('fix sRGB conflicts', async () => {
         await page.evaluate((textureId) => {
-            // Remove texture from particlesystem normalMapAsset
+            // remove texture from particlesystem normalMapAsset
             const root = window.editor.api.globals.entities.root;
             root.unset('components.particlesystem.normalMapAsset');
 
-            // Set texture sRGB to true
+            // set texture sRGB to true
             const texture = window.editor.api.globals.assets.findOne((asset: Observer) => asset.get('id') === textureId);
             texture.set('data.srgb', true);
         }, textureId);
 
-        // Check for errors
+        // check for errors
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
         })).toStrictEqual([]);

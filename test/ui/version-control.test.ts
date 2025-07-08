@@ -54,10 +54,10 @@ test.describe('checkpoint/diff/merge/conflicts', () => {
             await page.getByRole('button', { name: 'Accept All Cookies' }).click();
 
             [materialId, mainBranchId, mainCheckpointId] = await page.evaluate(async () => {
-                // Setup material
+                // setup material
                 const material = await window.editor.api.globals.assets.createMaterial({ name: 'TEST_MATERIAL' });
 
-                // Create checkpoint
+                // create checkpoint
                 const checkpoint = await window.editor.api.globals.rest.checkpoints.checkpointCreate({
                     projectId: window.editor.api.globals.projectId,
                     branchId: window.editor.api.globals.branchId,

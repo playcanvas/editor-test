@@ -74,14 +74,14 @@ export const createProject = async (page: Page, projectName: string, masterProje
         // for route to be generated
         await wait(3000);
 
-        // Return project id
+        // return project id
         return create.id;
     }
 
     // FIXME: Poll job completion
     const job = await pollJob(page, create.id);
 
-    // Return project id
+    // return project id
     return job.data?.forked_id ?? 0;
 };
 
@@ -134,7 +134,7 @@ export const deleteAllProjects = async (page: Page) => {
 export const importProject = async (page: Page, importPath: string) => {
     await injectInterface(page);
 
-    // Start import
+    // start import
     const fileChooserPromise = page.waitForEvent('filechooser');
     const importProjectPromise = page.evaluate(() => window.wi.startImport(window.config.self.id));
     const fileChooser = await fileChooserPromise;
@@ -147,7 +147,7 @@ export const importProject = async (page: Page, importPath: string) => {
     // FIXME: Poll job completion
     const job = await pollJob(page, importProject.id);
 
-    // Return project id
+    // return project id
     return job.data?.project_id ?? 0;
 };
 
@@ -160,7 +160,7 @@ export const importProject = async (page: Page, importPath: string) => {
  */
 export const downloadApp = async (page: Page, sceneId: number): Promise<{ download_url: string }> => {
     const job = await page.evaluate(async (sceneId) => {
-        // Order scenes so that the scene with the given id is first
+        // order scenes so that the scene with the given id is first
         const { result: scenes = [] } = await window.editor.api.globals.rest.projects.projectScenes().promisify() as any;
         if (!scenes.length) {
             throw new Error('Scenes not found');
@@ -174,7 +174,7 @@ export const downloadApp = async (page: Page, sceneId: number): Promise<{ downlo
             return ids;
         }, []);
 
-        // Start download
+        // start download
         const job: any = await window.editor.api.globals.rest.apps.appDownload({
             name: 'TEST',
             project_id: window.config.project.id,
@@ -183,7 +183,7 @@ export const downloadApp = async (page: Page, sceneId: number): Promise<{ downlo
             engine_version: window.config.engineVersions.current.version
         }).promisify();
 
-        // Wait for job to complete
+        // wait for job to complete
         return await new Promise<any>((resolve) => {
             const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
                 if (name === 'job.update' && data.job.id === job.id) {
@@ -210,7 +210,7 @@ export const downloadApp = async (page: Page, sceneId: number): Promise<{ downlo
  */
 export const publishApp = async (page: Page, sceneId: number): Promise<{ id: number; url: string }> => {
     const app: any = await page.evaluate(async (sceneId) => {
-        // Order scenes so that the scene with the given id is first
+        // order scenes so that the scene with the given id is first
         const { result: scenes = [] } = await window.editor.api.globals.rest.projects.projectScenes().promisify() as any;
         if (!scenes.length) {
             throw new Error('Scenes not found');
@@ -224,7 +224,7 @@ export const publishApp = async (page: Page, sceneId: number): Promise<{ id: num
             return ids;
         }, []);
 
-        // Start publish
+        // start publish
         const app: any = await window.editor.api.globals.rest.apps.appCreate({
             name: 'TEST',
             project_id: window.config.project.id,
@@ -233,7 +233,7 @@ export const publishApp = async (page: Page, sceneId: number): Promise<{ id: num
             engine_version: window.config.engineVersions.current.version
         }).promisify();
 
-        // Wait for app to complete
+        // wait for app to complete
         return await new Promise<any>((resolve) => {
             const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
                 if (name === 'app.update' && data.app.id === app.id) {

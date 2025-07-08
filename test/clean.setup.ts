@@ -7,7 +7,7 @@ import { middleware } from '../lib/middleware';
 setup('removing old projects', async ({ page }) => {
     await middleware(page.context());
 
-    // Delete all projects
+    // delete all projects
     await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
     await deleteAllProjects(page);
 });

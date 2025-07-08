@@ -11,7 +11,7 @@ export const googleAuth = async (statePath: string, email: string, password: str
         ]
     });
 
-    // Modified from https://github.com/microsoft/playwright/issues/24374
+    // modified from https://github.com/microsoft/playwright/issues/24374
     const context = await browser.newContext({
         bypassCSP: true,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML. like Gecko) Chrome/94.0.4606.61 Safari/537.36'
@@ -44,7 +44,7 @@ export const nativeAuth = async (statePath: string, email: string, password: str
         ]
     });
 
-    // Modified from https://github.com/microsoft/playwright/issues/24374
+    // modified from https://github.com/microsoft/playwright/issues/24374
     const context = await browser.newContext({
         bypassCSP: true,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML. like Gecko) Chrome/94.0.4606.61 Safari/537.36'
