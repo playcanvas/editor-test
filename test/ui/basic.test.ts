@@ -43,6 +43,8 @@ test.describe('create/delete', () => {
         })).toStrictEqual([]);
     });
 
+    // FIXME: Forking not supported in Editor UI
+
     test('delete project', async () => {
         expect(await capture('delete-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
