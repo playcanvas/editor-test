@@ -56,6 +56,71 @@ test.describe('create/delete', () => {
     });
 });
 
+test.describe('navigation', () => {
+    let projectId: number;
+    let sceneId: number;
+    let page: Page;
+
+    test.describe.configure({
+        mode: 'serial'
+    });
+
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage();
+        await middleware(page.context());
+    });
+
+    test.afterAll(async () => {
+        await page.close();
+    });
+
+    test('create project', async () => {
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await createProject(page, PROJECT_NAME);
+        })).toStrictEqual([]);
+    });
+
+    test('goto editor', async () => {
+        expect(await capture('editor', page, async () => {
+            await page.getByText('Blank Project').click();
+            await page.getByRole('button', { name: 'EDITOR' }).click();
+            await page.waitForURL('**/editor/scene/**', { waitUntil: 'networkidle' });
+            sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
+        })).toStrictEqual([]);
+    });
+
+    test('goto code editor', async () => {
+        expect(await capture('code-editor', page, async () => {
+            // open code editor
+            const codePagePromise = page.waitForEvent('popup');
+            await page.locator('button').first().click();
+            await page.locator('span').filter({ hasText: /^Code Editor$/ }).click();
+            const codePage = await codePagePromise;
+            await codePage.waitForURL('**/editor/code/**', { waitUntil: 'networkidle' });
+            codePage.close();
+        })).toStrictEqual([]);
+    });
+
+    test('goto launcher', async () => {
+        expect(await capture('launcher', page, async () => {
+            // open launcher
+            const launchPagePromise = page.waitForEvent('popup');
+            await page.getByRole('button', { name: ' Launch' }).click();
+            const launchPage = await launchPagePromise;
+            await launchPage.waitForURL(`**/${sceneId}**`, { waitUntil: 'networkidle' });
+            launchPage.close();
+        })).toStrictEqual([]);
+    });
+
+    test('delete project', async () => {
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
+    });
+});
+
 test.describe('publish/download', () => {
     let projectId: number;
     let page: Page;
