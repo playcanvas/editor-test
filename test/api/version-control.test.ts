@@ -1,14 +1,14 @@
 import { type Observer } from '@playcanvas/observer';
 import { expect, test, type Page } from '@playwright/test';
 
-import { capture } from '../lib/capture';
+import { capture } from '../../lib/capture';
 import {
     createProject,
     deleteProject
-} from '../lib/common';
-import { editorBlankUrl, editorUrl } from '../lib/config';
-import { middleware } from '../lib/middleware';
-import { wait } from '../lib/utils';
+} from '../../lib/common';
+import { editorBlankUrl, editorUrl } from '../../lib/config';
+import { middleware } from '../../lib/middleware';
+import { wait } from '../../lib/utils';
 
 const PROJECT_NAME = 'Blank Project';
 

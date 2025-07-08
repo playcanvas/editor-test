@@ -1,15 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { capture } from '../lib/capture';
+import { capture } from '../../lib/capture';
 import {
     createProject,
     deleteApp,
     deleteProject,
     downloadApp,
     publishApp
-} from '../lib/common';
-import { codeEditorUrl, editorBlankUrl, editorSceneUrl, editorUrl, launchSceneUrl } from '../lib/config';
-import { middleware } from '../lib/middleware';
+} from '../../lib/common';
+import { codeEditorUrl, editorBlankUrl, editorSceneUrl, editorUrl, launchSceneUrl } from '../../lib/config';
+import { middleware } from '../../lib/middleware';
 
 const PROJECT_NAME = 'Blank Project';
 
