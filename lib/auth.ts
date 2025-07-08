@@ -37,7 +37,7 @@ export const googleAuth = async (statePath: string, email: string, password: str
 
 export const nativeAuth = async (statePath: string, email: string, password: string) => {
     const browser = await chromium.launch({
-        headless: true,
+        headless: false,
         args: [
             '--disable-features=IsolateOrigins,site-per-process',
             '--disable-blink-features=AutomationControlled'
@@ -53,8 +53,8 @@ export const nativeAuth = async (statePath: string, email: string, password: str
     await page.goto(`https://${LOGIN_HOST}`);
     await page.context().storageState({ path: statePath });
 
-    await page.getByLabel('Email or Username').fill(email);
-    await page.getByLabel('Password').fill(password);
+    await page.getByRole('textbox', { name: 'Email or Username' }).fill(email);
+    await page.getByRole('textbox', { name: 'Password' }).fill(password);
     await page.getByRole('button', { name: '  Log in' }).click();
     await page.waitForURL('**/user/**');
 

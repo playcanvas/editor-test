@@ -14,6 +14,7 @@
     "docker": "docker compose up --build",
     "report": "playwright show-report",
     "codegen": "playwright codegen --load-storage .auth/state.json",
+    "auth": "tsx src/auth.ts",
     "home": "tsx src/home.ts",
     "lint": "eslint . --ext .ts,.mjs",
     "typecheck": "tsc --declaration --emitDeclarationOnly"
