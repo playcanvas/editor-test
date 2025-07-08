@@ -37,7 +37,7 @@ export const googleAuth = async (statePath: string, email: string, password: str
 
 export const nativeAuth = async (statePath: string, email: string, password: string) => {
     const browser = await chromium.launch({
-        headless: false,
+        headless: true,
         args: [
             '--disable-features=IsolateOrigins,site-per-process',
             '--disable-blink-features=AutomationControlled'
