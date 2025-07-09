@@ -139,12 +139,12 @@ test.describe('navigation', () => {
             };
             const selectVersion = async (version: 'current' | 'previous' | 'releaseCandidate') => {
                 await page.locator([
-                    'div.pcui-container.settings',
-                    'div:nth-child(2)',
-                    'div:nth-child(2)',
-                    'div:first-child',
-                    'div:first-child',
-                    'div:nth-child(2)'
+                    '.pcui-container.settings',
+                    '.pcui-collapsible:nth-child(2)',
+                    '.pcui-panel-content',
+                    '.pcui-inspector',
+                    ':first-child',
+                    ':nth-child(2)'
                 ].join(' > ')).click();
                 const option = await page.locator(`#layout-attributes #${version}`);
                 if (await option.count() > 0) {
