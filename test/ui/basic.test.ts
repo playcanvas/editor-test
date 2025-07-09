@@ -110,7 +110,7 @@ test.describe('navigation', () => {
             await page.locator('span').filter({ hasText: /^Settings$/ }).click();
             await page.waitForSelector('.pcui-container.settings');
 
-            await page.getByText('RENDERING').click();
+            await page.getByText('RENDERING', { exact: true }).click();
             const webgpu = await page.locator('div').filter({ hasText: /^Enable WebGPU$/ }).locator('div');
             const webgl2 = await page.locator('div').filter({ hasText: /^Enable WebGL 2\.0$/ }).locator('div');
 

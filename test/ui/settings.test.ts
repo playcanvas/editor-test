@@ -35,16 +35,25 @@ test.describe('settings', () => {
     test('create project', async () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
             projectId = await createProject(page, PROJECT_NAME);
+        })).toStrictEqual([]);
+    });
+
+    test('goto editor', async () => {
+        expect(await capture('editor', page, async () => {
+            await page.getByText('Blank Project').click();
+            await page.getByRole('button', { name: 'EDITOR' }).click();
+            await page.waitForURL('**/editor/scene/**', { waitUntil: 'networkidle' });
         })).toStrictEqual([]);
     });
 
     test('check settings', async () => {
         expect(await capture('editor', page, async () => {
-            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
-
-            // open settings
-            await page.getByRole('button', { name: '' }).click();
+            // open settings dialog
+            await page.locator('button').first().click();
+            await page.locator('span').filter({ hasText: /^Settings$/ }).click();
+            await page.waitForSelector('.pcui-container.settings');
 
             // check asset tasks
             await page.getByText('ASSET TASKS', { exact: true }).click();
