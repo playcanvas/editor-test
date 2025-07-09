@@ -179,6 +179,15 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.getByText('START MERGE').click();
 
             // apply merge
+            await page.waitForSelector([
+                '.picker-conflict-manager.diff',
+                '.content',
+                '.ui-panel',
+                '.content',
+                '.left',
+                '.content',
+                '.confirm:not(.hidden)'
+            ].join(' > '));
             await page.getByText('COMPLETE MERGE').click();
 
             // wait for page to reload
@@ -204,10 +213,41 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.getByText('START MERGE').click();
 
             // review conflicts
+            await page.waitForSelector([
+                '.picker-conflict-manager',
+                '.content',
+                '.ui-panel',
+                '.content',
+                '.right',
+                '.content',
+                '.bottom',
+                '.content',
+                '.theirs',
+                '.content',
+                '.ui-button:not(.disabled)'
+            ].join(' > '));
             await page.getByText('USE ALL FROM THIS BRANCH').nth(1).click();
+            await page.waitForSelector([
+                '.picker-conflict-manager',
+                '.content',
+                '.ui-panel',
+                '.content',
+                '.left',
+                '.content',
+                '.ui-button:not(.disabled)'
+            ].join(' > '));
             await page.getByText('REVIEW MERGE').click();
 
             // apply merge
+            await page.waitForSelector([
+                '.picker-conflict-manager.diff',
+                '.content',
+                '.ui-panel',
+                '.content',
+                '.left',
+                '.content',
+                '.confirm:not(.hidden)'
+            ].join(' > '));
             await page.getByText('COMPLETE MERGE').click();
 
             // wait for page to reload
