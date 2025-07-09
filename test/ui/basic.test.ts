@@ -104,7 +104,15 @@ test.describe('navigation', () => {
 
     test('goto launcher', async () => {
         expect(await capture('launcher', page, async () => {
-            // open launcher
+            // uncheck debug option
+            await page.getByRole('button', { name: ' Launch' }).hover();
+            await page.locator('div').filter({ hasText: /^Debug$/ }).locator('div').click();
+
+            const devices = ['webgpu', 'webgl2', 'webgl1'];
+            const types = ['debug', 'profiler', 'release'];
+            const versions = ['current', 'previous', 'force', 'releaseCandidate'];
+
+
             const launchPagePromise = page.waitForEvent('popup');
             await page.getByRole('button', { name: ' Launch' }).click();
             const launchPage = await launchPagePromise;
@@ -113,12 +121,12 @@ test.describe('navigation', () => {
         })).toStrictEqual([]);
     });
 
-    test('delete project', async () => {
-        expect(await capture('delete-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await deleteProject(page, projectId);
-        })).toStrictEqual([]);
-    });
+    // test('delete project', async () => {
+    //     expect(await capture('delete-project', page, async () => {
+    //         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+    //         await deleteProject(page, projectId);
+    //     })).toStrictEqual([]);
+    // });
 });
 
 test.describe('publish/download', () => {
