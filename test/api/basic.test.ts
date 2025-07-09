@@ -109,8 +109,6 @@ test.describe('navigation', () => {
             const { current, previous, releaseCandidate } = engineVersions;
 
             // list of devices, types, and versions to test
-            const devices = ['webgpu', 'webgl2'];
-            const types = ['debug', 'profiler', 'release'];
             const versions = [current.version];
             if (previous) {
                 versions.push(previous.version);
@@ -118,11 +116,13 @@ test.describe('navigation', () => {
             if (releaseCandidate) {
                 versions.push(releaseCandidate.version);
             }
+            const types = ['debug', 'profiler', 'release'];
+            const devices = ['webgpu', 'webgl2'];
 
             // open launcher for each combination
-            for (const device of devices) {
+            for (const version of versions) {
                 for (const type of types) {
-                    for (const version of versions) {
+                    for (const device of devices) {
                         const url = launchSceneUrl(sceneId, { device, type, version });
                         await page.goto(url, { waitUntil: 'networkidle' });
                     }
