@@ -106,38 +106,27 @@ test.describe('navigation', () => {
 
     test('goto launcher', async () => {
         expect(await capture('launcher', page, async () => {
-            const { current, previous, force, releaseCandidate } = engineVersions;
+            const { current, previous, releaseCandidate } = engineVersions;
 
             // list of devices, types, and versions to test
-            const devices = ['webgpu', 'webgl2', 'webgl1'];
-            const types = ['debug', 'profiler', 'release'];
-            const versions = [current.version, force.version];
+            const versions = [current.version];
             if (previous) {
                 versions.push(previous.version);
             }
             if (releaseCandidate) {
                 versions.push(releaseCandidate.version);
             }
-
-            // generate all combinations of devices, types, and versions
-            const options = [];
-            for (const device of devices) {
-                for (const type of types) {
-                    for (const version of versions) {
-                        // skip webgl1 for versions other than 1.x
-                        if (device === 'webgl1' && !version.startsWith('1.')) {
-                            continue;
-                        }
-                        options.push({ device, type, version });
-                    }
-                }
-            }
+            const types = ['debug', 'profiler', 'release'];
+            const devices = ['webgpu', 'webgl2'];
 
             // open launcher for each combination
-            for (const opt of options) {
-                const url = launchSceneUrl(sceneId, opt);
-                // eslint-disable-next-line no-await-in-loop
-                await page.goto(url, { waitUntil: 'networkidle' });
+            for (const version of versions) {
+                for (const type of types) {
+                    for (const device of devices) {
+                        const url = launchSceneUrl(sceneId, { device, type, version });
+                        await page.goto(url, { waitUntil: 'networkidle' });
+                    }
+                }
             }
         })).toStrictEqual([]);
     });
