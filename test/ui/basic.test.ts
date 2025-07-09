@@ -108,7 +108,7 @@ test.describe('navigation', () => {
             // open settings dialog
             await page.locator('button').first().click();
             await page.locator('span').filter({ hasText: /^Settings$/ }).click();
-            await page.waitForSelector('div.pcui-container.settings');
+            await page.waitForSelector('.pcui-container.settings');
 
             await page.getByText('RENDERING').click();
             const webgpu = await page.locator('div').filter({ hasText: /^Enable WebGPU$/ }).locator('div');
