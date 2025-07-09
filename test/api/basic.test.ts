@@ -67,6 +67,7 @@ test.describe('create/delete', () => {
 test.describe('navigation', () => {
     let projectId: number;
     let sceneId: number;
+    let engineVersions: typeof window.config.engineVersions;
     let page: Page;
 
     test.describe.configure({
@@ -93,6 +94,7 @@ test.describe('navigation', () => {
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
             sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
+            engineVersions = await page.evaluate(() => window.config.engineVersions);
         })).toStrictEqual([]);
     });
 
@@ -104,7 +106,39 @@ test.describe('navigation', () => {
 
     test('goto launcher', async () => {
         expect(await capture('launcher', page, async () => {
-            await page.goto(launchSceneUrl(sceneId), { waitUntil: 'networkidle' });
+            const { current, previous, force, releaseCandidate } = engineVersions;
+
+            // list of devices, types, and versions to test
+            const devices = ['webgpu', 'webgl2', 'webgl1'];
+            const types = ['debug', 'profiler', 'release'];
+            const versions = [current.version, force.version];
+            if (previous) {
+                versions.push(previous.version);
+            }
+            if (releaseCandidate) {
+                versions.push(releaseCandidate.version);
+            }
+
+            // generate all combinations of devices, types, and versions
+            const options = [];
+            for (const device of devices) {
+                for (const type of types) {
+                    for (const version of versions) {
+                        // skip webgl1 for versions other than 1.x
+                        if (device === 'webgl1' && !version.startsWith('1.')) {
+                            continue;
+                        }
+                        options.push({ device, type, version });
+                    }
+                }
+            }
+
+            // open launcher for each combination
+            for (const opt of options) {
+                const url = launchSceneUrl(sceneId, opt);
+                // eslint-disable-next-line no-await-in-loop
+                await page.goto(url, { waitUntil: 'networkidle' });
+            }
         })).toStrictEqual([]);
     });
 
