@@ -44,6 +44,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('create project', async () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
             projectId = await createProject(page, PROJECT_NAME);
         })).toStrictEqual([]);
     });

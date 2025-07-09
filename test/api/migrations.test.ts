@@ -36,6 +36,7 @@ test.describe('migrations', () => {
     test('import project', async () => {
         expect(await capture('import-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
             projectId = await importProject(page, IN_PATH);
         })).toStrictEqual([]);
     });
