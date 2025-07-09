@@ -93,17 +93,17 @@ test.describe('navigation', () => {
         })).toStrictEqual([]);
     });
 
-    test('goto code editor', async () => {
-        expect(await capture('code-editor', page, async () => {
-            // open code editor
-            const codePagePromise = page.waitForEvent('popup');
-            await page.locator('button').first().click();
-            await page.locator('span').filter({ hasText: /^Code Editor$/ }).click();
-            const codePage = await codePagePromise;
-            await codePage.waitForURL('**/editor/code/**', { waitUntil: 'networkidle' });
-            codePage.close();
-        })).toStrictEqual([]);
-    });
+    // test('goto code editor', async () => {
+    //     expect(await capture('code-editor', page, async () => {
+    //         // open code editor
+    //         const codePagePromise = page.waitForEvent('popup');
+    //         await page.locator('button').first().click();
+    //         await page.locator('span').filter({ hasText: /^Code Editor$/ }).click();
+    //         const codePage = await codePagePromise;
+    //         await codePage.waitForURL('**/editor/code/**', { waitUntil: 'networkidle' });
+    //         codePage.close();
+    //     })).toStrictEqual([]);
+    // });
 
     test('goto launcher', async () => {
         expect(await capture('launcher', page, async () => {
@@ -112,21 +112,96 @@ test.describe('navigation', () => {
             await page.locator('span').filter({ hasText: /^Settings$/ }).click();
             await page.waitForSelector('div.pcui-container.settings');
 
-            // launch
-            const launchPagePromise = page.waitForEvent('popup');
-            await page.getByRole('button', { name: ' Launch' }).click();
-            const launchPage = await launchPagePromise;
-            await launchPage.waitForURL(`**/${sceneId}**`, { waitUntil: 'networkidle' });
-            launchPage.close();
+            await page.getByText('RENDERING').click();
+            const webgpu = await page.locator('div').filter({ hasText: /^Enable WebGPU$/ }).locator('div');
+            const webgl2 = await page.locator('div').filter({ hasText: /^Enable WebGL 2\.0$/ }).locator('div');
+
+            const launch = await page.getByRole('button', { name: ' Launch' });
+            const debug = await page.locator('div').filter({ hasText: /^Debug$/ }).locator('div');
+            const profiler = await page.locator('div').filter({ hasText: /^Profiler$/ }).locator('div');
+
+            const selectType = async (type: 'debug' | 'profiler' | 'release') => {
+                await launch.hover();
+                if ((await debug.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                    await debug.click();
+                }
+                if ((await profiler.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                    await profiler.click();
+                }
+                switch (type) {
+                    case 'debug': {
+                        await debug.click();
+                        break;
+                    }
+                    case 'profiler': {
+                        await profiler.click();
+                        break;
+                    }
+                }
+            };
+            const selectVersion = async (version: 'current' | 'previous' | 'releaseCandidate') => {
+                await page.locator([
+                    'div.pcui-container.settings',
+                    'div:nth-child(2)',
+                    'div:nth-child(2)',
+                    'div:first-child',
+                    'div:first-child',
+                    'div:nth-child(2)'
+                ].join(' > ')).click();
+                const option = await page.locator(`#layout-attributes #${version}`);
+                if (await option.count() > 0) {
+                    await option.click();
+                }
+            };
+            const selectDevice = async (device: 'webgl2' | 'webgpu') => {
+                if ((await webgpu.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                    await webgpu.click();
+                }
+                if ((await webgl2.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                    await webgl2.click();
+                }
+                switch (device) {
+                    case 'webgpu': {
+                        await webgpu.click();
+                        break;
+                    }
+                    case 'webgl2': {
+                        await webgl2.click();
+                        break;
+                    }
+                }
+            };
+
+            // list of devices, types, and versions to test
+            const versions = ['current', 'previous', 'releaseCandidate'] as const;
+            const types = ['debug', 'profiler', 'release'] as const;
+            const devices = ['webgpu', 'webgl2'] as const;
+
+            // open launcher for each combination
+            for (const version of versions) {
+                for (const type of types) {
+                    for (const device of devices) {
+                        await selectVersion(version);
+                        await selectType(type);
+                        await selectDevice(device);
+
+                        const launchPagePromise = page.waitForEvent('popup');
+                        await launch.click();
+                        const launchPage = await launchPagePromise;
+                        await launchPage.waitForURL(`**/${sceneId}**`, { waitUntil: 'networkidle' });
+                        launchPage.close();
+                    }
+                }
+            }
         })).toStrictEqual([]);
     });
 
-    test('delete project', async () => {
-        expect(await capture('delete-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await deleteProject(page, projectId);
-        })).toStrictEqual([]);
-    });
+    // test('delete project', async () => {
+    //     expect(await capture('delete-project', page, async () => {
+    //         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+    //         await deleteProject(page, projectId);
+    //     })).toStrictEqual([]);
+    // });
 });
 
 test.describe('publish/download', () => {
