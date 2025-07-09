@@ -3,10 +3,12 @@ import { expect, test, type Page } from '@playwright/test';
 import { capture } from '../../lib/capture';
 import {
     createProject,
-    deleteProject
+    deleteProject,
+    getSetting
 } from '../../lib/common';
 import { editorBlankUrl, editorUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
+import { wait } from '../../lib/utils';
 
 const PROJECT_NAME = 'Blank Project';
 
@@ -77,6 +79,7 @@ test.describe('navigation', () => {
     test('create project', async () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
             projectId = await createProject(page, PROJECT_NAME);
         })).toStrictEqual([]);
     });
@@ -104,15 +107,12 @@ test.describe('navigation', () => {
 
     test('goto launcher', async () => {
         expect(await capture('launcher', page, async () => {
-            // uncheck debug option
-            await page.getByRole('button', { name: ' Launch' }).hover();
-            await page.locator('div').filter({ hasText: /^Debug$/ }).locator('div').click();
+            // open settings dialog
+            await page.locator('button').first().click();
+            await page.locator('span').filter({ hasText: /^Settings$/ }).click();
+            await page.waitForSelector('div.pcui-container.settings');
 
-            const devices = ['webgpu', 'webgl2', 'webgl1'];
-            const types = ['debug', 'profiler', 'release'];
-            const versions = ['current', 'previous', 'force', 'releaseCandidate'];
-
-
+            // launch
             const launchPagePromise = page.waitForEvent('popup');
             await page.getByRole('button', { name: ' Launch' }).click();
             const launchPage = await launchPagePromise;
@@ -121,12 +121,12 @@ test.describe('navigation', () => {
         })).toStrictEqual([]);
     });
 
-    // test('delete project', async () => {
-    //     expect(await capture('delete-project', page, async () => {
-    //         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-    //         await deleteProject(page, projectId);
-    //     })).toStrictEqual([]);
-    // });
+    test('delete project', async () => {
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
+    });
 });
 
 test.describe('publish/download', () => {
