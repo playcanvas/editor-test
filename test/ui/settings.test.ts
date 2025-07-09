@@ -40,16 +40,10 @@ test.describe('settings', () => {
         })).toStrictEqual([]);
     });
 
-    test('goto editor', async () => {
-        expect(await capture('editor', page, async () => {
-            await page.getByText('Blank Project').click();
-            await page.getByRole('button', { name: 'EDITOR' }).click();
-            await page.waitForURL('**/editor/scene/**', { waitUntil: 'networkidle' });
-        })).toStrictEqual([]);
-    });
-
     test('check settings', async () => {
         expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
             // open settings dialog
             await page.locator('button').first().click();
             await page.locator('span').filter({ hasText: /^Settings$/ }).click();
