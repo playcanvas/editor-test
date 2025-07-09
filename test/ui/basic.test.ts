@@ -266,6 +266,7 @@ test.describe('publish/download', () => {
             const appPagePromise = page.waitForEvent('popup');
             await page.getByText('Blank Project', { exact: true }).click();
             const appPage = await appPagePromise;
+            await appPage.waitForURL('**/b/**', { waitUntil: 'networkidle' });
             await appPage.close();
 
             // delete app
