@@ -124,7 +124,6 @@ test.describe('navigation', () => {
                 for (const type of types) {
                     for (const version of versions) {
                         const url = launchSceneUrl(sceneId, { device, type, version });
-                        // eslint-disable-next-line no-await-in-loop
                         await page.goto(url, { waitUntil: 'networkidle' });
                     }
                 }
