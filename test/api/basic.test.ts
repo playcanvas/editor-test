@@ -119,8 +119,7 @@ test.describe('navigation', () => {
                 versions.push(releaseCandidate.version);
             }
 
-            // generate all combinations of devices, types, and versions
-            const options = [];
+            // open launcher for each combination
             for (const device of devices) {
                 for (const type of types) {
                     for (const version of versions) {
@@ -128,16 +127,12 @@ test.describe('navigation', () => {
                         if (device === 'webgl1' && !version.startsWith('1.')) {
                             continue;
                         }
-                        options.push({ device, type, version });
+
+                        const url = launchSceneUrl(sceneId, { device, type, version });
+                        // eslint-disable-next-line no-await-in-loop
+                        await page.goto(url, { waitUntil: 'networkidle' });
                     }
                 }
-            }
-
-            // open launcher for each combination
-            for (const opt of options) {
-                const url = launchSceneUrl(sceneId, opt);
-                // eslint-disable-next-line no-await-in-loop
-                await page.goto(url, { waitUntil: 'networkidle' });
             }
         })).toStrictEqual([]);
     });
