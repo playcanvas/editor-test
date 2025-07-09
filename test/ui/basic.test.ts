@@ -3,12 +3,10 @@ import { expect, test, type Page } from '@playwright/test';
 import { capture } from '../../lib/capture';
 import {
     createProject,
-    deleteProject,
-    getSetting
+    deleteProject
 } from '../../lib/common';
 import { editorBlankUrl, editorUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
-import { wait } from '../../lib/utils';
 
 const PROJECT_NAME = 'Blank Project';
 
@@ -93,17 +91,17 @@ test.describe('navigation', () => {
         })).toStrictEqual([]);
     });
 
-    // test('goto code editor', async () => {
-    //     expect(await capture('code-editor', page, async () => {
-    //         // open code editor
-    //         const codePagePromise = page.waitForEvent('popup');
-    //         await page.locator('button').first().click();
-    //         await page.locator('span').filter({ hasText: /^Code Editor$/ }).click();
-    //         const codePage = await codePagePromise;
-    //         await codePage.waitForURL('**/editor/code/**', { waitUntil: 'networkidle' });
-    //         codePage.close();
-    //     })).toStrictEqual([]);
-    // });
+    test('goto code editor', async () => {
+        expect(await capture('code-editor', page, async () => {
+            // open code editor
+            const codePagePromise = page.waitForEvent('popup');
+            await page.locator('button').first().click();
+            await page.locator('span').filter({ hasText: /^Code Editor$/ }).click();
+            const codePage = await codePagePromise;
+            await codePage.waitForURL('**/editor/code/**', { waitUntil: 'networkidle' });
+            codePage.close();
+        })).toStrictEqual([]);
+    });
 
     test('goto launcher', async () => {
         expect(await capture('launcher', page, async () => {
@@ -196,12 +194,12 @@ test.describe('navigation', () => {
         })).toStrictEqual([]);
     });
 
-    // test('delete project', async () => {
-    //     expect(await capture('delete-project', page, async () => {
-    //         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-    //         await deleteProject(page, projectId);
-    //     })).toStrictEqual([]);
-    // });
+    test('delete project', async () => {
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
+    });
 });
 
 test.describe('publish/download', () => {
