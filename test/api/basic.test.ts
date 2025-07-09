@@ -106,12 +106,12 @@ test.describe('navigation', () => {
 
     test('goto launcher', async () => {
         expect(await capture('launcher', page, async () => {
-            const { current, previous, force, releaseCandidate } = engineVersions;
+            const { current, previous, releaseCandidate } = engineVersions;
 
             // list of devices, types, and versions to test
-            const devices = ['webgpu', 'webgl2', 'webgl1'];
+            const devices = ['webgpu', 'webgl2'];
             const types = ['debug', 'profiler', 'release'];
-            const versions = [current.version, force.version];
+            const versions = [current.version];
             if (previous) {
                 versions.push(previous.version);
             }
@@ -123,11 +123,6 @@ test.describe('navigation', () => {
             for (const device of devices) {
                 for (const type of types) {
                     for (const version of versions) {
-                        // skip webgl1 for versions other than 1.x
-                        if (device === 'webgl1' && !version.startsWith('1.')) {
-                            continue;
-                        }
-
                         const url = launchSceneUrl(sceneId, { device, type, version });
                         // eslint-disable-next-line no-await-in-loop
                         await page.goto(url, { waitUntil: 'networkidle' });
