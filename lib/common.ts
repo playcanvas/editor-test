@@ -13,20 +13,6 @@ export const injectInterface = async (page: Page) => {
 };
 
 /**
- * Find a setting by name.
- *
- * @param page - The page to search in.
- * @param name - The name of the setting to find.
- * @returns - The div containing the setting.
- */
-export const getSetting = (page: Page, name: string) => {
-    return page
-    .locator('div')
-    .filter({ hasText: new RegExp(`^${name}$`) })
-    .locator('div');
-};
-
-/**
  * Polls for a job to complete.
  *
  * @param page - The page to poll.
