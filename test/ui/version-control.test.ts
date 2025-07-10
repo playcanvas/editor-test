@@ -82,7 +82,6 @@ test.describe('branch/checkpoint/diff/merge', () => {
             // create red branch
             await page.locator(`#checkpoint-${mainCheckpointId}`).getByText('').click();
             await page.locator('div').filter({ hasText: /^New Branch$/ }).nth(1).click();
-            await page.getByRole('textbox').nth(3).click();
             await page.getByRole('textbox').nth(3).fill('red');
             await page.getByText('Create New Branch').click();
 
@@ -117,7 +116,6 @@ test.describe('branch/checkpoint/diff/merge', () => {
             // create green branch
             await page.locator(`#checkpoint-${mainCheckpointId}`).getByText('').click();
             await page.locator('div').filter({ hasText: /^New Branch$/ }).nth(1).click();
-            await page.getByRole('textbox').nth(3).click();
             await page.getByRole('textbox').nth(3).fill('green');
             await page.getByText('Create New Branch').click();
 
