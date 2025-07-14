@@ -187,7 +187,7 @@ test.describe('navigation', () => {
                         await launch.click();
                         const launchPage = await launchPagePromise;
                         await launchPage.waitForURL(`**/${sceneId}**`, { waitUntil: 'networkidle' });
-                        launchPage.close();
+                        await launchPage.close();
                     }
                 }
             }
