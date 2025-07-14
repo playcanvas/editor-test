@@ -1,0 +1,32 @@
+name: Test
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: 'test'
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Editor Testing Suite
+        run: |
+          docker run \
+          --pull always \
+          --rm \
+          -e PC_HOST=playcanvas.com \
+          -e PC_LOGIN_HOST=login.playcanvas.com \
+          -e PC_LAUNCH_HOST=launch.playcanvas.com \
+          -e PC_EMAIL=${{ secrets.PC_EMAIL }} \
+          -e PC_PASSWORD=${{ secrets.PC_PASSWORD }} \
+          ghcr.io/playcanvas/editor-test:latest
