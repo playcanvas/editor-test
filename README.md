@@ -71,6 +71,32 @@ To create new tests, ensure you have [Node.js](https://nodejs.org/) 18 or later 
 > [!NOTE]
 > Run `npm run` for the full list of npm scripts
 
+## Library integration testing
+
+The testing suite is built on the following open source libraries:
+
+| Library                                                       | Details                                     |
+| ------------------------------------------------------------- | ------------------------------------------- |
+| [PlayCanvas Engine](https://github.com/playcanvas/engine)     | Powers the Editor's 3D View and Launch Page |
+| [Observer](https://github.com/playcanvas/playcanvas-observer) | Data binding and history                    |
+| [Editor API](https://github.com/playcanvas/editor-api)        | Public API for Editor automation            |
+
+To test the integration of these libraries use [npm link](https://docs.npmjs.com/cli/v9/commands/npm-link). Follow these steps:
+
+1. Create a global link from source
+
+    ```sh
+    cd <library>
+    npm run link
+    ```
+
+2. Create a link to the global link
+
+    ```sh
+    cd editor-test
+    npm run link <library>
+    ```
+
 [resolution-badge]: https://isitmaintained.com/badge/resolution/playcanvas/editor-test.svg
 [open-issues-badge]: https://isitmaintained.com/badge/open/playcanvas/editor-test.svg
 [isitmaintained-url]: https://isitmaintained.com/project/playcanvas/editor-test
