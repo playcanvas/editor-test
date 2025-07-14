@@ -48,7 +48,7 @@ test.describe('create/delete', () => {
     test('delete project', async () => {
         expect(await capture('delete-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByText(PROJECT_NAME).click();
+            await page.getByText(PROJECT_NAME).first().click();
             await page.getByRole('button', { name: 'DELETE PROJECT' }).click();
             await page.getByRole('textbox').nth(4).fill(PROJECT_NAME);
             await page.getByRole('button', { name: 'DELETE', exact: true }).click();
