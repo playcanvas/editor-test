@@ -34,7 +34,7 @@ export default defineConfig({
             dependencies: ['auth']
         },
         {
-            name: 'chromium',
+            name: 'chrome',
             use: {
                 ...devices['Desktop Chrome'],
                 storageState: AUTH_STATE
