@@ -104,32 +104,42 @@ test.describe('navigation', () => {
         })).toStrictEqual([]);
     });
 
-    test('goto launcher', async () => {
-        expect(await capture('launcher', page, async () => {
-            const { current, previous, releaseCandidate } = engineVersions;
+    for (const version of ['current', 'previous', 'releaseCandidate'] as const) {
+        for (const type of ['debug', 'profiler', 'release'] as const) {
+            for (const device of ['webgpu', 'webgl2'] as const) {
+                test(`goto launcher (version: ${version}, type: ${type}, device: ${device})`, async () => {
+                    expect(await capture('launcher', page, async () => {
+                        const { current, previous, releaseCandidate } = engineVersions;
 
-            // list of devices, types, and versions to test
-            const versions = [current.version];
-            if (previous) {
-                versions.push(previous.version);
-            }
-            if (releaseCandidate) {
-                versions.push(releaseCandidate.version);
-            }
-            const types = ['debug', 'profiler', 'release'];
-            const devices = ['webgpu', 'webgl2'];
+                        // select version number
+                        let versionNumber = current.version;
+                        switch (version) {
+                            case 'previous': {
+                                if (!previous) {
+                                    test.skip(true, `no previous version available for ${version}`);
+                                    return;
+                                }
+                                versionNumber = previous.version;
+                                break;
+                            }
+                            case 'releaseCandidate': {
+                                if (!releaseCandidate) {
+                                    test.skip(true, `no release candidate version available for ${version}`);
+                                    return;
+                                }
+                                versionNumber = releaseCandidate.version;
+                                break;
+                            }
+                        }
 
-            // open launcher for each combination
-            for (const version of versions) {
-                for (const type of types) {
-                    for (const device of devices) {
-                        const url = launchSceneUrl(sceneId, { device, type, version });
+                        // launch page
+                        const url = launchSceneUrl(sceneId, { device, type, version: versionNumber });
                         await page.goto(url, { waitUntil: 'networkidle' });
-                    }
-                }
+                    })).toStrictEqual([]);
+                });
             }
-        })).toStrictEqual([]);
-    });
+        }
+    }
 
     test('delete project', async () => {
         expect(await capture('delete-project', page, async () => {
