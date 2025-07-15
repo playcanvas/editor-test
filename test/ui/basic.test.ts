@@ -103,96 +103,89 @@ test.describe('navigation', () => {
         })).toStrictEqual([]);
     });
 
-    test('goto launcher', async () => {
-        expect(await capture('launcher', page, async () => {
+    test('open settings', async () => {
+        expect(await capture('settings', page, async () => {
             // open settings dialog
             await page.locator('button').first().click();
             await page.locator('span').filter({ hasText: /^Settings$/ }).click();
             await page.waitForSelector('.pcui-container.settings');
 
             await page.getByText('RENDERING', { exact: true }).click();
-            const webgpu = await page.locator('div').filter({ hasText: /^Enable WebGPU$/ }).locator('div');
-            const webgl2 = await page.locator('div').filter({ hasText: /^Enable WebGL 2\.0$/ }).locator('div');
+        })).toStrictEqual([]);
+    });
 
-            const launch = await page.getByRole('button', { name: ' Launch' });
-            const debug = await page.locator('div').filter({ hasText: /^Debug$/ }).locator('div');
-            const profiler = await page.locator('div').filter({ hasText: /^Profiler$/ }).locator('div');
+    for (const version of ['current', 'previous', 'releaseCandidate'] as const) {
+        for (const type of ['debug', 'profiler', 'release'] as const) {
+            for (const device of ['webgpu', 'webgl2'] as const) {
+                test(`goto launcher (version: ${version}, type: ${type}, device: ${device})`, async () => {
+                    expect(await capture('launcher', page, async () => {
+                        // select version
+                        await page.locator([
+                            '.pcui-container.settings',
+                            '.pcui-collapsible:nth-child(2)',
+                            '.pcui-panel-content',
+                            '.pcui-inspector',
+                            ':first-child',
+                            ':nth-child(2)'
+                        ].join(' > ')).click();
+                        const option = await page.locator(`#layout-attributes #${version}`);
+                        if (await option.count() > 0) {
+                            await option.click();
+                        }
 
-            const selectType = async (type: 'debug' | 'profiler' | 'release') => {
-                await launch.hover();
-                if ((await debug.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
-                    await debug.click();
-                }
-                if ((await profiler.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
-                    await profiler.click();
-                }
-                switch (type) {
-                    case 'debug': {
-                        await debug.click();
-                        break;
-                    }
-                    case 'profiler': {
-                        await profiler.click();
-                        break;
-                    }
-                }
-            };
-            const selectVersion = async (version: 'current' | 'previous' | 'releaseCandidate') => {
-                await page.locator([
-                    '.pcui-container.settings',
-                    '.pcui-collapsible:nth-child(2)',
-                    '.pcui-panel-content',
-                    '.pcui-inspector',
-                    ':first-child',
-                    ':nth-child(2)'
-                ].join(' > ')).click();
-                const option = await page.locator(`#layout-attributes #${version}`);
-                if (await option.count() > 0) {
-                    await option.click();
-                }
-            };
-            const selectDevice = async (device: 'webgl2' | 'webgpu') => {
-                if ((await webgpu.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
-                    await webgpu.click();
-                }
-                if ((await webgl2.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
-                    await webgl2.click();
-                }
-                switch (device) {
-                    case 'webgpu': {
-                        await webgpu.click();
-                        break;
-                    }
-                    case 'webgl2': {
-                        await webgl2.click();
-                        break;
-                    }
-                }
-            };
+                        // select type
+                        const launch = await page.getByRole('button', { name: ' Launch' });
+                        const debug = await page.locator('div').filter({ hasText: /^Debug$/ }).locator('div');
+                        const profiler = await page.locator('div').filter({ hasText: /^Profiler$/ }).locator('div');
+                        await launch.hover();
+                        if ((await debug.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                            await debug.click();
+                        }
+                        if ((await profiler.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                            await profiler.click();
+                        }
+                        switch (type) {
+                            case 'debug': {
+                                await debug.click();
+                                break;
+                            }
+                            case 'profiler': {
+                                await profiler.click();
+                                break;
+                            }
+                        }
 
-            // list of devices, types, and versions to test
-            const versions = ['current', 'previous', 'releaseCandidate'] as const;
-            const types = ['debug', 'profiler', 'release'] as const;
-            const devices = ['webgpu', 'webgl2'] as const;
+                        // select device
+                        const webgpu = await page.locator('div').filter({ hasText: /^Enable WebGPU$/ }).locator('div');
+                        const webgl2 = await page.locator('div').filter({ hasText: /^Enable WebGL 2\.0$/ }).locator('div');
+                        if ((await webgpu.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                            await webgpu.click();
+                        }
+                        if ((await webgl2.getAttribute('class'))?.includes('pcui-boolean-input-ticked')) {
+                            await webgl2.click();
+                        }
+                        switch (device) {
+                            case 'webgpu': {
+                                await webgpu.click();
+                                break;
+                            }
+                            case 'webgl2': {
+                                await webgl2.click();
+                                break;
+                            }
+                        }
 
-            // open launcher for each combination
-            for (const version of versions) {
-                for (const type of types) {
-                    for (const device of devices) {
-                        await selectVersion(version);
-                        await selectType(type);
-                        await selectDevice(device);
-
+                        // launch page
                         const launchPagePromise = page.waitForEvent('popup');
                         await launch.click();
                         const launchPage = await launchPagePromise;
                         await launchPage.waitForURL(`**/${sceneId}**`, { waitUntil: 'networkidle' });
                         await launchPage.close();
-                    }
-                }
+                    })).toStrictEqual([]);
+                });
             }
-        })).toStrictEqual([]);
-    });
+        }
+    }
 
     test('delete project', async () => {
         expect(await capture('delete-project', page, async () => {
