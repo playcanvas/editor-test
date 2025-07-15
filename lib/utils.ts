@@ -34,12 +34,15 @@ export const wait = (ms: number) => {
     });
 };
 
+const map = new Map<string, number>();
 /**
- * Generate a new id.
+ * Generate a unique name.
  *
- * @returns A function that returns a new id.
+ * @returns A unique name.
  */
-export const id = () => {
-    let id = 0;
-    return () => id++;
+export const uniqueName = (name: string) => {
+    const id = map.get(name) || 0;
+    const next = id + 1;
+    map.set(name, next);
+    return `${name}-${next}`;
 };

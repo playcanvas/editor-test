@@ -8,15 +8,14 @@ import {
 } from '../../lib/common';
 import { editorBlankUrl, editorUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
-import { wait } from '../../lib/utils';
-
-const PROJECT_NAME = 'Blank Project';
+import { uniqueName, wait } from '../../lib/utils';
 
 test.describe.configure({
     mode: 'serial'
 });
 
 test.describe('branch/checkpoint/diff/merge', () => {
+    const projectName = uniqueName('api-vc');
     let projectId: number;
     let page: Page;
     let materialId: number;
@@ -45,7 +44,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, PROJECT_NAME);
+            projectId = await createProject(page, projectName);
         })).toStrictEqual([]);
     });
 

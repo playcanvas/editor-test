@@ -10,14 +10,15 @@ import {
 } from '../../lib/common';
 import { codeEditorUrl, editorBlankUrl, editorSceneUrl, editorUrl, launchSceneUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
-
-const PROJECT_NAME = 'Blank Project';
+import { uniqueName } from '../../lib/utils';
 
 test.describe.configure({
     mode: 'serial'
 });
 
 test.describe('create/delete', () => {
+    const projectName = uniqueName('api-project');
+    const forkedProjectName = uniqueName('api-project');
     let projectId: number;
     let forkedProjectId: number;
     let page: Page;
@@ -38,14 +39,14 @@ test.describe('create/delete', () => {
     test('create project', async () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            projectId = await createProject(page, PROJECT_NAME);
+            projectId = await createProject(page, projectName);
         })).toStrictEqual([]);
     });
 
     test('fork project', async () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            forkedProjectId = await createProject(page, `${PROJECT_NAME} FORK`, projectId);
+            forkedProjectId = await createProject(page, forkedProjectName, projectId);
         })).toStrictEqual([]);
     });
 
@@ -65,6 +66,7 @@ test.describe('create/delete', () => {
 });
 
 test.describe('navigation', () => {
+    const projectName = uniqueName('api-nav');
     let projectId: number;
     let sceneId: number;
     let engineVersions: typeof window.config.engineVersions;
@@ -86,7 +88,7 @@ test.describe('navigation', () => {
     test('create project', async () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            projectId = await createProject(page, PROJECT_NAME);
+            projectId = await createProject(page, projectName);
         })).toStrictEqual([]);
     });
 
@@ -150,6 +152,7 @@ test.describe('navigation', () => {
 });
 
 test.describe('publish/download', () => {
+    const projectName = uniqueName('api-apps');
     let projectId: number;
     let sceneId: number;
     let page: Page;
@@ -171,7 +174,7 @@ test.describe('publish/download', () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, PROJECT_NAME);
+            projectId = await createProject(page, projectName);
         })).toStrictEqual([]);
     });
 

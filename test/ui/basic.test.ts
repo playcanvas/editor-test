@@ -7,14 +7,14 @@ import {
 } from '../../lib/common';
 import { editorBlankUrl, editorUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
-
-const PROJECT_NAME = 'Blank Project';
+import { uniqueName } from '../../lib/utils';
 
 test.describe.configure({
     mode: 'serial'
 });
 
 test.describe('create/delete', () => {
+    const projectName = uniqueName('ui-project');
     let page: Page;
 
     test.describe.configure({
@@ -36,7 +36,7 @@ test.describe('create/delete', () => {
             await page.getByRole('button', { name: 'Accept All Cookies' }).click();
             await page.getByRole('button', { name: 'NEW PROJECT' }).click();
             await page.locator('div').filter({ hasText: /^NameDescriptionPrivate \(Premium\)$/ })
-            .locator('input[type="text"]').fill(PROJECT_NAME);
+            .locator('input[type="text"]').fill(projectName);
             await page.getByRole('button', { name: 'CREATE' }).click();
             await page.getByRole('button', { name: 'Open New Project' }).click();
             await page.waitForURL('**/editor/scene/**');
@@ -48,15 +48,16 @@ test.describe('create/delete', () => {
     test('delete project', async () => {
         expect(await capture('delete-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByText(PROJECT_NAME).last().click();
+            await page.getByText(projectName).first().click();
             await page.getByRole('button', { name: 'DELETE PROJECT' }).click();
-            await page.getByRole('textbox').nth(4).fill(PROJECT_NAME);
+            await page.getByRole('textbox').nth(4).fill(projectName);
             await page.getByRole('button', { name: 'DELETE', exact: true }).click();
         })).toStrictEqual([]);
     });
 });
 
 test.describe('navigation', () => {
+    const projectName = uniqueName('ui-nav');
     let projectId: number;
     let sceneId: number;
     let page: Page;
@@ -78,13 +79,13 @@ test.describe('navigation', () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, PROJECT_NAME);
+            projectId = await createProject(page, projectName);
         })).toStrictEqual([]);
     });
 
     test('goto editor', async () => {
         expect(await capture('editor', page, async () => {
-            await page.getByText(PROJECT_NAME).last().click();
+            await page.getByText(projectName).first().click();
             await page.getByRole('button', { name: 'EDITOR' }).click();
             await page.waitForURL('**/editor/scene/**', { waitUntil: 'networkidle' });
             sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
@@ -196,6 +197,7 @@ test.describe('navigation', () => {
 });
 
 test.describe('publish/download', () => {
+    const projectName = uniqueName('ui-apps');
     let projectId: number;
     let page: Page;
 
@@ -216,7 +218,7 @@ test.describe('publish/download', () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, PROJECT_NAME);
+            projectId = await createProject(page, projectName);
         })).toStrictEqual([]);
     });
 
@@ -275,7 +277,7 @@ test.describe('publish/download', () => {
 
             // launch app
             const appPagePromise = page.waitForEvent('popup');
-            await page.getByText('Blank Project', { exact: true }).click();
+            await page.getByText(projectName, { exact: true }).click();
             const appPage = await appPagePromise;
             await appPage.waitForURL('**/b/**', { waitUntil: 'networkidle' });
             await appPage.close();
