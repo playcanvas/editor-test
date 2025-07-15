@@ -33,7 +33,8 @@ export default [
             'jsdoc/require-returns': 'off',
             'jsdoc/require-returns-type': 'off',
             'no-use-before-define': 'off',
-            'no-await-in-loop': 'off'
+            'no-await-in-loop': 'off',
+            'no-loop-func': 'off'
         }
     },
     {
