@@ -84,7 +84,7 @@ test.describe('navigation', () => {
 
     test('goto editor', async () => {
         expect(await capture('editor', page, async () => {
-            await page.getByText('Blank Project').click();
+            await page.getByText(PROJECT_NAME).first().click();
             await page.getByRole('button', { name: 'EDITOR' }).click();
             await page.waitForURL('**/editor/scene/**', { waitUntil: 'networkidle' });
             sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
