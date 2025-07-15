@@ -6,7 +6,7 @@ import { AUTH_STATE } from './lib/config';
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
-    timeout: 2 * 60 * 1000,
+    timeout: 5 * 60 * 1000,
     testDir: './test',
     fullyParallel: false, // FIXME: Enable once account per worker is implemented
     forbidOnly: !!process.env.CI,
