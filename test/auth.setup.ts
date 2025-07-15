@@ -20,7 +20,7 @@ setup('authenticate user', async ({ page }) => {
         await page.goto(`https://${HOST}/editor`);
         const title = await page.title();
         if (/Editor/.test(title)) {
-            setup.skip();
+            setup.skip(true, 'already authenticated');
             return;
         }
     }
