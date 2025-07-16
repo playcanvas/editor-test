@@ -46,7 +46,10 @@ export const createProject = async (page: Page, projectName: string, masterProje
     await injectInterface(page);
 
     const create = await page.evaluate(
-        ({ name, id }) => window.wi.createProject(window.config.self.username, name, id),
+        ({ name, id }) => window.editor.api.globals.rest.projects.projectCreate({
+            name,
+            fork_from: id
+        }).promisify() as any,
         {
             name: projectName,
             id: masterProjectId
