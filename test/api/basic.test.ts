@@ -1,3 +1,5 @@
+import { tmpdir } from 'os';
+
 import { expect, test, type Page } from '@playwright/test';
 
 import { capture } from '../../lib/capture';
@@ -6,11 +8,15 @@ import {
     deleteApp,
     deleteProject,
     downloadApp,
+    exportProject,
+    importProject,
     publishApp
 } from '../../lib/common';
 import { codeEditorUrl, editorBlankUrl, editorSceneUrl, editorUrl, launchSceneUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
 import { uniqueName } from '../../lib/utils';
+
+const EXPORT_PATH = `${tmpdir()}/exported-project.zip`;
 
 test.describe.configure({
     mode: 'serial'
@@ -54,6 +60,63 @@ test.describe('create/delete', () => {
         expect(await capture('delete-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await deleteProject(page, forkedProjectId);
+        })).toStrictEqual([]);
+    });
+
+    test('delete project', async () => {
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
+        })).toStrictEqual([]);
+    });
+});
+
+test.describe('export/import', () => {
+    const projectName = uniqueName('api-export');
+    let projectId: number;
+    let importedProjectId: number;
+    let page: Page;
+
+    test.describe.configure({
+        mode: 'serial'
+    });
+
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage();
+        await middleware(page.context());
+    });
+
+    test.afterAll(async () => {
+        await page.close();
+    });
+
+    test('create project', async () => {
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            projectId = await createProject(page, projectName);
+        })).toStrictEqual([]);
+    });
+
+    test('export project', async () => {
+        expect(await capture('export-project', page, async () => {
+            const downloadPromise = page.waitForEvent('download');
+            await exportProject(page, projectId);
+            const download = await downloadPromise;
+            await download.saveAs(EXPORT_PATH);
+        })).toStrictEqual([]);
+    });
+
+    test('import project', async () => {
+        expect(await capture('import-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            importedProjectId = await importProject(page, EXPORT_PATH);
+        })).toStrictEqual([]);
+    });
+
+    test('delete imported project', async () => {
+        expect(await capture('delete-imported-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, importedProjectId);
         })).toStrictEqual([]);
     });
 
