@@ -9,7 +9,7 @@ import { type Page } from '@playwright/test';
  * @returns The data result.
  */
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
-    return await page.evaluate(async ({ name, fork_from }) => {
+    const projectId: number = await page.evaluate(async ({ name, fork_from }) => {
         const res: any = await window.editor.api.globals.rest.projects.projectCreate({
             name,
             fork_from
@@ -53,6 +53,7 @@ export const createProject = async (page: Page, projectName: string, masterProje
         // return project id
         return job.data?.forked_id ?? 0;
     }, { name: projectName, fork_from: masterProjectId });
+    return projectId;
 };
 
 /**
