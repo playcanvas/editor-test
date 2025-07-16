@@ -247,8 +247,11 @@ export const publishApp = async (page: Page, sceneId: number): Promise<{ id: num
 export const deleteApp = async (page: Page, appId: number) => {
     await injectInterface(page);
 
-    const delJob = await page.evaluate(appId => window.wi.deleteApp(appId), appId);
-    if (delJob.error) {
-        throw new Error(`Delete error: ${delJob.error}`);
+    const job = await page.evaluate((appId) => {
+        const app = window.editor.api.globals.rest.apps.appDelete(appId).promisify() as any;
+        return app.task ?? { error: 'Job not found' };
+    }, appId);
+    if (job.error) {
+        throw new Error(`Delete error: ${job.error}`);
     }
 };
