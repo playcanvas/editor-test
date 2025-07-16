@@ -101,25 +101,6 @@ export const importProject = async (page: Page, importPath: string) => {
     // import project
     const fileChooserPromise = page.waitForEvent('filechooser');
     const importProjectPromise = page.evaluate(async () => {
-        const ajax = (method: string, url: string, data?: object | FormData, auth: boolean = true) => {
-            const headers = {
-                Authorization: `Bearer ${window.config.accessToken}`,
-                'Content-Type': 'application/json'
-            };
-            let body;
-            if (data instanceof FormData) {
-                body = data;
-            } else {
-                headers['Content-Type'] = 'application/json';
-                body = JSON.stringify(data);
-            }
-            return fetch(url, {
-                method,
-                headers: auth ? headers : undefined,
-                body
-            });
-        };
-
         const filePicker = document.createElement('input');
         filePicker.id = 'file-picker';
         filePicker.type = 'file';
@@ -145,17 +126,31 @@ export const importProject = async (page: Page, importPath: string) => {
         const chunkCount = Math.ceil(file.size / chunkSize);
 
         // start upload
-        const startRes = await ajax('POST', '/api/upload/start-upload', {
-            fileName: file.name
-        }, true);
+        const startRes = await fetch('/api/upload/start-upload', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${window.config.accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fileName: file.name
+            })
+        });
         const startJson = await startRes.json();
 
         // get signed urls
-        const signedRes = await ajax('POST', '/api/upload/signed-urls', {
-            uploadId: startJson.uploadId,
-            parts: chunkCount,
-            key: startJson.key
-        }, true);
+        const signedRes = await fetch('/api/upload/signed-urls', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${window.config.accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                uploadId: startJson.uploadId,
+                parts: chunkCount,
+                key: startJson.key
+            })
+        });
         const signedJson = await signedRes.json();
 
         // upload chunks
@@ -186,11 +181,18 @@ export const importProject = async (page: Page, importPath: string) => {
         }
 
         // complete upload
-        await ajax('POST', '/api/upload/complete-upload', {
-            uploadId: startJson.uploadId,
-            parts: parts,
-            key: startJson.key
-        }, true);
+        await fetch('/api/upload/complete-upload', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${window.config.accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                uploadId: startJson.uploadId,
+                parts: parts,
+                key: startJson.key
+            })
+        });
 
         // import project
         const job: any = await window.editor.api.globals.rest.projects.projectImport({
