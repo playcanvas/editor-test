@@ -45,11 +45,11 @@ export const pollJob = async (page: Page, jobId: number) => {
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
     await injectInterface(page);
 
-    const create = await page.evaluate(
+    const create: any = await page.evaluate(
         ({ name, fork_from }) => window.editor.api.globals.rest.projects.projectCreate({
             name,
             fork_from
-        }).promisify() as any,
+        }).promisify(),
         {
             name: projectName,
             fork_from: masterProjectId
@@ -93,10 +93,10 @@ export const deleteProject = async (page: Page, projectId: number) => {
  * @param page - The page.
  */
 export const deleteAllProjects = async (page: Page) => {
-    await injectInterface(page);
-
-    const projects = await page.evaluate(() => window.wi.getProjects(window.config.self.id));
-
+    const projects = await page.evaluate(async () => {
+        const res: any = await window.editor.api.globals.rest.users.userProjects(window.config.self.id, '').promisify();
+        return res.result ?? [];
+    });
     let deletePromise = Promise.resolve();
     for (const project of projects) {
         deletePromise = deletePromise.then(async () => {
