@@ -21,7 +21,7 @@ export const injectInterface = async (page: Page) => {
  */
 export const pollJob = async (page: Page, jobId: number) => {
     const job = await poll(async () => {
-        const job = await page.evaluate(jobId => window.wi.checkJob(jobId), jobId);
+        const job = await page.evaluate(jobId => window.editor.api.globals.rest.jobs.jobGet({ jobId }).promisify(), jobId);
         if (job.status !== 'running') {
             return job;
         }
