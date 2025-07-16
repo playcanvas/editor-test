@@ -20,7 +20,7 @@
     "typecheck": "tsc --declaration --emitDeclarationOnly"
   },
   "devDependencies": {
-    "@playcanvas/editor-api": "^1.1.19",
+    "@playcanvas/editor-api": "^1.1.22",
     "@playcanvas/eslint-config": "^2.0.9",
     "@playcanvas/observer": "^1.6.6",
     "@playwright/test": "^1.53.2",

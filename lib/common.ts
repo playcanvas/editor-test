@@ -174,7 +174,7 @@ export const downloadApp = async (page: Page, sceneId: number): Promise<{ downlo
             const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
                 if (name === 'job.update' && data.job.id === job.id) {
                     handle.unbind();
-                    resolve(await window.editor.api.globals.rest.jobs.jobGet(data.job.id).promisify());
+                    resolve(await window.editor.api.globals.rest.jobs.jobGet({ jobId: data.job.id }).promisify());
                 }
             });
         });
