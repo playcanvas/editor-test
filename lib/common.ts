@@ -245,10 +245,8 @@ export const publishApp = async (page: Page, sceneId: number): Promise<{ id: num
  * @param appId - The app id.
  */
 export const deleteApp = async (page: Page, appId: number) => {
-    await injectInterface(page);
-
-    const job = await page.evaluate((appId) => {
-        const app = window.editor.api.globals.rest.apps.appDelete(appId).promisify() as any;
+    const job = await page.evaluate(async (appId) => {
+        const app: any = await window.editor.api.globals.rest.apps.appDelete(appId).promisify();
         return app.task ?? { error: 'Job not found' };
     }, appId);
     if (job.error) {
