@@ -200,11 +200,10 @@ export const importProject = async (page: Page, importPath: string) => {
         }, true);
 
         // import project
-        const res = await ajax('POST', '/api/projects/import', {
+        return await window.editor.api.globals.rest.projects.projectImport({
             export_url: startJson.key,
             owner: window.config.self.id
-        });
-        return await res.json();
+        }).promisify() as any;
     });
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(importPath);
