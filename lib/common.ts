@@ -1,16 +1,6 @@
 import { type Page } from '@playwright/test';
 
 import { poll, wait } from './utils';
-import { WebInterface } from './web-interface';
-
-/**
- * Inject the web interface into the page.
- *
- * @param page - The page to inject the interface into.
- */
-export const injectInterface = async (page: Page) => {
-    await page.evaluate(`window.wi = new (${WebInterface.toString()})()`);
-};
 
 /**
  * Polls for a job to complete.
@@ -43,8 +33,6 @@ export const pollJob = async (page: Page, jobId: number) => {
  * @returns The data result.
  */
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
-    await injectInterface(page);
-
     const create: any = await page.evaluate(
         ({ name, fork_from }) => window.editor.api.globals.rest.projects.projectCreate({
             name,
@@ -117,11 +105,107 @@ export const deleteAllProjects = async (page: Page) => {
  * @returns The data result.
  */
 export const importProject = async (page: Page, importPath: string) => {
-    await injectInterface(page);
-
-    // start import
+    // import project
     const fileChooserPromise = page.waitForEvent('filechooser');
-    const importProjectPromise = page.evaluate(() => window.wi.startImport(window.config.self.id));
+    const importProjectPromise = page.evaluate(async () => {
+        const ajax = (method: string, url: string, data?: object | FormData, auth: boolean = true) => {
+            const headers = {
+                Authorization: `Bearer ${window.config.accessToken}`,
+                'Content-Type': 'application/json'
+            };
+            let body;
+            if (data instanceof FormData) {
+                body = data;
+            } else {
+                headers['Content-Type'] = 'application/json';
+                body = JSON.stringify(data);
+            }
+            return fetch(url, {
+                method,
+                headers: auth ? headers : undefined,
+                body
+            });
+        };
+
+        const filePicker = document.createElement('input');
+        filePicker.id = 'file-picker';
+        filePicker.type = 'file';
+        filePicker.accept = 'application/zip';
+        filePicker.click();
+        const files = await new Promise<FileList | null>((resolve) => {
+            filePicker.addEventListener('change', () => {
+                resolve(filePicker.files);
+            });
+        });
+        filePicker.remove();
+
+        if (!files || files.length === 0) {
+            return { error: 'No files selected' };
+        }
+        const file = files[0];
+
+        const form = new FormData();
+        form.append('file', file);
+
+        // calculate chunk count
+        const chunkSize = 20 * 1024 * 1024;
+        const chunkCount = Math.ceil(file.size / chunkSize);
+
+        // start upload
+        const startRes = await ajax('POST', '/api/upload/start-upload', {
+            fileName: file.name
+        }, true);
+        const startJson = await startRes.json();
+
+        // get signed urls
+        const signedRes = await ajax('POST', '/api/upload/signed-urls', {
+            uploadId: startJson.uploadId,
+            parts: chunkCount,
+            key: startJson.key
+        }, true);
+        const signedJson = await signedRes.json();
+
+        // upload chunks
+        let chunk = 1;
+        const promises = [];
+        for (let start = 0; start < file.size; start += chunkSize) {
+            const end = Math.min(start + chunkSize, file.size);
+            const blob = file.slice(start, end);
+            const url = signedJson.signedUrls[chunk - 1];
+            promises.push(fetch(url, {
+                method: 'PUT',
+                body: blob,
+                headers: {
+                    'Content-Type': 'application/zip'
+                }
+            }));
+            chunk++;
+        }
+        const uploadRes = await Promise.all(promises);
+
+        // get etags
+        const parts = [];
+        for (let i = 0; i < uploadRes.length; i++) {
+            const res = uploadRes[i];
+            const etag = res.headers.get('ETag') ?? '';
+            const cleanEtag = etag.replace(/^"|"$/g, '');
+            parts.push({ PartNumber: i + 1, ETag: cleanEtag });
+        }
+
+        // complete upload
+        await ajax('POST', '/api/upload/complete-upload', {
+            uploadId: startJson.uploadId,
+            parts: parts,
+            key: startJson.key
+        }, true);
+
+        // import project
+        const res = await ajax('POST', '/api/projects/import', {
+            export_url: startJson.key,
+            owner: window.config.self.id
+        });
+        return await res.json();
+    });
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(importPath);
     const importProject = await importProjectPromise;
