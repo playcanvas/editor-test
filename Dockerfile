@@ -17,4 +17,4 @@ COPY package.json package-lock.json ./
 COPY tsconfig.json ./
 
 ENV CI=true
-CMD ["npm", "run", "test-ci"]
+CMD ["npm", "run", "test"]
