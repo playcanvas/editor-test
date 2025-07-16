@@ -46,13 +46,13 @@ export const createProject = async (page: Page, projectName: string, masterProje
     await injectInterface(page);
 
     const create = await page.evaluate(
-        ({ name, id }) => window.editor.api.globals.rest.projects.projectCreate({
+        ({ name, fork_from }) => window.editor.api.globals.rest.projects.projectCreate({
             name,
-            fork_from: id
+            fork_from
         }).promisify() as any,
         {
             name: projectName,
-            id: masterProjectId
+            fork_from: masterProjectId
         }
     );
     if (create.error) {
