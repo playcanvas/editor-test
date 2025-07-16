@@ -1,29 +1,5 @@
 import { type Page } from '@playwright/test';
 
-import { poll, wait } from './utils';
-
-/**
- * Polls for a job to complete.
- *
- * @param page - The page to poll.
- * @param jobId - The job id to poll.
- * @returns The job result.
- */
-export const pollJob = async (page: Page, jobId: number) => {
-    const job = await poll(async () => {
-        const job = await page.evaluate(jobId => window.editor.api.globals.rest.jobs.jobGet({ jobId }).promisify(), jobId);
-        if (job.status !== 'running') {
-            return job;
-        }
-    });
-    if (job.error) {
-        throw new Error(`Job error: ${job.error}`);
-    } else if (job.status !== 'complete') {
-        throw new Error(`Job status: ${job.status}`);
-    }
-    return job;
-};
-
 /**
  * Create a project. If masterProjectId is provided, the project will be forked from the master project.
  *
@@ -33,33 +9,50 @@ export const pollJob = async (page: Page, jobId: number) => {
  * @returns The data result.
  */
 export const createProject = async (page: Page, projectName: string, masterProjectId?: number) => {
-    const create: any = await page.evaluate(
-        ({ name, fork_from }) => window.editor.api.globals.rest.projects.projectCreate({
+    return await page.evaluate(async ({ name, fork_from }) => {
+        const res: any = await window.editor.api.globals.rest.projects.projectCreate({
             name,
             fork_from
-        }).promisify(),
-        {
-            name: projectName,
-            fork_from: masterProjectId
+        }).promisify();
+
+        // check if not forked (no job created)
+        if (!fork_from && res.id) {
+            // wait for pipeline job to complete (version control documents)
+            await new Promise<void>((resolve, reject) => {
+                const handle = window.editor.api.globals.messenger.on('message', (name: string, data: any) => {
+                    if (name === 'project.create' && data.project_id === res.id) {
+                        handle.unbind();
+                        if (data.status === 'success') {
+                            resolve();
+                        } else {
+                            reject(new Error(`Project creation failed: ${data.error}`));
+                        }
+                    }
+                });
+            });
+
+            // return project id
+            return res.id;
         }
-    );
-    if (create.error) {
-        throw new Error(`Create error: ${create.error}`);
-    }
-    if (!masterProjectId && create.id) {
-        // FIXME: project creation should be complete after response returned by need to wait
-        // for route to be generated
-        await wait(3000);
+
+        // wait for job to complete
+        const job = await new Promise<any>((resolve) => {
+            const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
+                if (name === 'job.update' && data.job.id === res.id) {
+                    handle.unbind();
+                    resolve(await window.editor.api.globals.rest.jobs.jobGet({ jobId: data.job.id }).promisify());
+                }
+            });
+        });
+
+        // check for errors
+        if (job.error) {
+            throw new Error(`Create error: ${job.error}`);
+        }
 
         // return project id
-        return create.id;
-    }
-
-    // FIXME: Poll job completion
-    const job = await pollJob(page, create.id);
-
-    // return project id
-    return job.data?.forked_id ?? 0;
+        return job.data?.forked_id ?? 0;
+    }, { name: projectName, fork_from: masterProjectId });
 };
 
 /**
