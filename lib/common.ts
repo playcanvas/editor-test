@@ -140,7 +140,7 @@ export const importProject = async (page: Page, importPath: string) => {
         filePicker.remove();
 
         if (!files || files.length === 0) {
-            return { error: 'No files selected' };
+            throw new Error('No files selected');
         }
         const file = files[0];
 
@@ -200,22 +200,27 @@ export const importProject = async (page: Page, importPath: string) => {
         }, true);
 
         // import project
-        return await window.editor.api.globals.rest.projects.projectImport({
+        const job: any = await window.editor.api.globals.rest.projects.projectImport({
             export_url: startJson.key,
             owner: window.config.self.id
-        }).promisify() as any;
+        }).promisify();
+
+        // wait for job to complete
+        return await new Promise<any>((resolve) => {
+            const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
+                if (name === 'job.update' && data.job.id === job.id) {
+                    handle.unbind();
+                    resolve(await window.editor.api.globals.rest.jobs.jobGet({ jobId: data.job.id }).promisify());
+                }
+            });
+        });
     });
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(importPath);
-    const importProject = await importProjectPromise;
-    if (importProject.error) {
-        throw new Error(`Import error: ${importProject.error}`);
+    const job = await importProjectPromise;
+    if (job.error) {
+        throw new Error(`Import error: ${job.error}`);
     }
-
-    // FIXME: Poll job completion
-    const job = await pollJob(page, importProject.id);
-
-    // return project id
     return job.data?.project_id ?? 0;
 };
 
