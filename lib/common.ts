@@ -79,12 +79,9 @@ export const createProject = async (page: Page, projectName: string, masterProje
  * @returns The errors.
  */
 export const deleteProject = async (page: Page, projectId: number) => {
-    await injectInterface(page);
-
-    const success = await page.evaluate(id => window.wi.deleteProject(id), projectId);
-    if (!success) {
-        throw new Error('Failed to delete project');
-    }
+    await page.evaluate((projectId) => {
+        return window.editor.api.globals.rest.projects.projectDelete({ projectId }).promisify();
+    }, projectId);
 };
 
 /**
@@ -100,10 +97,9 @@ export const deleteAllProjects = async (page: Page) => {
     let deletePromise = Promise.resolve();
     for (const project of projects) {
         deletePromise = deletePromise.then(async () => {
-            const success = await page.evaluate(id => window.wi.deleteProject(id), project.id);
-            if (!success) {
-                throw new Error('Failed to delete project');
-            }
+            await page.evaluate((projectId) => {
+                return window.editor.api.globals.rest.projects.projectDelete({ projectId }).promisify();
+            }, project.id);
         });
     }
 
