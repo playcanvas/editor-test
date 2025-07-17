@@ -170,16 +170,17 @@ test.describe('navigation', () => {
                 test(`goto launcher (version: ${version}, type: ${type}, device: ${device})`, async () => {
                     expect(await capture('launcher', page, async () => {
                         const { current, previous, releaseCandidate } = engineVersions;
+                        const args: Record<string, string> = { device };
 
                         // select version number
-                        let versionNumber = current.version;
+                        args.version = current.version;
                         switch (version) {
                             case 'previous': {
                                 if (!previous) {
                                     test.skip(true, `no previous version available for ${version}`);
                                     return;
                                 }
-                                versionNumber = previous.version;
+                                args.version = previous.version;
                                 break;
                             }
                             case 'releaseCandidate': {
@@ -187,13 +188,25 @@ test.describe('navigation', () => {
                                     test.skip(true, `no release candidate version available for ${version}`);
                                     return;
                                 }
-                                versionNumber = releaseCandidate.version;
+                                args.version = releaseCandidate.version;
+                                break;
+                            }
+                        }
+
+                        // select type
+                        switch (type) {
+                            case 'debug': {
+                                args.debug = 'true';
+                                break;
+                            }
+                            case 'profiler': {
+                                args.profile = 'true';
                                 break;
                             }
                         }
 
                         // launch page
-                        const url = launchSceneUrl(sceneId, { device, type, version: versionNumber });
+                        const url = launchSceneUrl(sceneId, args);
                         await page.goto(url, { waitUntil: 'networkidle' });
                     })).toStrictEqual([]);
                 });
