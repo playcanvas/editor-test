@@ -34,21 +34,22 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
         await middleware(page.context());
+
+        // create a temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        projectId = await createProject(page, projectName);
     });
 
     test.afterAll(async () => {
+        // delete temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await deleteProject(page, projectId);
+
         await page.close();
     });
 
-    test('create project', async () => {
-        expect(await capture('create-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, projectName);
-        })).toStrictEqual([]);
-    });
-
-    test('prepare project', async () => {
+    test('create base checkpoint', async () => {
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
 
@@ -339,13 +340,6 @@ test.describe('branch/checkpoint/diff/merge', () => {
 
             // delete branch
             await page.getByText('Delete Branch', { exact: true }).click();
-        })).toStrictEqual([]);
-    });
-
-    test('delete project', async () => {
-        expect(await capture('delete-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await deleteProject(page, projectId);
         })).toStrictEqual([]);
     });
 });
