@@ -80,18 +80,19 @@ test.describe('export/import', () => {
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
         await middleware(page.context());
+
+        // create a temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        projectId = await createProject(page, projectName);
     });
 
     test.afterAll(async () => {
-        await page.close();
-    });
+        // delete temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await deleteProject(page, projectId);
 
-    test('create project', async () => {
-        expect(await capture('create-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, projectName);
-        })).toStrictEqual([]);
+        await page.close();
     });
 
     test('export project', async () => {
@@ -114,12 +115,6 @@ test.describe('export/import', () => {
             await deleteProject(page, importedProjectId);
         })).toStrictEqual([]);
     });
-
-    test('delete project', async () => {
-        expect(await capture('delete-project', page, async () => {
-            await deleteProject(page, projectId);
-        })).toStrictEqual([]);
-    });
 });
 
 test.describe('navigation', () => {
@@ -136,18 +131,19 @@ test.describe('navigation', () => {
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
         await middleware(page.context());
+
+        // create a temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        projectId = await createProject(page, projectName);
     });
 
     test.afterAll(async () => {
-        await page.close();
-    });
+        // delete temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await deleteProject(page, projectId);
 
-    test('create project', async () => {
-        expect(await capture('create-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, projectName);
-        })).toStrictEqual([]);
+        await page.close();
     });
 
     test('goto editor', async () => {
@@ -213,13 +209,6 @@ test.describe('navigation', () => {
             }
         }
     }
-
-    test('delete project', async () => {
-        expect(await capture('delete-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await deleteProject(page, projectId);
-        })).toStrictEqual([]);
-    });
 });
 
 test.describe('publish/download', () => {
@@ -235,25 +224,23 @@ test.describe('publish/download', () => {
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
         await middleware(page.context());
+
+        // create a temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        projectId = await createProject(page, projectName);
+
+        // acquire scene ID
+        await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+        sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
     });
 
     test.afterAll(async () => {
+        // delete temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await deleteProject(page, projectId);
+
         await page.close();
-    });
-
-    test('create project', async () => {
-        expect(await capture('create-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await createProject(page, projectName);
-        })).toStrictEqual([]);
-    });
-
-    test('goto editor', async () => {
-        expect(await capture('editor', page, async () => {
-            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
-            sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
-        })).toStrictEqual([]);
     });
 
     test('download app', async () => {
@@ -277,13 +264,6 @@ test.describe('publish/download', () => {
             // delete app
             await page.goto(editorSceneUrl(sceneId), { waitUntil: 'networkidle' });
             await deleteApp(page, app.id);
-        })).toStrictEqual([]);
-    });
-
-    test('delete project', async () => {
-        expect(await capture('delete-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await deleteProject(page, projectId);
         })).toStrictEqual([]);
     });
 });

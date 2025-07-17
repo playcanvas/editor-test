@@ -27,18 +27,19 @@ test.describe('migrations', () => {
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
         await middleware(page.context());
+
+        // import project containing textures
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        projectId = await importProject(page, IN_PATH);
     });
 
     test.afterAll(async () => {
-        await page.close();
-    });
+        // delete temporary project
+        await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+        await deleteProject(page, projectId);
 
-    test('import project', async () => {
-        expect(await capture('import-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
-            projectId = await importProject(page, IN_PATH);
-        })).toStrictEqual([]);
+        await page.close();
     });
 
     test('prepare project', async () => {
@@ -156,13 +157,6 @@ test.describe('migrations', () => {
         // check for errors
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
-        })).toStrictEqual([]);
-    });
-
-    test('delete project', async () => {
-        expect(await capture('delete-project', page, async () => {
-            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await deleteProject(page, projectId);
         })).toStrictEqual([]);
     });
 });
