@@ -221,6 +221,43 @@ export const importProject = async (page: Page, importPath: string) => {
 };
 
 /**
+ * Export a project.
+ *
+ * @param page - The page.
+ * @param projectId - The project id.
+ */
+export const exportProject = async (page: Page, projectId: number) => {
+    await page.evaluate(async (projectId) => {
+        const job: any = await window.editor.api.globals.rest.projects.projectExport({ projectId }).promisify();
+        if (job.error) {
+            throw new Error(`Export error: ${job.error}`);
+        }
+
+        // wait for job to complete
+        const res = await new Promise<any>((resolve) => {
+            const handle = window.editor.api.globals.messenger.on('message', async (name: string, data: any) => {
+                if (name === 'job.update' && data.job.id === job.id) {
+                    handle.unbind();
+                    resolve(await window.editor.api.globals.rest.jobs.jobGet({ jobId: data.job.id }).promisify());
+                }
+            });
+        });
+
+        // check for errors
+        if (res.error) {
+            throw new Error(`Export error: ${res.error}`);
+        }
+
+        // download the exported project
+        const download = document.createElement('a');
+        download.href = res.data.url;
+        document.body.appendChild(download);
+        download.click();
+        document.body.removeChild(download);
+    }, projectId);
+};
+
+/**
  * Download project app.
  *
  * @param page - The page.
