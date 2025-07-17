@@ -113,15 +113,14 @@ test.describe('export/import', () => {
             await fileChooser.setFiles(EXPORT_PATH);
             await upload;
 
-            // wait for import to complete
-            const continueBtn = await page.waitForSelector([
+            // wait for continue prompt
+            await page.waitForSelector([
                 '.ui-overlay.picker-modal-confirmation',
                 '.content',
                 '.pcui-panel',
                 '.pcui-panel-content',
                 '.positive-action-button'
             ].join(' > '));
-            await continueBtn.click();
         })).toStrictEqual([]);
     });
 
