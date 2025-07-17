@@ -1,3 +1,5 @@
+import { tmpdir } from 'os';
+
 import { expect, test, type Page } from '@playwright/test';
 
 import { capture } from '../../lib/capture';
@@ -8,6 +10,8 @@ import {
 import { editorBlankUrl, editorUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
 import { uniqueName } from '../../lib/utils';
+
+const EXPORT_PATH = `${tmpdir()}/exported-project.zip`;
 
 test.describe.configure({
     mode: 'serial'
@@ -52,6 +56,89 @@ test.describe('create/delete', () => {
             await page.getByRole('button', { name: 'DELETE PROJECT' }).click();
             await page.getByRole('textbox').nth(4).fill(projectName);
             await page.getByRole('button', { name: 'DELETE', exact: true }).click();
+        })).toStrictEqual([]);
+    });
+});
+
+test.describe('export/import', () => {
+    const projectName = uniqueName('api-export');
+    let projectId: number;
+    let page: Page;
+
+    test.describe.configure({
+        mode: 'serial'
+    });
+
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage();
+        await middleware(page.context());
+    });
+
+    test.afterAll(async () => {
+        await page.close();
+    });
+
+    test('create project', async () => {
+        expect(await capture('create-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+            projectId = await createProject(page, projectName);
+        })).toStrictEqual([]);
+    });
+
+    test('export project', async () => {
+        expect(await capture('export-project', page, async () => {
+            // open project dialog
+            await page.getByText(projectName).first().click();
+
+            // save export project
+            const downloadPagePromise = page.waitForEvent('popup');
+            const downloadPromise = page.waitForEvent('download');
+            await page.getByRole('button', { name: 'EXPORT PROJECT' }).click();
+            await downloadPagePromise;
+            const download = await downloadPromise;
+            await download.saveAs(EXPORT_PATH);
+        })).toStrictEqual([]);
+    });
+
+    test('import project', async () => {
+        expect(await capture('import-project', page, async () => {
+            // close project dialog
+            await page.getByText('').click();
+
+            // import project
+            const fileChooserPromise = page.waitForEvent('filechooser');
+            const upload = page.getByRole('button', { name: '', exact: true }).click();
+            const fileChooser = await fileChooserPromise;
+            await fileChooser.setFiles(EXPORT_PATH);
+            await upload;
+
+            // wait for import to complete
+            const continueBtn = await page.waitForSelector([
+                '.ui-overlay.picker-modal-confirmation',
+                '.content',
+                '.pcui-panel',
+                '.pcui-panel-content',
+                '.positive-action-button'
+            ].join(' > '));
+            await continueBtn.click();
+        })).toStrictEqual([]);
+    });
+
+    test('delete imported project', async () => {
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await page.getByText(projectName).first().click();
+            await page.getByRole('button', { name: 'DELETE PROJECT' }).click();
+            await page.getByRole('textbox').nth(4).fill(projectName);
+            await page.getByRole('button', { name: 'DELETE', exact: true }).click();
+        })).toStrictEqual([]);
+    });
+
+    test('delete project', async () => {
+        expect(await capture('delete-project', page, async () => {
+            await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
+            await deleteProject(page, projectId);
         })).toStrictEqual([]);
     });
 });
