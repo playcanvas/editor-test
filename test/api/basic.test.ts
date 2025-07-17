@@ -229,10 +229,6 @@ test.describe('publish/download', () => {
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
         await page.getByRole('button', { name: 'Accept All Cookies' }).click();
         projectId = await createProject(page, projectName);
-
-        // acquire scene ID
-        await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
-        sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
     });
 
     test.afterAll(async () => {
@@ -241,6 +237,13 @@ test.describe('publish/download', () => {
         await deleteProject(page, projectId);
 
         await page.close();
+    });
+
+    test('goto editor', async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+            sceneId = parseInt(await page.evaluate(() => window.config.scene.id), 10);
+        })).toStrictEqual([]);
     });
 
     test('download app', async () => {

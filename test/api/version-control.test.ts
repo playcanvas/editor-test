@@ -49,7 +49,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
         await page.close();
     });
 
-    test('prepare project', async () => {
+    test('create base checkpoint', async () => {
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
 
