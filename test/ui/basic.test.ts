@@ -11,8 +11,6 @@ import { editorBlankUrl, editorUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
 import { uniqueName } from '../../lib/utils';
 
-const EXPORT_PATH = `${tmpdir()}/exported-project.zip`;
-
 test.describe.configure({
     mode: 'serial'
 });
@@ -38,12 +36,15 @@ test.describe('create/delete', () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+
+            // create project
             await page.getByRole('button', { name: 'NEW PROJECT' }).click();
             await page.locator('div').filter({ hasText: /^NameDescriptionPrivate \(Premium\)$/ })
             .locator('input[type="text"]').fill(projectName);
             await page.getByRole('button', { name: 'CREATE' }).click();
-            await page.getByRole('button', { name: 'Open New Project' }).click();
-            await page.waitForURL('**/editor/scene/**');
+
+            // continue browsing
+            await page.getByRole('button', { name: 'Continue browsing' }).click();
         })).toStrictEqual([]);
     });
 
@@ -62,6 +63,7 @@ test.describe('create/delete', () => {
 
 test.describe('export/import', () => {
     const projectName = uniqueName('api-export');
+    const exportPath = `${tmpdir()}/${uniqueName('exported-project')}.zip`;
     let projectId: number;
     let page: Page;
 
@@ -97,7 +99,7 @@ test.describe('export/import', () => {
             await page.getByRole('button', { name: 'EXPORT PROJECT' }).click();
             await downloadPagePromise;
             const download = await downloadPromise;
-            await download.saveAs(EXPORT_PATH);
+            await download.saveAs(exportPath);
         })).toStrictEqual([]);
     });
 
@@ -110,22 +112,16 @@ test.describe('export/import', () => {
             const fileChooserPromise = page.waitForEvent('filechooser');
             const upload = page.getByRole('button', { name: '', exact: true }).click();
             const fileChooser = await fileChooserPromise;
-            await fileChooser.setFiles(EXPORT_PATH);
+            await fileChooser.setFiles(exportPath);
             await upload;
 
-            // wait for continue prompt
-            await page.waitForSelector([
-                '.ui-overlay.picker-modal-confirmation',
-                '.content',
-                '.pcui-panel',
-                '.pcui-panel-content',
-                '.positive-action-button'
-            ].join(' > '));
+            // continue browsing
+            await page.getByRole('button', { name: 'Continue browsing' }).click();
         })).toStrictEqual([]);
     });
 
     test('delete imported project', async () => {
-        expect(await capture('delete-project', page, async () => {
+        expect(await capture('delete-imported-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
             await page.getByText(projectName).first().click();
             await page.getByRole('button', { name: 'DELETE PROJECT' }).click();
