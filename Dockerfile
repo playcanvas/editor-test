@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/playwright:v1.53.2-noble AS base
-WORKDIR /usr/src/app
+WORKDIR /usr/src/test
 
 FROM base AS install
 RUN mkdir -p /temp/dev

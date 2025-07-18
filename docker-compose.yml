@@ -6,4 +6,4 @@ services:
     env_file:
       - .env.dev
     volumes:
-      - ./.auth:/usr/src/app/.auth
+      - ./.auth:/usr/src/test/.auth
