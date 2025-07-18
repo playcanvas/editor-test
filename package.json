@@ -11,7 +11,6 @@
     "test-debug": "playwright test --debug ",
     "test-ui": "playwright test --ui",
     "test-headed": "playwright test --headed",
-    "docker": "docker compose up --build",
     "report": "playwright show-report",
     "codegen": "playwright codegen --load-storage .auth/state.json",
     "auth": "tsx src/auth.ts",
