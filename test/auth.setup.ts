@@ -17,7 +17,7 @@ if (SESSION_EXISTS) {
 setup('authenticate user', async ({ page }) => {
     await middleware(page.context());
     if (SESSION_EXISTS) {
-        await page.goto(`https://${HOST}/editor`);
+        await page.goto(`https://${HOST}/editor`, { waitUntil: 'networkidle' });
         const title = await page.title();
         if (/Editor/.test(title)) {
             setup.skip(true, 'already authenticated');
