@@ -42,8 +42,14 @@ To run the test suite ensure you have [Docker](https://www.docker.com/) installe
     docker compose up
     ```
 
+3. Stop the container with Docker compose
+
+    ```sh
+    docker compose down --remove-orphans
+    ```
+
 > [!NOTE]
-> To build the image from source instead of pulling from the registry append the `--build` flag or run `npm run docker`
+> To build the image from source instead of pulling from the registry append the `--build` flag
 
 ## Local Development
 
