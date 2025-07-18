@@ -2,9 +2,9 @@ import { chromium } from '@playwright/test';
 
 import { LOGIN_HOST } from './config';
 
-export const googleAuth = async (statePath: string, email: string, password: string) => {
+export const googleAuth = async (statePath: string, email: string, password: string, headless: boolean = true) => {
     const browser = await chromium.launch({
-        headless: true,
+        headless,
         args: [
             '--disable-features=IsolateOrigins,site-per-process',
             '--disable-blink-features=AutomationControlled'
@@ -35,9 +35,9 @@ export const googleAuth = async (statePath: string, email: string, password: str
     await browser.close();
 };
 
-export const nativeAuth = async (statePath: string, email: string, password: string) => {
+export const nativeAuth = async (statePath: string, email: string, password: string, headless: boolean = true) => {
     const browser = await chromium.launch({
-        headless: true,
+        headless,
         args: [
             '--disable-features=IsolateOrigins,site-per-process',
             '--disable-blink-features=AutomationControlled'
