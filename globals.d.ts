@@ -8,6 +8,4 @@ interface Window {
             globals: typeof import('@playcanvas/editor-api').globals
         };
     };
-
-    wi: import('./lib/web-interface').WebInterface;
 }
