@@ -9,8 +9,7 @@ const RPM = {
         normal: 120,
         strict: 5,
         assets: 120,
-        post: 30,
-        download: 5000
+        post: 30
     }
 };
 
@@ -44,12 +43,6 @@ const limiters = {
             maxConcurrent: MAX_CONCURRENT,
             reservoir: RPM.api.post,
             reservoirRefreshAmount: RPM.api.post,
-            reservoirRefreshInterval: ONE_MINUTE
-        }),
-        download: new Bottleneck({
-            maxConcurrent: MAX_CONCURRENT,
-            reservoir: RPM.api.download * 2,
-            reservoirRefreshAmount: RPM.api.download,
             reservoirRefreshInterval: ONE_MINUTE
         })
     }
