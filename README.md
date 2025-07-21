@@ -36,6 +36,9 @@ To run the test suite ensure you have [Docker](https://www.docker.com/) installe
     PC_LOCAL_FRONTEND=<true|false>
     ```
 
+> [!IMPORTANT]
+> The account used must be an existing account
+
 2. Run the container with Docker compose
 
     ```sh
