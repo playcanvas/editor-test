@@ -37,7 +37,7 @@ To run the test suite ensure you have [Docker](https://www.docker.com/) installe
     ```
 
 > [!IMPORTANT]
-> The account used must be an existing account
+> The account used must be an existing account. Create one [here](https://login.playcanvas.com)
 
 2. Run the container with Docker compose
 
