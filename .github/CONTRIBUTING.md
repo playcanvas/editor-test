@@ -102,7 +102,7 @@ editor-test/
 
 1. **Create a feature branch** from `main`:
    ```bash
-   git checkout -b feature/your-test-name
+   git checkout -b feat/your-test-name
    ```
 
 2. **Keep your branch up to date**:
@@ -279,7 +279,7 @@ await wait(5000); // Use sparingly
 
 1. **Push your branch** to your fork:
    ```bash
-   git push origin feature/your-test-name
+   git push origin feat/your-test-name
    ```
 
 2. **Create a Pull Request** on GitHub with:
