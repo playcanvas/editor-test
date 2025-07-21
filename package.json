@@ -16,7 +16,7 @@
     "auth": "tsx src/auth.ts",
     "home": "tsx src/home.ts",
     "lint": "eslint . --ext .ts,.mjs",
-    "typecheck": "tsc --declaration --emitDeclarationOnly"
+    "type:check": "tsc --declaration --emitDeclarationOnly"
   },
   "devDependencies": {
     "@playcanvas/editor-api": "^1.1.24",
