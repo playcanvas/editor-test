@@ -33,7 +33,7 @@ To run the test suite ensure you have [Docker](https://www.docker.com/) installe
     PC_LAUNCH_HOST=launch.playcanvas.com
     PC_EMAIL=<playcanvas-email>
     PC_PASSWORD=<playcanvas-password>
-    PC_FRONTEND=<optional-frontend>
+    PC_LOCAL_FRONTEND=<true|false>
     ```
 
 2. Run the container with Docker compose
