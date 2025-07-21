@@ -9,7 +9,7 @@ export const PASSWORD = process.env.PC_PASSWORD ?? '';
 export const HOST = process.env.PC_HOST ?? 'playcanvas.com';
 export const LOGIN_HOST = process.env.PC_LOGIN_HOST ?? 'login.playcanvas.com';
 export const LAUNCH_HOST = process.env.PC_LAUNCH_HOST ?? 'launch.playcanvas.com';
-export const PC_LOCAL_FRONTEND = process.env.PC_LOCAL_FRONTEND === 'true';
+export const LOCAL_FRONTEND = process.env.PC_LOCAL_FRONTEND === 'true';
 
 if (!EMAIL || !PASSWORD) {
     throw new Error('PC_EMAIL and PC_PASSWORD are not set in the environment variables.');
@@ -17,7 +17,7 @@ if (!EMAIL || !PASSWORD) {
 
 const queryString = (params: SearchParams) => {
     const preset = [];
-    if (PC_LOCAL_FRONTEND) {
+    if (LOCAL_FRONTEND) {
         preset.push('use_local_frontend');
     }
     return preset.concat(Object.entries(params).map(([key, value]) => {
