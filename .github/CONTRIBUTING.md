@@ -124,9 +124,7 @@ editor-test/
 
 2. **Test your changes** thoroughly:
    ```bash
-   npm test                   # Run all tests
-   npm run test:api           # Run API tests only
-   npm run test:ui            # Run UI tests only
+   npm test
    ```
 
 3. **Ensure code quality**:
@@ -328,21 +326,40 @@ When reporting bugs or requesting test improvements:
 # Run all tests
 npm test
 
-# Run specific test categories
-npm run test:api
+# Run tests with UI mode
 npm run test:ui
+
+# Run tests in headed mode (see browser)
+npm run test:headed
 
 # Run tests in debug mode
 npm run test:debug
+
+# Run specific test files
+npm test -- test/api/basic.test.ts
+npm test -- test/ui/version-control.test.ts
+
+# Run tests matching a pattern
+npm test -- --grep "create project"
+npm test -- --grep "version control"
+
+# Run API tests only
+npm test -- test/api/
+
+# Run UI tests only
+npm test -- test/ui/
+
+# Generate test code interactively
+npm run codegen
+
+# View test report
+npm run report
 
 # Run linting
 npm run lint
 
 # Type checking
 npm run type:check
-
-# Clean up test projects
-npm run test:clean
 ```
 
 ### Common Issues
