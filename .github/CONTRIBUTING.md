@@ -23,7 +23,7 @@ By participating in this project, you are expected to uphold our Code of Conduct
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 16 or later
+- [Node.js](https://nodejs.org/) 18 or later
 - [Git](https://git-scm.com/)
 - A GitHub account
 - Access to PlayCanvas Editor environment
