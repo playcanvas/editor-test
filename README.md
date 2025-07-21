@@ -12,6 +12,8 @@ This is the official testing suite for the [PlayCanvas Editor](https://playcanva
 [![Percentage of issues still open][open-issues-badge]][isitmaintained-url]
 [![Twitter][twitter-badge]][twitter-url]
 
+![Playwright](./images/playwright.png)
+
 </div>
 
 ## Tests
