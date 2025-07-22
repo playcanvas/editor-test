@@ -11,6 +11,7 @@ const context = await browser.newContext({
     storageState: fs.existsSync(AUTH_STATE) ? AUTH_STATE : undefined
 });
 const page = await context.newPage();
+await page.context().storageState({ path: AUTH_STATE });
 page.on('close', async () => {
     await browser.close();
 });
