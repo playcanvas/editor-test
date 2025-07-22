@@ -34,3 +34,4 @@ jobs:
               tags: ghcr.io/playcanvas/editor-test:latest
               cache-from: type=registry,ref=ghcr.io/playcanvas/editor-test:cache
               cache-to: type=registry,ref=ghcr.io/playcanvas/editor-test:cache,mode=max
+              platforms: linux/amd64,linux/arm64
