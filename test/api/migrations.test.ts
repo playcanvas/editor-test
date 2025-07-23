@@ -2,7 +2,7 @@ import type { Observer } from '@playcanvas/observer';
 import { expect, test, type Page } from '@playwright/test';
 
 import { capture } from '../../lib/capture';
-import { deleteProject, importProject } from '../../lib/common';
+import { checkCookieAccept, deleteProject, importProject } from '../../lib/common';
 import { editorBlankUrl, editorUrl } from '../../lib/config';
 import { middleware } from '../../lib/middleware';
 
@@ -30,7 +30,7 @@ test.describe('migrations', () => {
 
         // import project containing textures
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await importProject(page, IN_PATH);
     });
 

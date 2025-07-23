@@ -4,6 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { capture } from '../../lib/capture';
 import {
+    checkCookieAccept,
     createProject,
     deleteProject
 } from '../../lib/common';
@@ -35,7 +36,7 @@ test.describe('create/delete', () => {
     test('create project', async () => {
         expect(await capture('create-project', page, async () => {
             await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-            await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+            await checkCookieAccept(page);
 
             // create project
             await page.getByRole('button', { name: 'NEW PROJECT' }).click();
@@ -77,7 +78,7 @@ test.describe('export/import', () => {
 
         // create a temporary project
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await createProject(page, projectName);
     });
 
@@ -148,7 +149,7 @@ test.describe('navigation', () => {
 
         // create a temporary project
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await createProject(page, projectName);
     });
 
@@ -281,7 +282,7 @@ test.describe('publish/download', () => {
 
         // create a temporary project
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await createProject(page, projectName);
     });
 

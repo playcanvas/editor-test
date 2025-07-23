@@ -4,6 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { capture } from '../../lib/capture';
 import {
+    checkCookieAccept,
     createProject,
     deleteApp,
     deleteProject,
@@ -83,7 +84,7 @@ test.describe('export/import', () => {
 
         // create a temporary project
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await createProject(page, projectName);
     });
 
@@ -134,7 +135,7 @@ test.describe('navigation', () => {
 
         // create a temporary project
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await createProject(page, projectName);
     });
 
@@ -227,7 +228,7 @@ test.describe('publish/download', () => {
 
         // create a temporary project
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await createProject(page, projectName);
     });
 

@@ -1,6 +1,19 @@
 import { type Page } from '@playwright/test';
 
 /**
+ * Check if the "Accept All Cookies" button is present and click it.
+ * This is necessary to ensure that the test can proceed without being blocked by cookie consent banners.
+ *
+ * @param page - The page to check for the cookie consent button.
+ */
+export const checkCookieAccept = async (page: Page) => {
+    const cookie = page.getByRole('button', { name: 'Accept All Cookies' });
+    if (await cookie.count() > 0) {
+        await cookie.click();
+    }
+};
+
+/**
  * Create a project. If masterProjectId is provided, the project will be forked from the master project.
  *
  * @param page - The page.

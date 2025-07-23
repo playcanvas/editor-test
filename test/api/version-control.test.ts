@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { capture } from '../../lib/capture';
 import {
+    checkCookieAccept,
     createProject,
     deleteProject
 } from '../../lib/common';
@@ -37,7 +38,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
 
         // create a temporary project
         await page.goto(editorBlankUrl(), { waitUntil: 'networkidle' });
-        await page.getByRole('button', { name: 'Accept All Cookies' }).click();
+        await checkCookieAccept(page);
         projectId = await createProject(page, projectName);
     });
 
