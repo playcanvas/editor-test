@@ -25,6 +25,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Cache auth directory
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.auth
+          key: ${{ runner.os }}-auth-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-auth-
+
       - name: Run Editor Testing Suite
         run: |
           docker run \
@@ -35,4 +42,5 @@ jobs:
           -e PC_LAUNCH_HOST=${{ secrets.PC_LAUNCH_HOST }} \
           -e PC_EMAIL=${{ secrets.PC_EMAIL }} \
           -e PC_PASSWORD=${{ secrets.PC_PASSWORD }} \
+          -v ${{ github.workspace }}/.auth:/app/.auth \
           ghcr.io/playcanvas/editor-test:latest
