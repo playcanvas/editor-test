@@ -11,9 +11,9 @@ const context = await browser.newContext({
     storageState: fs.existsSync(AUTH_STATE) ? AUTH_STATE : undefined
 });
 const page = await context.newPage();
-await page.context().storageState({ path: AUTH_STATE });
 page.on('close', async () => {
+    await page.context().storageState({ path: AUTH_STATE });
     await browser.close();
 });
 
-await page.goto(`https://${HOST}`);
+await page.goto(`https://${HOST}`, { waitUntil: 'networkidle' });

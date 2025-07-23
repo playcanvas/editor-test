@@ -27,13 +27,14 @@ export const googleAuth = async (statePath: string, email: string, password: str
     });
     const context = await browser.newContext(SILENT_CTX);
     const page = await context.newPage();
-    await page.goto(`https://${LOGIN_HOST}`);
-    await page.context().storageState({ path: statePath });
+    await page.goto(`https://${LOGIN_HOST}`, { waitUntil: 'networkidle' });
 
+    // check for reCAPTCHA
     if (await captchaFound(page)) {
         throw new Error('Please complete the reCAPTCHA manually.');
     }
 
+    // sign in with Google
     const page1Promise = page.waitForEvent('popup');
     await page.getByText('Sign in with Google').click();
     const page1 = await page1Promise;
@@ -43,6 +44,9 @@ export const googleAuth = async (statePath: string, email: string, password: str
     await page1.getByRole('button', { name: 'Next' }).click();
     await page1.waitForEvent('close');
     await page.waitForURL('**/user/**');
+
+    // save the storage state
+    await page.context().storageState({ path: statePath });
 
     await page.close();
     await context.close();
@@ -56,18 +60,21 @@ export const nativeAuth = async (statePath: string, email: string, password: str
     });
     const context = await browser.newContext(SILENT_CTX);
     const page = await context.newPage();
-    await page.goto(`https://${LOGIN_HOST}`);
-    await page.context().storageState({ path: statePath });
+    await page.goto(`https://${LOGIN_HOST}`, { waitUntil: 'networkidle' });
 
+    // check for reCAPTCHA
     if (await captchaFound(page)) {
         throw new Error('Please complete the reCAPTCHA manually.');
     }
 
+    // sign in with native auth
     await page.getByRole('textbox', { name: 'Email or Username' }).fill(email);
     await page.getByRole('textbox', { name: 'Password' }).fill(password);
     await page.getByRole('button', { name: '  Log in' }).click();
-
     await page.waitForURL('**/user/**');
+
+    // save the storage state
+    await page.context().storageState({ path: statePath });
 
     await page.close();
     await context.close();
