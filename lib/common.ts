@@ -15,6 +15,7 @@ export const checkCookieAccept = async (page: Page) => {
 
 /**
  * Check if a reCAPTCHA is found on the page.
+ *
  * @param page - The page to check for reCAPTCHA.
  * @returns A boolean indicating whether reCAPTCHA is found.
  */
