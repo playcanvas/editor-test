@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to the PlayCanvas Editor Testing Suite! This guide will help you get started with contributing to this project.
 
+Looking for ideas? Check out issues under the [good first issue](https://github.com/playcanvas/editor-test/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22) label or create an issue to start a conversation. The [Forum](https://playcanvas.com) is a good place to discuss ideas with the community as well. It strongly advised to create an issue or community post when suggesting major changes or add significant features to get advice on how to approach it.
+
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
