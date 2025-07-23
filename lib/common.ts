@@ -14,6 +14,19 @@ export const checkCookieAccept = async (page: Page) => {
 };
 
 /**
+ * Check if a reCAPTCHA is found on the page.
+ * @param page - The page to check for reCAPTCHA.
+ * @returns A boolean indicating whether reCAPTCHA is found.
+ */
+export const checkCaptchaFound = async (page: Page) => {
+    const footer = await page.locator('#login-form div').first();
+    if ((await footer.getAttribute('class'))?.includes('captcha')) {
+        return true;
+    }
+    return false;
+};
+
+/**
  * Create a project. If masterProjectId is provided, the project will be forked from the master project.
  *
  * @param page - The page.

@@ -1,5 +1,6 @@
-import { chromium, type Page } from '@playwright/test';
+import { chromium } from '@playwright/test';
 
+import { checkCaptchaFound } from './common';
 import { LOGIN_HOST } from './config';
 
 // modified from https://github.com/microsoft/playwright/issues/24374
@@ -12,14 +13,6 @@ const SILENT_CTX = {
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
 };
 
-const captchaFound = async (page: Page) => {
-    const footer = await page.locator('#login-form div').first();
-    if ((await footer.getAttribute('class'))?.includes('captcha')) {
-        return true;
-    }
-    return false;
-};
-
 export const googleAuth = async (statePath: string, email: string, password: string, headless: boolean = true) => {
     const browser = await chromium.launch({
         headless,
@@ -30,7 +23,7 @@ export const googleAuth = async (statePath: string, email: string, password: str
     await page.goto(`https://${LOGIN_HOST}`, { waitUntil: 'networkidle' });
 
     // check for reCAPTCHA
-    if (await captchaFound(page)) {
+    if (await checkCaptchaFound(page)) {
         throw new Error('Please complete the reCAPTCHA manually.');
     }
 
@@ -63,7 +56,7 @@ export const nativeAuth = async (statePath: string, email: string, password: str
     await page.goto(`https://${LOGIN_HOST}`, { waitUntil: 'networkidle' });
 
     // check for reCAPTCHA
-    if (await captchaFound(page)) {
+    if (await checkCaptchaFound(page)) {
         throw new Error('Please complete the reCAPTCHA manually.');
     }
 
