@@ -34,3 +34,5 @@ jobs:
               cache-to: type=registry,ref=ghcr.io/playcanvas/editor-test:cache,mode=max
               tags: ghcr.io/playcanvas/editor-test:latest
               platforms: linux/amd64,linux/arm64
+            env:
+              DOCKER_BUILD_SUMMARY: false
