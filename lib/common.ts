@@ -20,8 +20,12 @@ export const checkCookieAccept = async (page: Page) => {
  * @returns A boolean indicating whether reCAPTCHA is found.
  */
 export const checkCaptchaFound = async (page: Page) => {
-    const footer = await page.locator('#login-form div').first();
-    if ((await footer.getAttribute('class'))?.includes('captcha')) {
+    const form = page.locator('#login-form div');
+    if (await form.count() === 0) {
+        return false;
+    }
+    const block = await form.first();
+    if ((await block.getAttribute('class'))?.includes('captcha')) {
         return true;
     }
     return false;
