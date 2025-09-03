@@ -1,22 +1,10 @@
 {
-  "name": "editor-test",
+  "name": "@playcanvas/editor-test",
   "version": "0.0.1",
   "description": "Editor Testing Suite",
   "author": "PlayCanvas",
   "license": "MIT",
   "type": "module",
-  "scripts": {
-    "test": "playwright test",
-    "test:ci": "playwright test --reporter list",
-    "test:debug": "playwright test --debug ",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed",
-    "report": "playwright show-report",
-    "codegen": "playwright codegen --load-storage .auth/state.json",
-    "start": "tsx src/index.ts",
-    "lint": "eslint . --ext .ts,.mjs",
-    "type:check": "tsc --declaration --emitDeclarationOnly"
-  },
   "devDependencies": {
     "@playcanvas/editor-api": "^1.1.24",
     "@playcanvas/eslint-config": "^2.0.9",
@@ -30,5 +18,20 @@
     "globals": "^16.0.0",
     "node-fetch": "^3.3.2",
     "tsx": "^4.19.3"
+  },
+  "scripts": {
+    "codegen": "playwright codegen --load-storage .auth/state.json",
+    "lint": "eslint . --ext .ts,.mjs",
+    "start": "tsx src/index.ts",
+    "report": "playwright show-report",
+    "test": "playwright test",
+    "test:ci": "playwright test --reporter list",
+    "test:debug": "playwright test --debug ",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "type:check": "tsc --declaration --emitDeclarationOnly"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
