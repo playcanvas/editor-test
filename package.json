@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Editor Testing Suite",
   "author": "PlayCanvas",
-  "license": "Properietary",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "test": "playwright test",
