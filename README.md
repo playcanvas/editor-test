@@ -1,6 +1,5 @@
 # PlayCanvas Editor Testing Suite
 
-[![Github Version](https://img.shields.io/github/v/release/playcanvas/editor-test)](https://github.com/playcanvas/editor-test/releases)
 [![License](https://img.shields.io/npm/l/@playcanvas/editor-test)](https://github.com/playcanvas/editor-test/blob/main/LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=flat&logo=discord&logoColor=white&color=black)](https://discord.gg/RSaMRzg)
 [![Reddit](https://img.shields.io/badge/Reddit-FF4500?style=flat&logo=reddit&logoColor=white&color=black)](https://www.reddit.com/r/PlayCanvas)
