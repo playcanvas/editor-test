@@ -1,20 +1,17 @@
-<div align="center">
-
-<img width="200" src="https://s3-eu-west-1.amazonaws.com/static.playcanvas.com/platform/images/logo/playcanvas-logo-medium.png"/>
-
 # PlayCanvas Editor Testing Suite
 
-[User Manual](https://developer.playcanvas.com) | [Forum](https://forum.playcanvas.com)
+[![NPM Version](https://img.shields.io/npm/v/@playcanvas/editor-test)](https://www.npmjs.com/package/@playcanvas/editor-test)
+[![NPM Downloads](https://img.shields.io/npm/dw/@playcanvas/editor-test)](https://npmtrends.com/@playcanvas/editor-test)
+[![License](https://img.shields.io/npm/l/@playcanvas/editor-test)](https://github.com/playcanvas/editor-test/blob/main/LICENSE)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=flat&logo=discord&logoColor=white&color=black)](https://discord.gg/RSaMRzg)
+[![Reddit](https://img.shields.io/badge/Reddit-FF4500?style=flat&logo=reddit&logoColor=white&color=black)](https://www.reddit.com/r/PlayCanvas)
+[![X](https://img.shields.io/badge/X-000000?style=flat&logo=x&logoColor=white&color=black)](https://x.com/intent/follow?screen_name=playcanvas)
+
+| [User Manual](https://developer.playcanvas.com/user-manual/editor) | [API Reference](https://api.playcanvas.com/editor) | [Blog](https://blog.playcanvas.com) | [Forum](https://forum.playcanvas.com) |
 
 This is the official testing suite for the [PlayCanvas Editor](https://playcanvas.com)
 
-[![Average time to resolve an issue][resolution-badge]][isitmaintained-url]
-[![Percentage of issues still open][open-issues-badge]][isitmaintained-url]
-[![Twitter][twitter-badge]][twitter-url]
-
 ![Playwright](./images/playwright.png)
-
-</div>
 
 ## Tests
 
