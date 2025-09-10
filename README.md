@@ -1,5 +1,6 @@
 # PlayCanvas Editor Testing Suite
 
+[![Status](https://img.shields.io/github/actions/workflow/status/playcanvas/editor-test/.github%2Fworkflows%2Ftest.yml?label=status)](https://github.com/playcanvas/editor-test/actions/workflows/test.yml)
 [![License](https://img.shields.io/github/license/playcanvas/editor-test)](https://github.com/playcanvas/editor-test/blob/main/LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=flat&logo=discord&logoColor=white&color=black)](https://discord.gg/RSaMRzg)
 [![Reddit](https://img.shields.io/badge/Reddit-FF4500?style=flat&logo=reddit&logoColor=white&color=black)](https://www.reddit.com/r/PlayCanvas)
