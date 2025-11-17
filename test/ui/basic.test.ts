@@ -174,7 +174,7 @@ test.describe('navigation', () => {
         expect(await capture('code-editor', page, async () => {
             // open code editor
             const codePagePromise = page.waitForEvent('popup');
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Code Editor$/ }).click();
             const codePage = await codePagePromise;
             await codePage.waitForURL('**/editor/code/**', { waitUntil: 'networkidle' });
@@ -185,7 +185,7 @@ test.describe('navigation', () => {
     test('open settings', async () => {
         expect(await capture('settings', page, async () => {
             // open settings dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Settings$/ }).click();
             await page.waitForSelector('.pcui-container.settings');
 

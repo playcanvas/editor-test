@@ -77,7 +77,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('create red branch', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // create red branch
@@ -98,7 +98,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             }, materialId);
 
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).first().click();
 
             // create checkpoint
@@ -132,7 +132,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             }, materialId);
 
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).first().click();
 
             // create checkpoint
@@ -161,7 +161,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('merge red branch', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start merge
@@ -198,7 +198,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('merge green branch', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start merge
@@ -258,7 +258,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('restore checkpoint', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start restore checkpoint
@@ -280,7 +280,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('hard reset checkpoint', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start hard reset
@@ -303,7 +303,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('delete red branch', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // change filter to closed branches
@@ -329,7 +329,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     test('delete green branch', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
-            await page.locator('button').first().click();
+            await page.locator('.pcui-element.font-regular.logo').click();
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start delete green branch
