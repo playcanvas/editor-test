@@ -21,7 +21,8 @@ export default defineConfig({
             name: 'auth',
             testMatch: /auth\.setup\.ts/,
             use: {
-                ...devices['Desktop Chrome']
+                ...devices['Desktop Chrome'],
+                storageState: AUTH_STATE
             }
         },
         {

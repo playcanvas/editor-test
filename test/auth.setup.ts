@@ -1,11 +1,7 @@
 import { test as setup } from '@playwright/test';
 
-import { HOST, AUTH_STATE } from '../lib/config';
+import { HOST } from '../lib/config';
 import { middleware } from '../lib/middleware';
-
-setup.use({
-    storageState: AUTH_STATE
-});
 
 setup('authenticate user', async ({ page }) => {
     await middleware(page.context());
