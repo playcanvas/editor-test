@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.53.2-noble AS base
+FROM mcr.microsoft.com/playwright:v1.56.1-noble AS base
 WORKDIR /usr/src/test
 
 FROM base AS install
