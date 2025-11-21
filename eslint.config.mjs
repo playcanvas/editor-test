@@ -3,10 +3,7 @@ import typescriptParser from '@typescript-eslint/parser';
 import globals from 'globals';
 
 export default [
-    ...playcanvasConfig.map(config => ({
-        ignores: ['test/fixtures/**/*.js'],
-        ...config
-    })),
+    ...playcanvasConfig,
     {
         files: ['**/*.ts'],
         languageOptions: {
@@ -18,7 +15,6 @@ export default [
                 ...globals.browser,
                 ...globals.mocha,
                 ...globals.node,
-                wi: false,
                 config: false,
                 editor: false
             }
