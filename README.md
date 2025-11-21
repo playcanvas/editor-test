@@ -29,9 +29,9 @@ To run the test suite ensure you have [Docker](https://www.docker.com/) installe
     PC_HOST=playcanvas.com
     PC_LOGIN_HOST=login.playcanvas.com
     PC_LAUNCH_HOST=launch.playcanvas.com
-    PC_EMAIL=<playcanvas-email>
-    PC_PASSWORD=<playcanvas-password>
     PC_LOCAL_FRONTEND=<true|false>
+    PC_COOKIE_NAME=pc_auth
+    PC_COOKIE_VALUE=<playcanvas-cookie>
     ```
 
 > [!IMPORTANT]

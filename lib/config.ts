@@ -1,19 +1,26 @@
 import 'dotenv/config';
+import type { BrowserContextOptions } from '@playwright/test';
 
 type SearchParams = Record<string, string | number | boolean>;
 
-export const AUTH_STATE = '.auth/state.json';
-
-export const EMAIL = process.env.PC_EMAIL ?? '';
-export const PASSWORD = process.env.PC_PASSWORD ?? '';
 export const HOST = process.env.PC_HOST ?? 'playcanvas.com';
 export const LOGIN_HOST = process.env.PC_LOGIN_HOST ?? 'login.playcanvas.com';
 export const LAUNCH_HOST = process.env.PC_LAUNCH_HOST ?? 'launch.playcanvas.com';
 export const LOCAL_FRONTEND = process.env.PC_LOCAL_FRONTEND === 'true';
 
-if (!EMAIL || !PASSWORD) {
-    throw new Error('PC_EMAIL and PC_PASSWORD are not set in the environment variables.');
-}
+export const AUTH_STATE: BrowserContextOptions['storageState'] = {
+    cookies: [{
+        name: process.env.PC_COOKIE_NAME ?? 'pc_auth',
+        value: process.env.PC_COOKIE_VALUE ?? '',
+        domain: `.${HOST}`,
+        path: '/',
+        expires: -1,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Lax'
+    }],
+    origins: []
+};
 
 const queryString = (params: SearchParams) => {
     const preset = [];
