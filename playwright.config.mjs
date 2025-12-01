@@ -24,7 +24,9 @@ export default defineConfig({
                 ...devices['Desktop Chrome'],
                 storageState: AUTH_STATE,
                 launchOptions: {
-                    '--disable-web-security': true
+                    args: [
+                        '--disable-web-security'
+                    ]
                 }
             }
         },
@@ -35,7 +37,9 @@ export default defineConfig({
                 ...devices['Desktop Chrome'],
                 storageState: AUTH_STATE,
                 launchOptions: {
-                    '--disable-web-security': true
+                    args: [
+                        '--disable-web-security'
+                    ]
                 }
             },
             dependencies: ['auth']
@@ -46,7 +50,9 @@ export default defineConfig({
                 ...devices['Desktop Chrome'],
                 storageState: AUTH_STATE,
                 launchOptions: {
-                    '--disable-web-security': true
+                    args: [
+                        '--disable-web-security'
+                    ]
                 }
             },
             dependencies: ['clean']
