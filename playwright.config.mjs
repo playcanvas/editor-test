@@ -22,7 +22,10 @@ export default defineConfig({
             testMatch: /auth\.setup\.ts/,
             use: {
                 ...devices['Desktop Chrome'],
-                storageState: AUTH_STATE
+                storageState: AUTH_STATE,
+                launchOptions: {
+                    '--disable-web-security': true
+                }
             }
         },
         {
@@ -30,7 +33,10 @@ export default defineConfig({
             testMatch: /clean\.setup\.ts/,
             use: {
                 ...devices['Desktop Chrome'],
-                storageState: AUTH_STATE
+                storageState: AUTH_STATE,
+                launchOptions: {
+                    '--disable-web-security': true
+                }
             },
             dependencies: ['auth']
         },
@@ -38,7 +44,10 @@ export default defineConfig({
             name: 'chrome',
             use: {
                 ...devices['Desktop Chrome'],
-                storageState: AUTH_STATE
+                storageState: AUTH_STATE,
+                launchOptions: {
+                    '--disable-web-security': true
+                }
             },
             dependencies: ['clean']
         }
