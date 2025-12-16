@@ -307,6 +307,7 @@ test.describe('publish/download', () => {
 
             // download app
             await page.getByRole('button', { name: 'Download .zip' }).click();
+            await page.waitForSelector('.pcui-element.font-regular.web-download.pcui-button:not(.pcui-disabled)');
             await page.getByText('Download', { exact: true }).nth(1).click();
 
             // download link
