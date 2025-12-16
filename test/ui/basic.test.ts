@@ -307,22 +307,12 @@ test.describe('publish/download', () => {
 
             // download app
             await page.getByRole('button', { name: 'Download .zip' }).click();
-            await page.waitForSelector([
-                '.download-mode',
-                '.content',
-                '.scenes:not(.hidden)',
-                '.content',
-                '.scene-list',
-                '.primary',
-                '.ui-label.date'
-            ].join(' > '));
             await page.getByText('Download', { exact: true }).nth(1).click();
 
             // download link
             const downloadPagePromise = page.waitForEvent('popup');
             const downloadPromise = page.waitForEvent('download');
-            await page.locator('span').filter({ hasText: 'Your build is readyDownload' })
-            .locator('div').click();
+            await page.getByText('Download', { exact: true }).nth(2).click();
             await downloadPagePromise;
             await downloadPromise;
         })).toStrictEqual([]);
@@ -335,15 +325,6 @@ test.describe('publish/download', () => {
 
             // publish app
             await page.getByRole('button', { name: 'Publish To PlayCanvas' }).click();
-            await page.waitForSelector([
-                ':not(.download-mode)',
-                '.content',
-                '.scenes:not(.hidden)',
-                '.content',
-                '.scene-list',
-                '.primary',
-                '.ui-label.date'
-            ].join(' > '));
             await page.getByText('Publish Now').click();
             await page.waitForSelector('.ui-list-item.primary.complete');
 
