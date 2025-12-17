@@ -306,13 +306,15 @@ test.describe('publish/download', () => {
             await page.getByRole('button', { name: '' }).click();
 
             // download app
+            const scenesList = page.waitForResponse(/playcanvas.com\/api\/projects\/\d+\/scenes/);
             await page.getByRole('button', { name: 'Download .zip' }).click();
-            await page.waitForSelector('.pcui-element.font-regular.web-download.pcui-button:not(.pcui-disabled)');
+            await scenesList;
             await page.getByText('Download', { exact: true }).nth(1).click();
 
             // download link
             const downloadPagePromise = page.waitForEvent('popup');
             const downloadPromise = page.waitForEvent('download');
+            await page.waitForSelector('.picker-publish-new > .web-download.pcui-button:not(.pcui-disabled)');
             await page.getByText('Download', { exact: true }).nth(2).click();
             await downloadPagePromise;
             await downloadPromise;
@@ -325,7 +327,10 @@ test.describe('publish/download', () => {
             await page.getByRole('button', { name: '' }).click();
 
             // publish app
+            const scenesList = page.waitForResponse(/playcanvas.com\/api\/projects\/\d+\/scenes/);
             await page.getByRole('button', { name: 'Publish To PlayCanvas' }).click();
+            await scenesList;
+            await page.waitForSelector('.picker-publish-new > .publish.pcui-button:not(.pcui-disabled)');
             await page.getByText('Publish Now').click();
             await page.waitForSelector('.ui-list-item.primary.complete');
 
