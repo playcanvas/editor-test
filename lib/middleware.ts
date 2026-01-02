@@ -66,6 +66,7 @@ const ASSET_ROUTES = [
 ];
 
 export const middleware = async (context: BrowserContext) => {
+    // mock OneTrust script to prevent cookie popups interfering with tests
     await context.route(/otSDKStub\.js$/, (route) => {
         return route.fulfill({
             status: 200,
