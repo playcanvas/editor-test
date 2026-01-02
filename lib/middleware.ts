@@ -66,7 +66,7 @@ const ASSET_ROUTES = [
 ];
 
 export const middleware = async (context: BrowserContext) => {
-    await context.route('**/otSDKStub.js', (route) => {
+    await context.route(/otSDKStub\.js$/, (route) => {
         return route.fulfill({
             status: 200,
             contentType: 'application/javascript',
