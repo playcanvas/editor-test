@@ -66,6 +66,14 @@ const ASSET_ROUTES = [
 ];
 
 export const middleware = async (context: BrowserContext) => {
+    await context.route('**/otSDKStub.js', (route) => {
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/javascript',
+            body: 'console.log(\'OneTrust mocked for testing\');'
+        });
+    });
+
     await context.route(/playcanvas\.com/, (route, request) => {
         return limiters.cloudfront.schedule(() => route.continue());
     });
