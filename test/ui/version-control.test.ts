@@ -149,7 +149,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.getByText('main', { exact: true }).click();
 
             // switch to main branch
-            await page.locator(`#branch-${mainBranchId}`).getByText('').click();
+            await page.locator(`#branch-${mainBranchId}`).locator('.pcui-button.dropdown').click();
             await page.getByText('Switch To This Branch').click();
 
             // wait for page to reload
@@ -165,7 +165,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start merge
-            await page.locator('li').filter({ hasText: redBranchId }).locator('div').nth(2).click();
+            await page.locator('li').filter({ hasText: redBranchId }).locator('.pcui-button.dropdown').click();
             await page.getByText('Merge Into Current Branch').click();
 
             // uncheck checkpoint create
@@ -202,7 +202,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start merge
-            await page.locator('li').filter({ hasText: greenBranchId }).locator('div').nth(2).click();
+            await page.locator('li').filter({ hasText: greenBranchId }).locator('.pcui-button.dropdown').click();
             await page.getByText('Merge Into Current Branch').click();
 
             // uncheck checkpoint create
@@ -307,11 +307,11 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // change filter to closed branches
-            await page.locator('div').filter({ hasText: /^Favorite Branches$/ }).click();
+            await page.locator('.pcui-select-input-value').filter({ hasText: 'Favorite Branches' }).click();
             await page.getByText('Closed Branches').click();
 
             // start delete red branch
-            await page.locator(`#branch-${redBranchId}`).getByText('').click();
+            await page.locator(`#branch-${redBranchId}`).locator('.pcui-button.dropdown').click();
             await page.locator('div').filter({ hasText: 'Delete This Branch' }).nth(4).click();
 
             // confirm delete
@@ -333,7 +333,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start delete green branch
-            await page.locator(`#branch-${greenBranchId}`).getByText('').click();
+            await page.locator(`#branch-${greenBranchId}`).locator('.pcui-button.dropdown').click();
             await page.locator('div').filter({ hasText: 'Delete This Branch' }).nth(4).click();
 
             // confirm delete
