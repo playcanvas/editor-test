@@ -144,7 +144,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
         })).toStrictEqual([]);
     });
 
-    test('create diff', async () => {
+    test('diff between red and main branch', async () => {
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
 

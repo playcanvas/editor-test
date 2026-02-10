@@ -153,7 +153,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
         })).toStrictEqual([]);
     });
 
-    test('view diff', async () => {
+    test('diff between green and main branch', async () => {
         expect(await capture('editor', page, async () => {
             // open version control dialog
             await page.locator('.pcui-element.font-regular.logo').click();
@@ -170,7 +170,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator(`#checkpoint-${mainCheckpointId}`).click();
 
             // compare
-            await page.getByText('COMPARE').click();
+            await page.locator('.ui-button.compare:not(.disabled)').click();
 
             // wait for diff to load
             await page.waitForSelector('.picker-conflict-manager.diff');
