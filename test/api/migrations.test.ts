@@ -54,8 +54,8 @@ test.describe('migrations', () => {
             const texture = window.editor.api.globals.assets.findOne((asset: Observer) => asset.get('name') === textureName);
 
             // setup project settings
-            const projectSettings = window.editor.call('settings:project');
-            projectSettings.sync._paths = null;
+            const projectSettings = window.editor.call('settings:project') as Observer;
+            (projectSettings.sync as any)._paths = null;
             projectSettings.set('deviceTypes', ['webgpu']);
             projectSettings.set('preferWebGl2', false);
             projectSettings.set('useLegacyAudio', true);
@@ -102,7 +102,7 @@ test.describe('migrations', () => {
 
             // check project settings migration
             const projectSettings = await page.evaluate(() => {
-                return window.editor.call('settings:project').json();
+                return (window.editor.call('settings:project') as Observer).json();
             });
             expect(projectSettings.hasOwnProperty('deviceTypes')).toBe(false);
             expect(projectSettings.hasOwnProperty('preferWebGl2')).toBe(false);
