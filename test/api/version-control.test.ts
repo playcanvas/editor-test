@@ -163,7 +163,9 @@ test.describe('branch/checkpoint/diff/merge', () => {
                     const evt = window.editor.on('messenger:job.update', async (...args: unknown[]) => {
                         const { job: jobData } = args[0] as { job: { id: number } };
                         const job = await jobDeferred.promise;
-                        if (jobData.id !== job.id) return;
+                        if (jobData.id !== job.id) {
+                            return;
+                        }
                         evt.unbind();
 
                         try {
