@@ -27,6 +27,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     let redBranchId: string;
 
     let greenBranchId: string;
+    let greenCheckpointId: string;
 
     test.describe.configure({
         mode: 'serial'
@@ -140,6 +141,39 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.getByRole('textbox').nth(3).fill('GREEN');
             await page.getByText('Create Checkpoint', { exact: true }).click();
             await page.getByText('GREEN', { exact: true }).waitFor({ state: 'visible' });
+
+            // capture green checkpoint id
+            greenCheckpointId = await page.evaluate(async () => {
+                const checkpoints = await window.editor.api.globals.rest.branches.branchCheckpoints({
+                    branchId: window.editor.api.globals.branchId,
+                    limit: 1
+                }).promisify();
+                return checkpoints.result[0].id;
+            });
+        })).toStrictEqual([]);
+    });
+
+    test('view diff', async () => {
+        expect(await capture('editor', page, async () => {
+            // open version control dialog
+            await page.locator('.pcui-element.font-regular.logo').click();
+            await page.locator('span').filter({ hasText: /^Version Control$/ }).first().click();
+
+            // click view diff
+            await page.locator('.diff').first().click();
+
+            // select green checkpoint (left)
+            await page.locator(`#checkpoint-${greenCheckpointId}`).click();
+
+            // select main checkpoint (right)
+            await page.getByText('main', { exact: true }).click();
+            await page.locator(`#checkpoint-${mainCheckpointId}`).click();
+
+            // compare
+            await page.getByText('COMPARE').click();
+
+            // wait for diff to load
+            await page.waitForSelector('.picker-conflict-manager.diff');
         })).toStrictEqual([]);
     });
 
