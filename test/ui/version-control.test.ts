@@ -162,12 +162,15 @@ test.describe('branch/checkpoint/diff/merge', () => {
             // click view diff
             await page.locator('.diff').first().click();
 
-            // select green checkpoint (left)
-            await page.locator(`#checkpoint-${greenCheckpointId}`).click();
+            // select green checkpoint (left) via diff-mode checkbox
+            await page.locator(`#checkpoint-${greenCheckpointId} .ui-checkbox.tick`).click();
 
-            // select main checkpoint (right)
+            // switch to main branch and wait for its checkpoints to load
             await page.getByText('main', { exact: true }).click();
-            await page.locator(`#checkpoint-${mainCheckpointId}`).click();
+            await page.locator(`#checkpoint-${mainCheckpointId}`).waitFor({ state: 'visible' });
+
+            // select main checkpoint (right) via diff-mode checkbox
+            await page.locator(`#checkpoint-${mainCheckpointId} .ui-checkbox.tick`).click();
 
             // compare
             await page.locator('.ui-button.compare:not(.disabled)').click();

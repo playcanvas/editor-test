@@ -144,18 +144,22 @@ test.describe('branch/checkpoint/diff/merge', () => {
         })).toStrictEqual([]);
     });
 
-    test('diff between red and main branch', async () => {
+    test('diff between green and main branch', async () => {
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
 
-            await page.evaluate(async ([redBranchId, mainBranchId]) => {
+            await page.evaluate(async ([greenBranchId, mainBranchId]) => {
                 const { rest } = window.editor.api.globals;
 
+                type Resolved<T extends (...args: never[]) => { promisify(): Promise<unknown> }> = Awaited<ReturnType<ReturnType<T>['promisify']>>;
+                type DiffJob = Resolved<typeof rest.jobs.jobGet>;
+                type DiffResult = Resolved<typeof rest.diff.diffGet>;
+
                 // deferred for the job response
-                const jobDeferred = Promise.withResolvers<DiffJob>(); // eslint-disable-line no-undef
+                const jobDeferred: PromiseWithResolvers<DiffJob> = Promise.withResolvers();
 
                 // wait for diff via messenger job.update event
-                const diffPromise = new Promise<DiffResult>((resolve, reject) => { // eslint-disable-line no-undef
+                const diffPromise: Promise<DiffResult> = new Promise((resolve, reject) => {
                     const evt = window.editor.on('messenger:job.update', async (...args: unknown[]) => {
                         const { job: jobData } = args[0] as { job: { id: number } };
                         const job = await jobDeferred.promise;
@@ -180,7 +184,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
 
                 // create diff
                 const job = await rest.diff.diffCreate({
-                    srcBranchId: redBranchId,
+                    srcBranchId: greenBranchId,
                     dstBranchId: mainBranchId
                 }).promisify();
                 jobDeferred.resolve(job);
@@ -200,7 +204,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
                 if (!diff.isDiff) {
                     throw new Error('diff.isDiff should be true');
                 }
-            }, [redBranchId, mainBranchId]);
+            }, [greenBranchId, mainBranchId]);
         })).toStrictEqual([]);
     });
 
