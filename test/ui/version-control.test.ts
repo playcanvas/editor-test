@@ -177,15 +177,16 @@ test.describe('branch/checkpoint/diff/merge', () => {
 
             // wait for diff to load
             await page.waitForSelector('.picker-conflict-manager.diff');
+
+            // close diff viewer
+            await page.locator('.picker-conflict-manager .close').click();
         })).toStrictEqual([]);
     });
 
     test('switch to main branch', async () => {
         expect(await capture('editor', page, async () => {
-            // select main branch
-            await page.getByText('main', { exact: true }).click();
-
-            // switch to main branch
+            // select main branch and open its dropdown
+            await page.locator(`#branch-${mainBranchId}`).click();
             await page.locator(`#branch-${mainBranchId}`).locator('.pcui-button.dropdown').click();
             await page.getByText('Switch To This Branch').click();
 
