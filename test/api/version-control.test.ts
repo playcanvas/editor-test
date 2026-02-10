@@ -144,6 +144,72 @@ test.describe('branch/checkpoint/diff/merge', () => {
         })).toStrictEqual([]);
     });
 
+    test('diff between green and main branch', async () => {
+        expect(await capture('editor', page, async () => {
+            await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });
+
+            await page.evaluate(async ([greenBranchId, mainBranchId]) => {
+                const { rest } = window.editor.api.globals;
+
+                type Resolved<T extends (...args: never[]) => { promisify(): Promise<unknown> }> = Awaited<ReturnType<ReturnType<T>['promisify']>>;
+                type DiffJob = Resolved<typeof rest.jobs.jobGet>;
+                type DiffResult = Resolved<typeof rest.diff.diffGet>;
+
+                // deferred for the job response
+                const jobDeferred: PromiseWithResolvers<DiffJob> = Promise.withResolvers();
+
+                // wait for diff via messenger job.update event
+                const diffPromise: Promise<DiffResult> = new Promise((resolve, reject) => {
+                    const evt = window.editor.on('messenger:job.update', async (...args: unknown[]) => {
+                        const { job: jobData } = args[0] as { job: { id: number } };
+                        const job = await jobDeferred.promise;
+                        if (jobData.id !== job.id) {
+                            return;
+                        }
+                        evt.unbind();
+
+                        try {
+                            // verify job completed
+                            const completedJob = await rest.jobs.jobGet({ jobId: job.id }).promisify();
+                            if (completedJob.status === 'error') {
+                                throw new Error(completedJob.messages?.[0] ?? 'Diff job failed');
+                            }
+
+                            // fetch full diff from S3
+                            const diff = await rest.diff.diffGet({ id: job.data.merge_id }).promisify();
+                            resolve(diff);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    });
+                });
+
+                // create diff
+                const job = await rest.diff.diffCreate({
+                    srcBranchId: greenBranchId,
+                    dstBranchId: mainBranchId
+                }).promisify();
+                jobDeferred.resolve(job);
+
+                // validate job response
+                if (!job.id || !job.data.merge_id) {
+                    throw new Error('diffCreate did not return a valid job');
+                }
+
+                // await full diff from messenger event
+                const diff = await diffPromise;
+
+                // validate diff response
+                if (typeof diff.numConflicts !== 'number') {
+                    throw new Error('diff missing numConflicts');
+                }
+                if (!diff.isDiff) {
+                    throw new Error('diff.isDiff should be true');
+                }
+            }, [greenBranchId, mainBranchId]);
+        })).toStrictEqual([]);
+    });
+
     test('switch to main branch', async () => {
         expect(await capture('editor', page, async () => {
             await page.goto(editorUrl(projectId), { waitUntil: 'networkidle' });

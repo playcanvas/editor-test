@@ -27,6 +27,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
     let redBranchId: string;
 
     let greenBranchId: string;
+    let greenCheckpointId: string;
 
     test.describe.configure({
         mode: 'serial'
@@ -140,15 +141,52 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.getByRole('textbox').nth(3).fill('GREEN');
             await page.getByText('Create Checkpoint', { exact: true }).click();
             await page.getByText('GREEN', { exact: true }).waitFor({ state: 'visible' });
+
+            // capture green checkpoint id
+            greenCheckpointId = await page.evaluate(async () => {
+                const checkpoints = await window.editor.api.globals.rest.branches.branchCheckpoints({
+                    branchId: window.editor.api.globals.branchId,
+                    limit: 1
+                }).promisify();
+                return checkpoints.result[0].id;
+            });
+        })).toStrictEqual([]);
+    });
+
+    test('diff between green and main branch', async () => {
+        expect(await capture('editor', page, async () => {
+            // open version control dialog
+            await page.locator('.pcui-element.font-regular.logo').click();
+            await page.locator('span').filter({ hasText: /^Version Control$/ }).first().click();
+
+            // click view diff
+            await page.locator('.diff').first().click();
+
+            // select green checkpoint (left) via diff-mode checkbox
+            await page.locator(`#checkpoint-${greenCheckpointId} .ui-checkbox.tick`).click();
+
+            // switch to main branch and wait for its checkpoints to load
+            await page.getByText('main', { exact: true }).click();
+            await page.locator(`#checkpoint-${mainCheckpointId}`).waitFor({ state: 'visible' });
+
+            // select main checkpoint (right) via diff-mode checkbox
+            await page.locator(`#checkpoint-${mainCheckpointId} .ui-checkbox.tick`).click();
+
+            // compare
+            await page.locator('.ui-button.compare:not(.disabled)').click();
+
+            // wait for diff to load
+            await page.waitForSelector('.picker-conflict-manager.diff');
+
+            // close diff viewer
+            await page.locator('.picker-conflict-manager .close').click();
         })).toStrictEqual([]);
     });
 
     test('switch to main branch', async () => {
         expect(await capture('editor', page, async () => {
-            // select main branch
-            await page.getByText('main', { exact: true }).click();
-
-            // switch to main branch
+            // select main branch and open its dropdown
+            await page.locator(`#branch-${mainBranchId}`).click();
             await page.locator(`#branch-${mainBranchId}`).locator('.pcui-button.dropdown').click();
             await page.getByText('Switch To This Branch').click();
 
