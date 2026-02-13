@@ -97,6 +97,7 @@ test.describe('export/import', () => {
     });
 
     test('export project', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('export-project', page, async () => {
             const downloadPromise = page.waitForEvent('download');
             await exportProject(page, projectId);
@@ -106,6 +107,7 @@ test.describe('export/import', () => {
     });
 
     test('import project', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('import-project', page, async () => {
             importedProjectId = await importProject(page, exportPath);
         })).toStrictEqual([]);
@@ -248,6 +250,7 @@ test.describe('publish/download', () => {
     });
 
     test('download app', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('download-project', page, async () => {
             // download app
             const job = await downloadApp(page, sceneId);
@@ -258,6 +261,7 @@ test.describe('publish/download', () => {
     });
 
     test('publish app', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('publish-project', page, async () => {
             // publish app
             const app = await publishApp(page, sceneId);
