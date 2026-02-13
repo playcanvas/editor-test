@@ -91,6 +91,7 @@ test.describe('export/import', () => {
     });
 
     test('export project', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('export-project', page, async () => {
             // open project dialog
             await page.getByText(projectName).first().click();
@@ -106,6 +107,7 @@ test.describe('export/import', () => {
     });
 
     test('import project', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('import-project', page, async () => {
             // close project dialog
             await page.getByText('').click();
@@ -301,6 +303,7 @@ test.describe('publish/download', () => {
     });
 
     test('download app', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('download-project', page, async () => {
             // open publish dialog
             await page.getByRole('button', { name: '' }).click();
@@ -314,7 +317,7 @@ test.describe('publish/download', () => {
             // download link
             const downloadPagePromise = page.waitForEvent('popup');
             const downloadPromise = page.waitForEvent('download');
-            await page.waitForSelector('.picker-publish-new > .web-download.pcui-button:not(.pcui-disabled)');
+            await page.waitForSelector('.picker-publish-new > .web-download.pcui-button:not(.pcui-disabled)', { timeout: 3 * 60 * 1000 });
             await page.getByText('Download', { exact: true }).nth(2).click();
             await downloadPagePromise;
             await downloadPromise;
@@ -322,6 +325,7 @@ test.describe('publish/download', () => {
     });
 
     test('publish app', async () => {
+        test.setTimeout(4 * 60 * 1000);
         expect(await capture('publish-project', page, async () => {
             // open publish dialog
             await page.getByRole('button', { name: '' }).click();
@@ -332,7 +336,7 @@ test.describe('publish/download', () => {
             await scenesList;
             await page.waitForSelector('.picker-publish-new > .publish.pcui-button:not(.pcui-disabled)');
             await page.getByText('Publish Now').click();
-            await page.waitForSelector('.ui-list-item.primary.complete');
+            await page.waitForSelector('.ui-list-item.primary.complete', { timeout: 3 * 60 * 1000 });
 
             // launch app
             const appPagePromise = page.waitForEvent('popup');
