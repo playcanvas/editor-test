@@ -336,7 +336,7 @@ test.describe('publish/download', () => {
             await scenesList;
             await page.waitForSelector('.picker-publish-new > .publish.pcui-button:not(.pcui-disabled)');
             await page.getByText('Publish Now').click();
-            await page.waitForSelector('.ui-list-item.primary.complete', { timeout: 3 * 60 * 1000 });
+            await page.waitForSelector('.ui-list-item.complete', { timeout: 3 * 60 * 1000 });
 
             // launch app
             const appPagePromise = page.waitForEvent('popup');
