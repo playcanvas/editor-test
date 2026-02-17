@@ -82,8 +82,8 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // create red branch
-            await page.locator(`#checkpoint-${mainCheckpointId}`).getByText('').click();
-            await page.locator('div').filter({ hasText: /^New Branch$/ }).nth(1).click();
+            await page.locator(`#checkpoint-${mainCheckpointId}`).locator('.pcui-button.dropdown').click();
+            await page.locator('.pcui-menu-item').filter({ hasText: /^New Branch$/ }).first().click();
             await page.getByRole('textbox').nth(3).fill('red');
             await page.getByText('Create New Branch').click();
 
@@ -116,8 +116,8 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.getByText('main', { exact: true }).click();
 
             // create green branch
-            await page.locator(`#checkpoint-${mainCheckpointId}`).getByText('').click();
-            await page.locator('div').filter({ hasText: /^New Branch$/ }).nth(1).click();
+            await page.locator(`#checkpoint-${mainCheckpointId}`).locator('.pcui-button.dropdown').click();
+            await page.locator('.pcui-menu-item').filter({ hasText: /^New Branch$/ }).first().click();
             await page.getByRole('textbox').nth(3).fill('green');
             await page.getByText('Create New Branch').click();
 
@@ -160,7 +160,7 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).first().click();
 
             // click view diff
-            await page.locator('.diff').first().click();
+            await page.locator('.branch-actions').getByText('View Diff').click();
 
             // select green checkpoint (left) via diff-mode checkbox
             await page.locator(`#checkpoint-${greenCheckpointId} .ui-checkbox.tick`).click();
@@ -300,8 +300,8 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start restore checkpoint
-            await page.locator(`#checkpoint-${mainCheckpointId}`).getByText('').click();
-            await page.locator('div').filter({ hasText: /^Restore$/ }).nth(1).click();
+            await page.locator(`#checkpoint-${mainCheckpointId}`).locator('.pcui-button.dropdown').click();
+            await page.locator('.pcui-menu-item').filter({ hasText: /^Restore$/ }).first().click();
 
             // uncheck checkpoint create
             await page.locator('.content > div:nth-child(2) > .content > .ui-checkbox').first().click();
@@ -322,8 +322,8 @@ test.describe('branch/checkpoint/diff/merge', () => {
             await page.locator('span').filter({ hasText: /^Version Control$/ }).click();
 
             // start hard reset
-            await page.locator(`#checkpoint-${mainCheckpointId}`).getByText('').click();
-            await page.locator('div').filter({ hasText: /^Hard Reset$/ }).nth(1).click();
+            await page.locator(`#checkpoint-${mainCheckpointId}`).locator('.pcui-button.dropdown').click();
+            await page.locator('.pcui-menu-item').filter({ hasText: /^Hard Reset$/ }).first().click();
 
             // confirm hard reset
             await page.locator('div').filter({ hasText: /^ARE YOU SURE\?Type "hard reset" to confirm$/ })
